@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Просмотр целей</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      display: flex;
+      background: #FFFFFF;
+      color: #0F172A;
+    }
+
+    .sidebar {
+      width: 280px;
+      height: 100vh;
+      background: #262626;
+      padding: 0;
+      position: fixed;
+      left: 0;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar .logo {
+      color: white;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: -0.3px;
+      text-transform: uppercase;
+    }
+
+    .main-content {
+      margin-left: 280px;
+      width: calc(100% - 280px);
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-content {
+      display: flex;
+      flex-direction: column;
+      padding: 40px 40px 60px 40px;
+      gap: 40px;
+      width: 100%;
+    }
+
+    .page-title {
+      font-family: 'Biocad Display', sans-serif;
+      font-weight: 700;
+      font-size: 40px;
+      line-height: 42px;
+      color: #0F172A;
+    }
+
+    .employee-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      min-width: 250px;
+    }
+
+    .info-item .label {
+      font-size: 16px;
+      font-weight: 500;
+      color: #94A3B8;
+    }
+
+    .info-item .value {
+      font-size: 16px;
+      font-weight: 500;
+      color: #0F172A;
+      margin-top: 4px;
+    }
+
+    .info-item .date-range {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .info-item .date-range span {
+      font-size: 16px;
+      font-weight: 500;
+      color: #0F172A;
+    }
+
+    .status-message {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+      gap: 12px;
+      width: 100%;
+      background: #F1F5F9;
+      border-radius: 12px;
+      margin-bottom: 40px;
+    }
+
+    .status-message .title {
+      font-family: 'Inter';
+      font-weight: 700;
+      font-size: 16px;
+      color: #475569;
+    }
+
+    .status-message .text {
+      font-family: 'Inter';
+      font-weight: 400;
+      font-size: 14px;
+      color: #64748B;
+      line-height: 1.5;
+    }
+
+    .goals-section {
+      margin-bottom: 40px;
+    }
+
+    .goal-form {
+      background: #F8FAFC;
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .form-row .field-group {
+      flex: 2;
+    }
+
+    .form-row .date-group {
+      flex: 1;
+    }
+
+    .form-row .field-group .title,
+    .form-row .date-group .title {
+      font-size: 14px;
+      font-weight: 400;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    .form-row .field-group .text-field {
+      width: 100%;
+      min-height: 40px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 16px;
+      color: #0F172A;
+      font-family: 'Inter', sans-serif;
+      cursor: default;
+    }
+
+    .form-row .date-group .date-field {
+      width: 100%;
+      height: 40px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 16px;
+      color: #0F172A;
+      cursor: default;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: flex-start;
+      gap: 16px;
+      margin-top: 40px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+      justify-content: center;
+    }
+
+    .btn-back {
+      background: #FFFFFF;
+      border: 1px solid #3389F4;
+      color: #3389F4;
+    }
+
+    .btn:hover {
+      opacity: 0.8;
+    }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      padding: 20px 40px;
+      gap: 8px;
+      background: #F8FAFC;
+      border-top: 1px solid #E2E8F0;
+      margin-top: auto;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 89.69px;
+      height: 32px;
+    }
+
+    .footer-logo span {
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+    }
+
+    .footer-text {
+      color: #94A3B8;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">BIOCAD</div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-content">
+      <h1 class="page-title" id="pageTitle">Просмотр целей</h1>
+
+      <div class="employee-info">
+        <div class="info-item">
+          <div class="label">Сотрудник</div>
+          <div class="value" id="employeeName">Котова Вероника</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Статус</div>
+          <div class="value" id="statusValue">На согласовании</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Должность</div>
+          <div class="value">Бизнес-аналитик К4</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Длительность ИС</div>
+          <div class="date-range">
+            <span>09.12.2025</span>
+            <span>по</span>
+            <span>09.02.2026</span>
+          </div>
+        </div>
+        <div class="info-item">
+          <div class="label">Функциональный руководитель</div>
+          <div class="value">Иванов Иван Иваныч</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Руководитель по юридической ОШС</div>
+          <div class="value">Петров Петр Петрович</div>
+        </div>
+      </div>
+
+      <!-- Сообщение о режиме просмотра -->
+      <div class="status-message">
+        <div class="title">Режим просмотра</div>
+        <div class="text">Вы находитесь в режиме просмотра целей сотрудника. Изменения недоступны.</div>
+      </div>
+
+      <!-- Цели -->
+      <div class="goals-section" id="goalsSection"></div>
+
+      <!-- Единственная кнопка "Выйти" -->
+      <div class="button-group">
+        <button class="btn btn-back" id="backBtn">Выйти</button>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-logo">
+        <span>BIOCAD</span>
+      </div>
+      <div class="footer-text">© 2016 - 2023. Все права защищены</div>
+    </footer>
+
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const employeeName = urlParams.get('employee') || 'Котова Вероника';
+      const employeeKey = employeeName.replace(/\s+/g, '-');
+      
+      document.getElementById('pageTitle').textContent = `Просмотр целей: ${employeeName}`;
+      document.getElementById('employeeName').textContent = employeeName;
+
+      const draftKey = `goals-draft-${employeeKey}`;
+      const statusKey = `goals-status-${employeeKey}`;
+
+      // Загружаем текущий статус
+      const currentStatus = localStorage.getItem(statusKey) || 'draft';
+      document.getElementById('statusValue').textContent = 
+        currentStatus === 'draft' ? 'Черновик' :
+        currentStatus === 'review' ? 'На согласовании' :
+        currentStatus === 'approved' ? 'Согласовано' :
+        currentStatus === 'sign' ? 'На подписании' :
+        currentStatus === 'in-progress' ? 'На выполнении' : currentStatus;
+
+      // Загружаем цели
+      let goalsData = JSON.parse(localStorage.getItem(draftKey));
+      
+      if (!goalsData || !goalsData.goals || !Array.isArray(goalsData.goals)) {
+        goalsData = { goals: [] };
+      }
+
+      function formatDate(dateString) {
+        if (!dateString) return '—';
+        const [year, month, day] = dateString.split('-');
+        return `${day}.${month}.${year}`;
+      }
+
+      function renderGoals() {
+        const goalsSection = document.getElementById('goalsSection');
+        
+        if (!goalsData.goals || goalsData.goals.length === 0) {
+          goalsSection.innerHTML = '<p style="text-align: center; color: #64748B; padding: 40px;">Цели не найдены</p>';
+          return;
+        }
+
+        // Фильтруем только непустые цели
+        const validGoals = goalsData.goals.filter(goal => 
+          (goal.goal && goal.goal.trim() !== '') || 
+          (goal.criteria && goal.criteria.trim() !== '') || 
+          (goal.date && goal.date !== '')
+        );
+
+        if (validGoals.length === 0) {
+          goalsSection.innerHTML = '<p style="text-align: center; color: #64748B; padding: 40px;">Цели не найдены</p>';
+          return;
+        }
+
+        let html = '';
+        validGoals.forEach((goal, index) => {
+          html += `
+            <div class="goal-form">
+              <div class="form-row">
+                <div class="field-group">
+                  <div class="title">Цель ${index + 1}</div>
+                  <div class="text-field">${goal.goal || '—'}</div>
+                </div>
+                <div class="date-group">
+                  <div class="title">Срок выполнения</div>
+                  <div class="date-field">${goal.date ? formatDate(goal.date) : '—'}</div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="field-group">
+                  <div class="title">Критерии достижения</div>
+                  <div class="text-field">${goal.criteria || '—'}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        
+        goalsSection.innerHTML = html;
+      }
+
+      renderGoals();
+
+      document.getElementById('backBtn').addEventListener('click', () => {
+        window.location.href = 'index.html?role=superior';
+      });
+    </script>
+  </main>
+</body>
+</html>

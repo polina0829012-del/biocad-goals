@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Цели на испытательный срок</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      display: flex;
+      background: #FFFFFF;
+      color: #0F172A;
+    }
+
+    .sidebar {
+      width: 280px;
+      height: 100vh;
+      background: #0F172A;
+      padding: 0;
+      position: fixed;
+      left: 0;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar .logo {
+      color: white;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: -0.3px;
+      text-transform: uppercase;
+    }
+
+    .main-content {
+      margin-left: 280px;
+      width: calc(100% - 280px);
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-content {
+      display: flex;
+      flex-direction: column;
+      padding: 40px 40px 60px 40px;
+      gap: 40px;
+      width: 100%;
+    }
+
+    .page-title {
+      font-family: 'Biocad Display', sans-serif;
+      font-weight: 700;
+      font-size: 40px;
+      line-height: 42px;
+      color: #0F172A;
+    }
+
+    .employee-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      min-width: 250px;
+    }
+
+    .info-item .label {
+      font-size: 16px;
+      font-weight: 500;
+      color: #94A3B8;
+    }
+
+    .info-item .value {
+      font-size: 16px;
+      font-weight: 500;
+      color: #0F172A;
+      margin-top: 4px;
+    }
+
+    .info-item .date-range {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .info-item .date-range span {
+      font-size: 16px;
+      font-weight: 500;
+      color: #0F172A;
+    }
+
+    .rework-message {
+      display: none;
+      background: #E7F2FF;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 40px;
+    }
+
+    .rework-message .title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #3389F4;
+      margin-bottom: 8px;
+    }
+
+    .rework-message .text {
+      font-weight: 400;
+      font-size: 14px;
+      color: #3389F4;
+      line-height: 1.5;
+    }
+
+    .goals-section {
+      margin-bottom: 40px;
+    }
+
+    .goal-form {
+      background: #F8FAFC;
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+      width: 100%;
+      position: relative;
+    }
+
+    .goal-form .delete-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: none;
+      border: none;
+      color: #EE4A3F;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .form-row .field-group {
+      flex: 2;
+    }
+
+    .form-row .date-group {
+      flex: 1;
+    }
+
+    .form-row .field-group .title,
+    .form-row .date-group .title {
+      font-size: 14px;
+      font-weight: 400;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    .form-row .field-group .text-field {
+      width: 100%;
+      min-height: 40px;
+      background: #FFFFFF;
+      border: 1px solid #3389F4;
+      box-shadow: 0px 0px 0px 2px rgba(51, 137, 244, 0.4);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 16px;
+      color: #0F172A;
+      font-family: 'Inter', sans-serif;
+      resize: vertical;
+    }
+
+    .form-row .date-group .date-field {
+      width: 100%;
+      height: 40px;
+      background: #FFFFFF;
+      border: 1px solid #3389F4;
+      box-shadow: 0px 0px 0px 2px rgba(51, 137, 244, 0.4);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 16px;
+      color: #0F172A;
+      cursor: pointer;
+    }
+
+    .add-goal-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: none;
+      border: 1px solid #94A3B8;
+      border-radius: 6px;
+      color: #94A3B8;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 20px;
+      margin-left: 0;
+      width: fit-content;
+    }
+
+    .add-goal-btn:hover {
+      background: #F1F5F9;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: flex-start;
+      gap: 16px;
+      margin-top: 40px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+    }
+
+    .btn-cancel {
+      background: #FFFFFF;
+      border: 1px solid #3389F4;
+      color: #3389F4;
+    }
+
+    .btn-save-draft {
+      background: #FFFFFF;
+      border: 1px solid #3389F4;
+      color: #3389F4;
+    }
+
+    .btn-submit {
+      background: #0066CC;
+      color: white;
+      border: none;
+    }
+
+    .btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      padding: 20px 40px;
+      gap: 8px;
+      background: #F8FAFC;
+      border-top: 1px solid #E2E8F0;
+      margin-top: auto;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 89.69px;
+      height: 32px;
+    }
+
+    .footer-logo span {
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+    }
+
+    .footer-text {
+      color: #94A3B8;
+      font-size: 14px;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 10px;
+      width: 500px;
+      max-width: 90%;
+      padding: 24px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #64748B;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn-ok {
+      padding: 8px 16px;
+      background: #3389F4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .warning-message {
+      color: #EE4A3F;
+      font-size: 14px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">BIOCAD</div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-content">
+      <h1 class="page-title" id="pageTitle">Цели на испытательный срок</h1>
+
+      <div class="employee-info">
+        <div class="info-item">
+          <div class="label">Статус</div>
+          <div class="value" id="statusValue">Черновик</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Должность</div>
+          <div class="value">Бизнес-аналитик К4</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Длительность ИС</div>
+          <div class="date-range">
+            <span>09.12.2025</span>
+            <span>по</span>
+            <span>09.02.2026</span>
+          </div>
+        </div>
+        <div class="info-item">
+          <div class="label">Функциональный руководитель</div>
+          <div class="value">Иванов Иван Иваныч</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Руководитель по юридической ОШС</div>
+          <div class="value">Петров Петр Петрович</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Согласовать до</div>
+          <div class="value">13.10.2025</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Подписать до</div>
+          <div class="value">20.10.2025</div>
+        </div>
+      </div>
+
+      <div class="rework-message" id="reworkMessage">
+        <div class="title">Комментарий HR по доработке:</div>
+        <div class="text" id="reworkComment"></div>
+      </div>
+
+      <div class="goals-section">
+        <div class="goal-form" id="goalForm1">
+          <button class="delete-btn" onclick="deleteGoal(this)" style="display: none;">✕</button>
+
+          <div class="form-row">
+            <div class="field-group">
+              <div class="title">Цель</div>
+              <textarea class="text-field goal-field" data-field="goal" placeholder="Введите цель"></textarea>
+            </div>
+            <div class="date-group">
+              <div class="title">Срок выполнения</div>
+              <input type="date" class="date-field goal-date" data-field="date" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="field-group">
+              <div class="title">Критерии достижения</div>
+              <textarea class="text-field goal-field" data-field="criteria" placeholder="Введите критерии"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <button class="add-goal-btn" id="addGoalBtn">
+          Добавить цель
+        </button>
+      </div>
+
+      <div class="button-group">
+        <button class="btn btn-cancel" id="exitBtn">Выйти</button>
+        <button class="btn btn-save-draft" id="saveDraftBtn">Сохранить черновик</button>
+        <button class="btn btn-submit" id="submitBtn">Отправить на согласование</button>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-logo">
+        <span>BIOCAD</span>
+      </div>
+      <div class="footer-text">© 2016 - 2023. Все права защищены</div>
+    </footer>
+
+    <!-- Модальное окно для сохранения черновика -->
+    <div class="modal-overlay" id="saveModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Сохранение</h3>
+          <button class="close-modal" id="closeSave">✕</button>
+        </div>
+        <p>Ваши цели были успешно сохранены</p>
+        <div class="modal-actions">
+          <button class="btn-ok" id="okSave">Понятно</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальное окно для отправки на согласование -->
+    <div class="modal-overlay" id="submitModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Отправка на согласование</h3>
+          <button class="close-modal" id="closeSubmit">✕</button>
+        </div>
+        <p>Ваши цели были успешно отправлены на согласование HR</p>
+        <div class="modal-actions">
+          <button class="btn-ok" id="okSubmit">Понятно</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальное окно для предупреждения об отсутствии изменений -->
+    <div class="modal-overlay" id="warningModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Внимание</h3>
+          <button class="close-modal" id="closeWarning">✕</button>
+        </div>
+        <p class="warning-message">⚠️ Перед тем как отправить цели на согласование, внесите изменения в соответствии с комментарием от HR</p>
+        <div class="modal-actions">
+          <button class="btn-ok" id="okWarning">Понятно</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const employeeName = urlParams.get('employee') || 'Котова Вероника';
+      const employeeKey = employeeName.replace(/\s+/g, '-');
+      
+      document.getElementById('pageTitle').textContent = `Цели на испытательный срок для ${employeeName}`;
+
+      const draftKey = `goals-draft-${employeeKey}`;
+      const statusKey = `goals-status-${employeeKey}`;
+      const commentKey = `goals-comment-${employeeKey}`;
+      const historyKey = `goals-history-${employeeKey}`;
+      const originalGoalsKey = `goals-original-${employeeKey}`; // Новый ключ для хранения оригинальных целей
+
+      // Загружаем данные
+      let goalsData = JSON.parse(localStorage.getItem(draftKey));
+      
+      if (!goalsData || !goalsData.goals || !Array.isArray(goalsData.goals)) {
+        goalsData = { goals: [] };
+      }
+      
+      if (goalsData.goals.length === 0) {
+        goalsData.goals.push({ goal: '', criteria: '', date: '' });
+        localStorage.setItem(draftKey, JSON.stringify(goalsData));
+      }
+
+      // Получаем предыдущий статус перед изменениями
+      const previousStatus = localStorage.getItem(statusKey);
+
+      // ВАЖНО: Сохраняем оригинальные цели (те, которые были до изменений)
+      // Если это первая загрузка после возврата из статуса "На подписании",
+      // то сохраняем текущие цели как оригинальные для сравнения
+      let originalGoals;
+      const savedOriginalGoals = localStorage.getItem(originalGoalsKey);
+      
+      if (savedOriginalGoals) {
+        // Если уже есть сохраненные оригинальные цели, используем их
+        originalGoals = JSON.parse(savedOriginalGoals);
+      } else {
+        // Иначе сохраняем текущие как оригинальные
+        originalGoals = JSON.parse(JSON.stringify(goalsData));
+        localStorage.setItem(originalGoalsKey, JSON.stringify(originalGoals));
+      }
+
+      const hrComment = localStorage.getItem(commentKey);
+      if (hrComment) {
+        document.getElementById('reworkMessage').style.display = 'block';
+        document.getElementById('reworkComment').textContent = hrComment;
+      }
+
+      const savedStatus = localStorage.getItem(statusKey);
+      if (savedStatus) {
+        document.getElementById('statusValue').textContent = 
+          savedStatus === 'draft' ? 'Черновик' : 
+          savedStatus === 'review' ? 'На согласовании' : 
+          savedStatus === 'approved' ? 'Согласовано' : 
+          savedStatus === 'sign' ? 'На подписании' :
+          savedStatus === 'in-progress' ? 'На выполнении' : savedStatus;
+      }
+
+      function hasGoalsChanged() {
+        const forms = document.querySelectorAll('.goal-form');
+        const currentGoals = [];
+        
+        forms.forEach(form => {
+          const goalField = form.querySelector('.goal-field[data-field="goal"]');
+          const criteriaField = form.querySelector('.goal-field[data-field="criteria"]');
+          const dateField = form.querySelector('.goal-date');
+          
+          currentGoals.push({
+            goal: goalField ? goalField.value.trim() : '',
+            criteria: criteriaField ? criteriaField.value.trim() : '',
+            date: dateField ? dateField.value : ''
+          });
+        });
+
+        const nonEmptyCurrentGoals = currentGoals.filter(g => 
+          g.goal !== '' || g.criteria !== '' || g.date !== ''
+        );
+
+        const nonEmptyOriginalGoals = originalGoals.goals.filter(g => 
+          (g.goal && g.goal.trim() !== '') || 
+          (g.criteria && g.criteria.trim() !== '') || 
+          (g.date && g.date !== '')
+        );
+
+        if (nonEmptyCurrentGoals.length !== nonEmptyOriginalGoals.length) {
+          return true;
+        }
+
+        for (let i = 0; i < nonEmptyCurrentGoals.length; i++) {
+          const current = nonEmptyCurrentGoals[i];
+          const original = nonEmptyOriginalGoals[i] || { goal: '', criteria: '', date: '' };
+          
+          if (current.goal !== (original.goal || '').trim() ||
+              current.criteria !== (original.criteria || '').trim() ||
+              current.date !== (original.date || '')) {
+            return true;
+          }
+        }
+
+        return false;
+      }
+
+      // Функция для создания истории изменений
+      function createChangeHistory() {
+        const forms = document.querySelectorAll('.goal-form');
+        const currentGoals = [];
+        
+        forms.forEach(form => {
+          const goalField = form.querySelector('.goal-field[data-field="goal"]');
+          const criteriaField = form.querySelector('.goal-field[data-field="criteria"]');
+          const dateField = form.querySelector('.goal-date');
+          
+          currentGoals.push({
+            goal: goalField ? goalField.value.trim() : '',
+            criteria: criteriaField ? criteriaField.value.trim() : '',
+            date: dateField ? dateField.value : ''
+          });
+        });
+
+        const history = {
+          timestamp: new Date().toISOString(),
+          previousGoals: originalGoals.goals, // Используем сохраненные оригинальные цели
+          currentGoals: currentGoals
+        };
+
+        console.log('Создаем историю изменений:', history);
+        localStorage.setItem(historyKey, JSON.stringify(history));
+        
+        // После создания истории очищаем сохраненные оригинальные цели
+        localStorage.removeItem(originalGoalsKey);
+      }
+
+      function initGoals() {
+        const goalForms = document.querySelectorAll('.goal-form');
+        
+        for (let i = 1; i < goalForms.length; i++) {
+          goalForms[i].remove();
+        }
+        
+        const updatedGoalForms = document.querySelectorAll('.goal-form');
+        
+        goalsData.goals.forEach((goal, index) => {
+          let form;
+          
+          if (index === 0) {
+            form = updatedGoalForms[0];
+            const deleteBtn = form.querySelector('.delete-btn');
+            deleteBtn.style.display = 'none';
+          } else {
+            const goalFormsContainer = document.querySelector('.goals-section');
+            form = document.createElement('div');
+            form.className = 'goal-form';
+            form.id = `goalForm${index + 1}`;
+            form.innerHTML = `
+              <button class="delete-btn" onclick="deleteGoal(this)">✕</button>
+              <div class="form-row">
+                <div class="field-group">
+                  <div class="title">Цель</div>
+                  <textarea class="text-field goal-field" data-field="goal" placeholder="Введите цель"></textarea>
+                </div>
+                <div class="date-group">
+                  <div class="title">Срок выполнения</div>
+                  <input type="date" class="date-field goal-date" data-field="date" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="field-group">
+                  <div class="title">Критерии достижения</div>
+                  <textarea class="text-field goal-field" data-field="criteria" placeholder="Введите критерии"></textarea>
+                </div>
+              </div>
+            `;
+            goalFormsContainer.insertBefore(form, document.getElementById('addGoalBtn'));
+          }
+          
+          const goalField = form.querySelector('.goal-field[data-field="goal"]');
+          const criteriaField = form.querySelector('.goal-field[data-field="criteria"]');
+          const dateField = form.querySelector('.goal-date');
+
+          if (goalField) goalField.value = goal.goal || '';
+          if (criteriaField) criteriaField.value = goal.criteria || '';
+          if (dateField) dateField.value = goal.date || '';
+        });
+      }
+
+      document.addEventListener('input', (e) => {
+        if (e.target.classList.contains('goal-field') || e.target.classList.contains('goal-date')) {
+          const forms = document.querySelectorAll('.goal-form');
+          const newGoals = [];
+          
+          forms.forEach(form => {
+            const goalField = form.querySelector('.goal-field[data-field="goal"]');
+            const criteriaField = form.querySelector('.goal-field[data-field="criteria"]');
+            const dateField = form.querySelector('.goal-date');
+            
+            newGoals.push({
+              goal: goalField ? goalField.value : '',
+              criteria: criteriaField ? criteriaField.value : '',
+              date: dateField ? dateField.value : ''
+            });
+          });
+          
+          goalsData.goals = newGoals;
+          localStorage.setItem(draftKey, JSON.stringify(goalsData));
+        }
+      });
+
+      document.getElementById('addGoalBtn').addEventListener('click', () => {
+        goalsData.goals.push({ goal: '', criteria: '', date: '' });
+        localStorage.setItem(draftKey, JSON.stringify(goalsData));
+        initGoals();
+      });
+
+      window.deleteGoal = function(button) {
+        const form = button.closest('.goal-form');
+        const index = Array.from(document.querySelectorAll('.goal-form')).indexOf(form);
+        
+        if (index === 0) return;
+        
+        goalsData.goals.splice(index, 1);
+        localStorage.setItem(draftKey, JSON.stringify(goalsData));
+        initGoals();
+      };
+
+      document.getElementById('saveDraftBtn').addEventListener('click', () => {
+        localStorage.setItem(draftKey, JSON.stringify(goalsData));
+        document.getElementById('saveModal').style.display = 'flex';
+      });
+
+      document.getElementById('submitBtn').addEventListener('click', () => {
+        const hasHRComment = localStorage.getItem(commentKey);
+        
+        // Создаем историю изменений если:
+        // 1. Есть комментарий HR (повторная отправка после доработки)
+        // 2. ИЛИ есть сохраненные оригинальные цели (возврат из статуса "На подписании")
+        const shouldCreateHistory = hasHRComment || localStorage.getItem(originalGoalsKey) !== null;
+        
+        if (shouldCreateHistory) {
+          if (!hasGoalsChanged()) {
+            document.getElementById('warningModal').style.display = 'flex';
+            return;
+          }
+          // Создаем историю ДО изменения статуса
+          createChangeHistory();
+        } else {
+          // При первой отправке удаляем историю, если она вдруг осталась
+          localStorage.removeItem(historyKey);
+        }
+        
+        localStorage.setItem(draftKey, JSON.stringify(goalsData));
+        localStorage.setItem(statusKey, 'review');
+        localStorage.removeItem(commentKey);
+        document.getElementById('submitModal').style.display = 'flex';
+      });
+
+      document.getElementById('okSave').addEventListener('click', () => {
+        document.getElementById('saveModal').style.display = 'none';
+      });
+
+      document.getElementById('closeSave').addEventListener('click', () => {
+        document.getElementById('saveModal').style.display = 'none';
+      });
+
+      document.getElementById('okSubmit').addEventListener('click', () => {
+        document.getElementById('submitModal').style.display = 'none';
+        window.location.href = 'review-goals.html?employee=' + encodeURIComponent(employeeName) + '&status=review&role=manager';
+      });
+
+      document.getElementById('closeSubmit').addEventListener('click', () => {
+        document.getElementById('submitModal').style.display = 'none';
+      });
+
+      document.getElementById('okWarning').addEventListener('click', () => {
+        document.getElementById('warningModal').style.display = 'none';
+      });
+
+      document.getElementById('closeWarning').addEventListener('click', () => {
+        document.getElementById('warningModal').style.display = 'none';
+      });
+
+      document.addEventListener('click', (e) => {
+        if (e.target === document.getElementById('saveModal')) {
+          document.getElementById('saveModal').style.display = 'none';
+        }
+        if (e.target === document.getElementById('submitModal')) {
+          document.getElementById('submitModal').style.display = 'none';
+        }
+        if (e.target === document.getElementById('warningModal')) {
+          document.getElementById('warningModal').style.display = 'none';
+        }
+      });
+
+      document.getElementById('exitBtn').addEventListener('click', () => {
+        window.location.href = 'index.html';
+      });
+
+      document.addEventListener('DOMContentLoaded', initGoals);
+    </script>
+  </main>
+</body>
+</html>

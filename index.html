@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Цели моей команды</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      display: flex;
+      background: #FFFFFF;
+      color: #0F172A;
+    }
+
+    .sidebar {
+      width: 280px;
+      height: 100vh;
+      background: #0F172A;
+      padding: 20px 0;
+      position: fixed;
+      left: 0;
+      top: 0;
+      overflow-y: auto;
+    }
+
+    .logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 32px;
+      margin-bottom: 40px;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .logo span {
+      color: white;
+      font-weight: 700;
+      font-size: 20px;
+    }
+
+    .sidebar-menu {
+      padding: 0 20px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      gap: 12px;
+      background: #0F172A;
+      cursor: pointer;
+      border-bottom: 1px solid #404040;
+    }
+
+    .menu-item:hover {
+      background: #1E1E1E;
+    }
+
+    .menu-item .title {
+      color: #D4D4D4;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .sidebar-footer {
+      padding: 20px 20px 14px;
+      margin-top: auto;
+    }
+
+    .sidebar-footer .footer-label {
+      color: #737373;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .main-content {
+      margin-left: 280px;
+      width: calc(100% - 280px);
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      padding: 0 40px;
+      height: 68px;
+      background: #FFFFFF;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 0;
+    }
+
+    .role-switcher {
+      display: flex;
+      align-items: center;
+      margin-left: 40px;
+      gap: 8px;
+      background: #F1F5F9;
+      padding: 4px;
+      border-radius: 8px;
+    }
+
+    .role-btn {
+      padding: 6px 12px;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #64748B;
+      cursor: pointer;
+    }
+
+    .role-btn.active {
+      background: #FFFFFF;
+      color: #3389F4;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .avatar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-left: auto;
+    }
+
+    .avatar .photo {
+      width: 48px;
+      height: 48px;
+      background: #E2E8F0;
+      border-radius: 28px;
+    }
+
+    .avatar .text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .avatar .name {
+      font-weight: 700;
+      font-size: 16px;
+      color: #475569;
+    }
+
+    .avatar .email {
+      font-size: 14px;
+      color: #64748B;
+    }
+
+    .tabs {
+      display: flex;
+      padding: 0 40px;
+      height: 38px;
+      background: #FFFFFF;
+      border-bottom: 1px solid #E2E8F0;
+      margin-top: 20px;
+    }
+
+    .tab {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 40px 16px;
+      margin-right: 32px;
+      color: #475569;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab.active {
+      border-bottom: 2px solid #3389F4;
+      color: #3389F4;
+      font-weight: 700;
+    }
+
+    .filter-bar {
+      display: flex;
+      padding: 0 40px;
+      margin-top: 20px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .filter-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px 8px 20px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 10px;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      height: 48px;
+    }
+
+    .filter-button .icon {
+      width: 20px;
+      height: 20px;
+      fill: #475569;
+    }
+
+    .reset-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px 8px 20px;
+      background: #FFFFFF;
+      border: 1px solid #EE4A3F;
+      border-radius: 10px;
+      color: #EE4A3F;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      height: 48px;
+      margin-left: auto;
+    }
+
+    .reset-button .icon {
+      width: 20px;
+      height: 20px;
+      fill: #EE4A3F;
+    }
+
+    .reset-button:hover {
+      background: #FEE2E2;
+    }
+
+    .filter-panel {
+      display: none;
+      position: absolute;
+      top: 150px;
+      left: 40px;
+      width: 484px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 10px;
+      box-shadow: 0px 2px 20px rgba(148, 163, 184, 0.25);
+      padding: 20px;
+      z-index: 10;
+      margin-top: 20px;
+    }
+
+    .filter-section {
+      margin-bottom: 20px;
+      border-bottom: 1px solid #E2E8F0;
+      padding-bottom: 16px;
+    }
+
+    .filter-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    .filter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .filter-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #0F172A;
+    }
+
+    .chevron-down {
+      width: 16px;
+      height: 16px;
+      fill: #64748B;
+      transition: transform 0.2s ease;
+    }
+
+    .chevron-down.rotated {
+      transform: rotate(90deg);
+    }
+
+    .filter-content {
+      margin-top: 12px;
+      display: none;
+    }
+
+    .filter-content.show {
+      display: block;
+    }
+
+    .filter-checkboxes {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      border: 1px solid #CBD5E1;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .checkbox-item label {
+      font-size: 14px;
+      color: #475569;
+    }
+
+    .filter-input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 16px;
+      border: 1px solid #CBD5E1;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn-clear, .btn-apply {
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .btn-clear {
+      background: #FFFFFF;
+      color: #64748B;
+      border: 1px solid #CBD5E1;
+    }
+
+    .btn-apply {
+      background: #3389F4;
+      color: white;
+    }
+
+    .table-container {
+      padding: 0 40px;
+      margin-top: 40px;
+    }
+
+    .employee-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .employee-table th,
+    .employee-table td {
+      padding: 16px 24px;
+      border-bottom: 1px solid #E2E8F0;
+      text-align: left;
+    }
+
+    .employee-table th {
+      font-size: 14px;
+      font-weight: 500;
+      color: #64748B;
+      background: #F8FAFC;
+    }
+
+    .employee-table th:nth-child(5) {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      background: #F8FAFC;
+    }
+
+    .employee-table th:nth-child(5) .sort-icon {
+      width: 12px;
+      height: 12px;
+      color: #64748B;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .status-badge {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-draft { background: #F1F5F9; color: #64748B; }
+    .status-review { background: #E7F2FF; color: #3389F4; }
+    .status-approved { background: #D9F2E7; color: #2E9264; }
+    .status-sign { background: #E7F2FF; color: #3389F4; }
+    .status-in-progress { background: #D9F2E7; color: #2E9264; }
+    .status-rework { background: #FCE7F3; color: #BE185D; }
+    .status-passed { background: #D9F2E7; color: #2E9264; }
+    .status-failed { background: #FCE7F3; color: #EE4A3F; }
+    .status-closed { background: #F1F5F9; color: #64748B; }
+
+    .bell-icon {
+      width: 16px;
+      height: 16px;
+      cursor: help;
+      position: relative;
+    }
+
+    .bell-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: #EE4A3F;
+    }
+
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+
+    .tooltip .tooltip-text {
+      visibility: hidden;
+      width: 220px;
+      background-color: #1E293B;
+      color: #fff;
+      text-align: center;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      position: absolute;
+      z-index: 100;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -110px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      white-space: normal;
+      line-height: 1.4;
+      pointer-events: none;
+    }
+
+    .tooltip .tooltip-text::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #1E293B transparent transparent transparent;
+    }
+
+    .tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .action-btn .icon {
+      width: 20px;
+      height: 20px;
+      fill: #94A3B8;
+    }
+
+    .action-btn:hover .icon {
+      fill: #3389F4;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 40px;
+      color: #64748B;
+      font-size: 16px;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 10px;
+      width: 400px;
+      max-width: 90%;
+      padding: 24px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #64748B;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn-cancel {
+      padding: 8px 16px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-confirm {
+      padding: 8px 16px;
+      background: #EE4A3F;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">
+      <span>BIOCAD</span>
+    </div>
+    <div class="sidebar-menu">
+      <div class="menu-item">
+        <div class="icon info"></div>
+        <span class="title">Эффективность</span>
+        <div class="chevron"></div>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="footer-label">БАЗА ЗНАНИЙ</div>
+      <div class="footer-label">ПОДРАЗДЕЛЕНИЯ</div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="header">
+      <h1>Цели моей команды</h1>
+      <div class="role-switcher" id="roleSwitcher">
+        <button class="role-btn active" data-role="manager">Руководитель</button>
+        <button class="role-btn" data-role="hr">HR</button>
+        <button class="role-btn" data-role="superior">Вышестоящий руководитель</button>
+        <button class="role-btn" data-role="employee">Сотрудник</button>
+      </div>
+      <div class="avatar">
+        <div class="photo"></div>
+        <div class="text">
+          <div class="name">Иванов Иван</div>
+          <div class="email">ivanov.i@company.com</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="tabs" id="tabs"></div>
+
+    <div class="filter-bar" id="filterBar">
+      <div class="filter-button" id="filterBtn">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        Добавить фильтр
+      </div>
+      
+      <!-- Кнопка сброса до черновика (только для руководителя) -->
+      <button class="reset-button" id="resetBtn" style="display: flex;">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 4V10H7" stroke="#EE4A3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3.51 14C4.15817 16.0632 5.46632 17.857 7.24486 19.0971C9.0234 20.3372 11.1629 20.9491 13.3353 20.8327C15.5077 20.7163 17.569 19.8784 19.2048 18.4598C20.8406 17.0412 21.9513 15.1308 22.3485 13.0213C22.7457 10.9118 22.4021 8.72782 21.3809 6.84002C20.3597 4.95223 18.7276 3.47899 16.7477 2.65405C14.7678 1.82912 12.5628 1.70671 10.4997 2.30877C8.43653 2.91083 6.64386 4.1951 5.41 5.94L1 10" stroke="#EE4A3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Сбросить до черновика
+      </button>
+    </div>
+
+    <div class="filter-panel" id="filterPanel">
+      <div class="filter-section">
+        <div class="filter-header" id="statusHeader">
+          <span class="filter-title">Статус</span>
+          <svg class="chevron-down" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        </div>
+        <div class="filter-content" id="statusContent">
+          <div class="filter-group">
+            <div class="filter-checkboxes" id="statusFilters">
+              <label class="checkbox-item"><input type="checkbox" value="draft"> Черновик</label>
+              <label class="checkbox-item"><input type="checkbox" value="review"> На согласовании</label>
+              <label class="checkbox-item"><input type="checkbox" value="approved"> Согласовано</label>
+              <label class="checkbox-item"><input type="checkbox" value="sign"> На подписании</label>
+              <label class="checkbox-item"><input type="checkbox" value="in-progress"> На выполнении</label>
+              <label class="checkbox-item"><input type="checkbox" value="rework"> На доработке</label>
+              <label class="checkbox-item"><input type="checkbox" value="passed"> Ис пройден</label>
+              <label class="checkbox-item"><input type="checkbox" value="failed"> Ис не пройден</label>
+              <label class="checkbox-item"><input type="checkbox" value="closed"> Закрыта</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-header" id="positionHeader">
+          <span class="filter-title">Должность</span>
+          <svg class="chevron-down" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        </div>
+        <div class="filter-content" id="positionContent">
+          <div class="filter-group">
+            <input type="text" class="filter-input" id="positionSearch" placeholder="Поиск должностей..." />
+            <div class="filter-checkboxes" id="positionFilters">
+              <label class="checkbox-item"><input type="checkbox" value="k2"> Бизнес-аналитик К2</label>
+              <label class="checkbox-item"><input type="checkbox" value="k3"> Бизнес-аналитик К3</label>
+              <label class="checkbox-item"><input type="checkbox" value="k4"> Бизнес-аналитик К4</label>
+              <label class="checkbox-item"><input type="checkbox" value="analyst"> Аналитик</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-group">
+          <label class="checkbox-item">
+            <input type="checkbox" id="directReports">
+            <span>Отображать только прямых подчинённых</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-header" id="endDateHeader">
+          <span class="filter-title">Дата завершения ИС</span>
+          <svg class="chevron-down" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        </div>
+        <div class="filter-content" id="endDateContent">
+          <div class="filter-group">
+            <input type="date" class="filter-input" id="endDateFrom" placeholder="Начало" />
+            <input type="date" class="filter-input" id="endDateTo" placeholder="Окончание" />
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-header" id="formCloseHeader">
+          <span class="filter-title">Дата закрытия формы</span>
+          <svg class="chevron-down" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        </div>
+        <div class="filter-content" id="formCloseContent">
+          <div class="filter-group">
+            <input type="date" class="filter-input" id="formCloseFrom" placeholder="Начало" />
+            <input type="date" class="filter-input" id="formCloseTo" placeholder="Окончание" />
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn-clear" id="clearFilters">Сбросить</button>
+        <button class="btn-apply" id="applyFilters">Применить</button>
+      </div>
+    </div>
+
+    <!-- Модальное окно подтверждения сброса -->
+    <div class="modal-overlay" id="resetModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Сброс целей</h3>
+          <button class="close-modal" id="closeResetModal">✕</button>
+        </div>
+        <p>Вы уверены, что хотите сбросить цели всех сотрудников до статуса "Черновик"? Это действие нельзя отменить.</p>
+        <div class="modal-actions">
+          <button class="btn-cancel" id="cancelReset">Отмена</button>
+          <button class="btn-confirm" id="confirmReset">Сбросить</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="employee-table">
+        <thead>
+          <tr>
+            <th>ФИО</th>
+            <th>Должность</th>
+            <th>Плановая дата завершения ИС</th>
+            <th>Дата закрытия формы (Факт)</th>
+            <th>
+              Статус
+              <span class="sort-icon" id="statusSortIcon">↓</span>
+            </th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="no-results" id="noResults" style="display: none;">Нет сотрудников, соответствующих выбранным условиям. Попробуйте изменить фильтры.</div>
+    </div>
+
+    <script>
+      const employees = [
+        {
+          name: 'Котова Вероника',
+          position: 'Бизнес-аналитик К4',
+          positionCode: 'k4',
+          status: 'draft',
+          endDate: '2026-02-09',
+          closeDate: null
+        },
+        {
+          name: 'Круглов Кирилл',
+          position: 'Бизнес-аналитик К2',
+          positionCode: 'k2',
+          status: 'review',
+          endDate: '2026-03-13',
+          closeDate: null
+        },
+        {
+          name: 'Крылов Кирилл',
+          position: 'Бизнес-аналитик К2',
+          positionCode: 'k2',
+          status: 'failed',
+          endDate: '2025-12-22',
+          closeDate: '2025-12-22'
+        },
+        {
+          name: 'Шевелев Георгий',
+          position: 'Бизнес-аналитик К3',
+          positionCode: 'k3',
+          status: 'passed',
+          endDate: '2025-12-22',
+          closeDate: '2025-12-22'
+        }
+      ];
+
+      let currentRole = 'manager';
+      let currentHRTab = 'review';
+
+      function renderTable() {
+        const tableBody = document.getElementById('tableBody');
+        const noResults = document.getElementById('noResults');
+        
+        let updatedEmployees = employees.map(emp => {
+          const statusKey = `goals-status-${emp.name.replace(/\s+/g, '-')}`;
+          const savedStatus = localStorage.getItem(statusKey);
+          if (savedStatus) {
+            return { ...emp, status: savedStatus };
+          }
+          return emp;
+        });
+        
+        if (currentRole === 'hr') {
+          if (currentHRTab === 'review') {
+            updatedEmployees = updatedEmployees.filter(emp => emp.status === 'review');
+          }
+        } else if (currentRole === 'employee') {
+          updatedEmployees = updatedEmployees.filter(emp => emp.name === 'Котова Вероника');
+        }
+        
+        updatedEmployees = applyFilterPanelFilters(updatedEmployees);
+        
+        if (updatedEmployees.length === 0) {
+          noResults.style.display = 'block';
+          tableBody.innerHTML = '';
+          return;
+        }
+        
+        noResults.style.display = 'none';
+        
+        tableBody.innerHTML = updatedEmployees.map(emp => {
+          const closeDate = emp.closeDate ? formatDate(emp.closeDate) : '–';
+          const commentKey = `goals-comment-${emp.name.replace(/\s+/g, '-')}`;
+          const hasComment = localStorage.getItem(commentKey);
+          
+          // Статус с возможным колокольчиком
+          let statusDisplay = `<span class="status-badge status-${emp.status}">${getStatusText(emp.status)}`;
+          
+          // Добавляем колокольчик только для руководителя, если статус "draft" и есть комментарий
+          if (currentRole === 'manager' && emp.status === 'draft' && hasComment) {
+            statusDisplay += `
+              <span class="tooltip bell-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke="#EE4A3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M13.73 21C13.5542 21.3031 13.3019 21.5547 12.9982 21.7295C12.6946 21.9044 12.3504 21.9965 12 21.9965C11.6496 21.9965 11.3054 21.9044 11.0018 21.7295C10.6982 21.5547 10.4458 21.3031 10.27 21" stroke="#EE4A3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="tooltip-text">Цели были возвращены HR на доработку</span>
+              </span>
+            `;
+          }
+          
+          statusDisplay += '</span>';
+          
+          // Выбираем иконку действия
+          let iconSvg = '';
+          if (emp.status === 'draft' && currentRole === 'manager') {
+            iconSvg = '<svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+          } else {
+            iconSvg = '<svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 12C1 12 5.5 4 12 4C18.5 4 23 12 23 12C23 12 18.5 20 12 20C5.5 20 1 12 1 12Z" stroke="#94A3B8" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="#94A3B8" stroke-width="1.5"/></svg>';
+          }
+          
+          return `
+            <tr class="employee-row" data-status="${emp.status}" data-position="${emp.positionCode}" data-end-date="${emp.endDate}" data-close-date="${emp.closeDate || ''}">
+              <td>${emp.name}</td>
+              <td>${emp.position}</td>
+              <td>${formatDate(emp.endDate)}</td>
+              <td>${closeDate}</td>
+              <td>${statusDisplay}</td>
+              <td><button class="action-btn" onclick="handleAction('${emp.name}', '${emp.status}')">${iconSvg}</button></td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      function applyFilterPanelFilters(employees) {
+        const statusFilters = Array.from(document.querySelectorAll('#statusFilters input:checked')).map(el => el.value);
+        const positionFilters = Array.from(document.querySelectorAll('#positionFilters input:checked')).map(el => el.value);
+        const endDateFrom = document.getElementById('endDateFrom').value;
+        const endDateTo = document.getElementById('endDateTo').value;
+        const formCloseFrom = document.getElementById('formCloseFrom').value;
+        const formCloseTo = document.getElementById('formCloseTo').value;
+        const showDirect = document.getElementById('directReports').checked;
+
+        return employees.filter(emp => {
+          if (statusFilters.length > 0 && !statusFilters.includes(emp.status)) return false;
+          if (positionFilters.length > 0 && !positionFilters.includes(emp.positionCode)) return false;
+          
+          if (endDateFrom && emp.endDate < endDateFrom) return false;
+          if (endDateTo && emp.endDate > endDateTo) return false;
+          
+          if (formCloseFrom || formCloseTo) {
+            if (!emp.closeDate) return false;
+            if (formCloseFrom && emp.closeDate < formCloseFrom) return false;
+            if (formCloseTo && emp.closeDate > formCloseTo) return false;
+          }
+          
+          if (showDirect && emp.positionCode !== 'k4') return false;
+          
+          return true;
+        });
+      }
+
+      function formatDate(dateString) {
+        if (!dateString) return '–';
+        const [year, month, day] = dateString.split('-');
+        return `${day}.${month}.${year}`;
+      }
+
+      function getStatusText(status) {
+        const statusMap = {
+          'draft': 'Черновик',
+          'review': 'На согласовании',
+          'approved': 'Согласовано',
+          'sign': 'На подписании',
+          'in-progress': 'На выполнении',
+          'rework': 'На доработке',
+          'passed': 'Ис пройден',
+          'failed': 'Ис не пройден',
+          'closed': 'Закрыта'
+        };
+        return statusMap[status] || status;
+      }
+
+      window.handleAction = function(employeeName, status) {
+        console.log('Переход для:', employeeName, 'статус:', status, 'роль:', currentRole);
+        
+        switch(currentRole) {
+          case 'manager':
+            if (status === 'draft') {
+              window.location.href = 'edit-goals.html?employee=' + encodeURIComponent(employeeName);
+            } else {
+              window.location.href = 'review-goals.html?employee=' + encodeURIComponent(employeeName) + '&status=' + encodeURIComponent(status) + '&role=manager';
+            }
+            break;
+            
+          case 'employee':
+            window.location.href = 'employee-view.html?employee=' + encodeURIComponent(employeeName) + '&status=' + encodeURIComponent(status);
+            break;
+            
+          case 'hr':
+            if (status === 'review') {
+              window.location.href = 'hr-review.html?employee=' + encodeURIComponent(employeeName);
+            } else {
+              window.location.href = 'hr-review.html?employee=' + encodeURIComponent(employeeName) + '&view=readonly';
+            }
+            break;
+            
+          case 'superior':
+            // Для вышестоящего руководителя - всегда открываем superior-view.html
+            window.location.href = 'superior-view.html?employee=' + encodeURIComponent(employeeName);
+            break;
+        }
+      };
+
+      // Функция сброса всех целей до черновика
+      function resetAllToDraft() {
+        employees.forEach(emp => {
+          const statusKey = `goals-status-${emp.name.replace(/\s+/g, '-')}`;
+          const commentKey = `goals-comment-${emp.name.replace(/\s+/g, '-')}`;
+          const documentKey = `goals-document-${emp.name.replace(/\s+/g, '-')}`;
+          const downloadFlagKey = `goals-downloaded-${emp.name.replace(/\s+/g, '-')}`;
+          const historyKey = `goals-history-${emp.name.replace(/\s+/g, '-')}`;
+          
+          // Сбрасываем статус на draft
+          localStorage.setItem(statusKey, 'draft');
+          
+          // Удаляем все вспомогательные данные
+          localStorage.removeItem(commentKey);
+          localStorage.removeItem(documentKey);
+          localStorage.removeItem(downloadFlagKey);
+          localStorage.removeItem(historyKey);
+        });
+        
+        // Обновляем таблицу
+        renderTable();
+        
+        alert('Все цели успешно сброшены до статуса "Черновик"');
+      }
+
+      // Обработчики для кнопки сброса
+      const resetBtn = document.getElementById('resetBtn');
+      const resetModal = document.getElementById('resetModal');
+      const closeResetModal = document.getElementById('closeResetModal');
+      const cancelReset = document.getElementById('cancelReset');
+      const confirmReset = document.getElementById('confirmReset');
+
+      resetBtn.addEventListener('click', () => {
+        resetModal.style.display = 'flex';
+      });
+
+      closeResetModal.addEventListener('click', () => {
+        resetModal.style.display = 'none';
+      });
+
+      cancelReset.addEventListener('click', () => {
+        resetModal.style.display = 'none';
+      });
+
+      confirmReset.addEventListener('click', () => {
+        resetAllToDraft();
+        resetModal.style.display = 'none';
+      });
+
+      window.addEventListener('click', (e) => {
+        if (e.target === resetModal) {
+          resetModal.style.display = 'none';
+        }
+      });
+
+      document.querySelectorAll('.role-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentRole = btn.dataset.role;
+          
+          if (currentRole === 'hr') {
+            currentHRTab = 'review';
+          }
+          
+          updateUIForRole(currentRole);
+          renderTable();
+        });
+      });
+
+      function updateUIForRole(role) {
+        const tabs = document.getElementById('tabs');
+        const filterBar = document.getElementById('filterBar');
+        const title = document.querySelector('.header h1');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        switch(role) {
+          case 'manager':
+            title.textContent = 'Цели моей команды';
+            tabs.innerHTML = `
+              <div class="tab active" data-tab="team">Цели моей команды</div>
+              <div class="tab" data-tab="my">Мои цели</div>
+            `;
+            filterBar.style.display = 'flex';
+            resetBtn.style.display = 'flex';
+            break;
+            
+          case 'hr':
+            title.textContent = 'Цели на согласовании';
+            tabs.innerHTML = `
+              <div class="tab ${currentHRTab === 'review' ? 'active' : ''}" data-tab="review">Цели на согласовании</div>
+              <div class="tab ${currentHRTab === 'all' ? 'active' : ''}" data-tab="all">Все цели</div>
+            `;
+            filterBar.style.display = 'flex';
+            resetBtn.style.display = 'none';
+            
+            setTimeout(() => {
+              document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                  tab.classList.add('active');
+                  currentHRTab = tab.dataset.tab;
+                  renderTable();
+                });
+              });
+            }, 100);
+            break;
+            
+          case 'superior':
+            title.textContent = 'Цели подразделения';
+            tabs.innerHTML = `
+              <div class="tab active" data-tab="subordinates">Цели подчиненных</div>
+              <div class="tab" data-tab="reports">Отчеты</div>
+            `;
+            filterBar.style.display = 'flex';
+            resetBtn.style.display = 'none';
+            break;
+            
+          case 'employee':
+            title.textContent = 'Мои цели';
+            tabs.innerHTML = `
+              <div class="tab active" data-tab="my">Мои цели</div>
+            `;
+            filterBar.style.display = 'none';
+            resetBtn.style.display = 'none';
+            break;
+        }
+      }
+
+      const filterBtn = document.getElementById('filterBtn');
+      const filterPanel = document.getElementById('filterPanel');
+      const applyFilters = document.getElementById('applyFilters');
+      const clearFilters = document.getElementById('clearFilters');
+
+      filterBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        filterPanel.style.display = 'block';
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!filterPanel.contains(e.target) && e.target !== filterBtn) {
+          filterPanel.style.display = 'none';
+        }
+      });
+
+      document.querySelectorAll('.filter-header').forEach(header => {
+        header.addEventListener('click', () => {
+          const content = header.nextElementSibling;
+          const chevron = header.querySelector('.chevron-down');
+          content.classList.toggle('show');
+          chevron.classList.toggle('rotated');
+        });
+      });
+
+      applyFilters.addEventListener('click', () => {
+        renderTable();
+        filterPanel.style.display = 'none';
+      });
+
+      clearFilters.addEventListener('click', () => {
+        document.querySelectorAll('#statusFilters input, #positionFilters input').forEach(el => el.checked = false);
+        document.getElementById('endDateFrom').value = '';
+        document.getElementById('endDateTo').value = '';
+        document.getElementById('formCloseFrom').value = '';
+        document.getElementById('formCloseTo').value = '';
+        document.getElementById('directReports').checked = false;
+        renderTable();
+        filterPanel.style.display = 'none';
+      });
+
+      document.getElementById('positionSearch').addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        document.querySelectorAll('#positionFilters .checkbox-item').forEach(item => {
+          const label = item.querySelector('label').textContent.toLowerCase();
+          item.style.display = label.includes(query) ? 'flex' : 'none';
+        });
+      });
+
+      let sortState = 0;
+      document.getElementById('statusSortIcon').addEventListener('click', () => {
+        sortState = (sortState + 1) % 3;
+        const icon = document.getElementById('statusSortIcon');
+        icon.textContent = sortState === 0 ? '↓' : (sortState === 1 ? '↑' : '↓');
+        sortTable(sortState);
+      });
+
+      function sortTable(state) {
+        const tbody = document.getElementById('tableBody');
+        const rows = Array.from(tbody.children);
+        
+        if (state === 0) {
+          renderTable();
+          return;
+        }
+        
+        const statusOrder = ['draft', 'review', 'approved', 'sign', 'in-progress', 'rework', 'passed', 'failed', 'closed'];
+        
+        rows.sort((a, b) => {
+          const aStatus = a.dataset.status;
+          const bStatus = b.dataset.status;
+          const aIndex = statusOrder.indexOf(aStatus);
+          const bIndex = statusOrder.indexOf(bStatus);
+          
+          return state === 1 ? aIndex - bIndex : bIndex - aIndex;
+        });
+        
+        tbody.innerHTML = '';
+        rows.forEach(row => tbody.appendChild(row));
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        updateUIForRole('manager');
+        renderTable();
+      });
+
+      window.addEventListener('storage', (e) => {
+        if (e.key && e.key.startsWith('goals-status-')) {
+          renderTable();
+        }
+      });
+    </script>
+  </main>
+</body>
+</html>

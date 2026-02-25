@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HR: Согласование целей</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      display: flex;
+      background: #FFFFFF;
+      color: #0F172A;
+    }
+
+    .sidebar {
+      width: 280px;
+      height: 100vh;
+      background: #262626;
+      padding: 0;
+      position: fixed;
+      left: 0;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar .logo {
+      color: white;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: -0.3px;
+      text-transform: uppercase;
+    }
+
+    .main-content {
+      margin-left: 280px;
+      width: calc(100% - 280px);
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-content {
+      display: flex;
+      flex-direction: column;
+      padding: 40px 40px 60px 40px;
+      gap: 40px;
+      width: 100%;
+    }
+
+    .page-title {
+      font-family: 'Biocad Display', sans-serif;
+      font-weight: 700;
+      font-size: 40px;
+      line-height: 42px;
+      color: #0F172A;
+    }
+
+    .employee-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      min-width: 250px;
+    }
+
+    .info-item .label {
+      font-size: 16px;
+      font-weight: 500;
+      color: #94A3B8;
+    }
+
+    .info-item .value {
+      font-size: 16px;
+      font-weight: 500;
+      color: #0F172A;
+      margin-top: 4px;
+    }
+
+    .info-item .date-range {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .info-item .date-range span {
+      font-size: 16px;
+      font-weight: 500;
+      color: #0F172A;
+    }
+
+    .status-message {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+      gap: 12px;
+      width: 100%;
+      background: #E7F2FF;
+      border-radius: 12px;
+      margin-bottom: 40px;
+    }
+
+    .status-message .title {
+      font-family: 'Inter';
+      font-weight: 700;
+      font-size: 16px;
+      color: #3389F4;
+    }
+
+    .status-message .text {
+      font-family: 'Inter';
+      font-weight: 400;
+      font-size: 14px;
+      color: #3389F4;
+      line-height: 1.5;
+    }
+
+    .rework-message {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+      gap: 12px;
+      width: 100%;
+      background: #E7F2FF;
+      border-radius: 12px;
+      margin-bottom: 40px;
+    }
+
+    .rework-message .title {
+      font-family: 'Inter';
+      font-weight: 700;
+      font-size: 16px;
+      color: #3389F4;
+    }
+
+    .rework-message .text {
+      font-family: 'Inter';
+      font-weight: 400;
+      font-size: 14px;
+      color: #3389F4;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .change-badge {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+
+    .badge-new {
+      background: #D9F2E7;
+      color: #2E9264;
+    }
+
+    .badge-deleted {
+      background: #FCE7F3;
+      color: #BE185D;
+    }
+
+    .badge-modified {
+      background: #E7F2FF;
+      color: #3389F4;
+    }
+
+    .goal-form {
+      background: #F8FAFC;
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+      width: 100%;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .goal-form.deleted {
+      opacity: 0.6;
+      background: #F1F5F9;
+    }
+
+    .goal-form.modified {
+      border-left: 4px solid #3389F4;
+    }
+
+    .goal-form.new {
+      border-left: 4px solid #2E9264;
+    }
+
+    .goal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    .goal-header .title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #0F172A;
+    }
+
+    .goal-header .date-tag {
+      font-size: 12px;
+      color: #64748B;
+    }
+
+    .split-view {
+      display: flex;
+      gap: 20px;
+      margin-top: 16px;
+    }
+
+    .split-view .old-version {
+      flex: 1;
+      background: #F1F5F9;
+      padding: 16px;
+      border-radius: 12px;
+      position: relative;
+    }
+
+    .split-view .old-version::before {
+      content: "Предыдущая версия";
+      position: absolute;
+      top: -10px;
+      left: 16px;
+      background: #64748B;
+      color: white;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .split-view .new-version {
+      flex: 1;
+      background: #F8FAFC;
+      padding: 16px;
+      border-radius: 12px;
+      position: relative;
+      border: 1px solid #2E9264;
+    }
+
+    .split-view .new-version::before {
+      content: "Новая версия";
+      position: absolute;
+      top: -10px;
+      left: 16px;
+      background: #2E9264;
+      color: white;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .field-comparison {
+      margin-bottom: 12px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      color: #64748B;
+      margin-bottom: 4px;
+    }
+
+    .field-value {
+      font-size: 14px;
+      padding: 8px;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .field-value.added {
+      background: #D9F2E7;
+      color: #2E9264;
+    }
+
+    .field-value.removed {
+      background: #FCE7F3;
+      color: #BE185D;
+      text-decoration: line-through;
+    }
+
+    .field-value.changed {
+      background: #E7F2FF;
+      color: #3389F4;
+    }
+
+    .field-value.unchanged {
+      background: #F1F5F9;
+      color: #64748B;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .form-row .field-group {
+      flex: 2;
+    }
+
+    .form-row .date-group {
+      flex: 1;
+    }
+
+    .form-row .field-group .title,
+    .form-row .date-group .title {
+      font-size: 14px;
+      font-weight: 400;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    .form-row .field-group .text-field {
+      width: 100%;
+      min-height: 40px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 16px;
+      color: #0F172A;
+      font-family: 'Inter', sans-serif;
+      cursor: default;
+    }
+
+    .form-row .date-group .date-field {
+      width: 100%;
+      height: 40px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 16px;
+      color: #0F172A;
+      cursor: default;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: flex-start;
+      gap: 16px;
+      margin-top: 40px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+      justify-content: center;
+    }
+
+    .btn-back {
+      background: #FFFFFF;
+      border: 1px solid #3389F4;
+      color: #3389F4;
+    }
+
+    .btn-rework {
+      background: #FFFFFF;
+      border: 1px solid #EE4A3F;
+      color: #EE4A3F;
+    }
+
+    .btn-approve {
+      background: #0066CC;
+      color: white;
+      border: none;
+    }
+
+    .btn:hover {
+      opacity: 0.8;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 10px;
+      width: 500px;
+      max-width: 90%;
+      padding: 24px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #64748B;
+    }
+
+    .modal-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      border: 1px solid #CBD5E1;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      margin-bottom: 16px;
+      resize: vertical;
+    }
+
+    .modal-textarea:focus {
+      outline: none;
+      border-color: #3389F4;
+      box-shadow: 0px 0px 0px 2px rgba(51, 137, 244, 0.2);
+    }
+
+    .error-message {
+      color: #EE4A3F;
+      font-size: 12px;
+      margin-top: -12px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn-cancel {
+      padding: 8px 16px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-submit-rework {
+      padding: 8px 16px;
+      background: #EE4A3F;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      padding: 20px 40px;
+      gap: 8px;
+      background: #F8FAFC;
+      border-top: 1px solid #E2E8F0;
+      margin-top: auto;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 89.69px;
+      height: 32px;
+    }
+
+    .footer-logo span {
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+    }
+
+    .footer-text {
+      color: #94A3B8;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">BIOCAD</div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-content">
+      <h1 class="page-title" id="pageTitle">HR: Согласование целей</h1>
+
+      <div class="employee-info">
+        <div class="info-item">
+          <div class="label">Сотрудник</div>
+          <div class="value" id="employeeName">Котова Вероника</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Статус</div>
+          <div class="value" id="statusValue">На согласовании</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Должность</div>
+          <div class="value">Бизнес-аналитик К4</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Длительность ИС</div>
+          <div class="date-range">
+            <span>09.12.2025</span>
+            <span>по</span>
+            <span>09.02.2026</span>
+          </div>
+        </div>
+        <div class="info-item">
+          <div class="label">Функциональный руководитель</div>
+          <div class="value">Иванов Иван Иваныч</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Согласовать до</div>
+          <div class="value">13.10.2025</div>
+        </div>
+      </div>
+
+      <!-- Сообщение о статусе -->
+      <div class="status-message" id="statusMessage" style="display: none;">
+        <div class="title" id="messageTitle"></div>
+        <div class="text" id="messageText"></div>
+      </div>
+
+      <!-- Сообщение о доработке -->
+      <div class="rework-message" id="reworkMessage" style="display: none;">
+        <div class="title">Комментарий HR по доработке:</div>
+        <div class="text" id="reworkComment"></div>
+      </div>
+
+      <!-- Сводка изменений (показывается только при наличии истории) -->
+      <div id="changesSummary" style="margin-bottom: 20px;"></div>
+
+      <!-- Цели -->
+      <div class="goals-section" id="goalsSection"></div>
+
+      <!-- Кнопки - показываем только если статус "На согласовании" -->
+      <div class="button-group" id="buttonGroup"></div>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-logo">
+        <span>BIOCAD</span>
+      </div>
+      <div class="footer-text">© 2016 - 2023. Все права защищены</div>
+    </footer>
+
+    <!-- Модальное окно для комментария -->
+    <div class="modal-overlay" id="reworkModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Отправить на доработку</h3>
+          <button class="close-modal" id="closeReworkModal">✕</button>
+        </div>
+        <p>Укажите, что необходимо исправить в целях?</p>
+        <textarea class="modal-textarea" id="reworkCommentInput" placeholder="Оставьте комментарий..."></textarea>
+        <div class="error-message" id="commentError">Пожалуйста, укажите комментарий</div>
+        <div class="modal-actions">
+          <button class="btn-cancel" id="cancelRework">Отменить</button>
+          <button class="btn-submit-rework" id="submitRework">Отправить на доработку</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const employeeName = urlParams.get('employee') || 'Котова Вероника';
+      const employeeKey = employeeName.replace(/\s+/g, '-');
+      
+      document.getElementById('pageTitle').textContent = `HR: Согласование целей для ${employeeName}`;
+      document.getElementById('employeeName').textContent = employeeName;
+
+      const draftKey = `goals-draft-${employeeKey}`;
+      const statusKey = `goals-status-${employeeKey}`;
+      const commentKey = `goals-comment-${employeeKey}`;
+      const historyKey = `goals-history-${employeeKey}`;
+
+      // Загружаем текущий статус
+      const currentStatus = localStorage.getItem(statusKey) || 'review';
+      document.getElementById('statusValue').textContent = 
+        currentStatus === 'review' ? 'На согласовании' :
+        currentStatus === 'approved' ? 'Согласовано' :
+        currentStatus === 'sign' ? 'На подписании' :
+        currentStatus === 'in-progress' ? 'На выполнении' : currentStatus;
+
+      // Загружаем текущие цели
+      let goalsData = JSON.parse(localStorage.getItem(draftKey));
+      
+      if (!goalsData || !goalsData.goals || !Array.isArray(goalsData.goals)) {
+        goalsData = { goals: [] };
+      }
+
+      // Загружаем историю изменений
+      const historyData = JSON.parse(localStorage.getItem(historyKey));
+      
+      let savedComment = localStorage.getItem(commentKey) || '';
+
+      if (savedComment) {
+        document.getElementById('reworkMessage').style.display = 'flex';
+        document.getElementById('reworkComment').textContent = savedComment;
+      }
+
+      function formatDate(dateString) {
+        if (!dateString) return '—';
+        const [year, month, day] = dateString.split('-');
+        return `${day}.${month}.${year}`;
+      }
+
+      function formatDateTime(isoString) {
+        if (!isoString) return '';
+        const date = new Date(isoString);
+        return `${date.toLocaleDateString('ru-RU')} ${date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`;
+      }
+
+      function compareGoals(oldGoal, newGoal) {
+        const changes = {
+          goal: { old: oldGoal?.goal || '', new: newGoal?.goal || '', changed: false },
+          criteria: { old: oldGoal?.criteria || '', new: newGoal?.criteria || '', changed: false },
+          date: { old: oldGoal?.date || '', new: newGoal?.date || '', changed: false }
+        };
+
+        changes.goal.changed = changes.goal.old !== changes.goal.new;
+        changes.criteria.changed = changes.criteria.old !== changes.criteria.new;
+        changes.date.changed = changes.date.old !== changes.date.new;
+
+        return changes;
+      }
+
+      function renderGoals() {
+        const goalsSection = document.getElementById('goalsSection');
+        const changesSummary = document.getElementById('changesSummary');
+        
+        if (!goalsData.goals || goalsData.goals.length === 0) {
+          goalsSection.innerHTML = '<p style="text-align: center; color: #64748B; padding: 40px;">Цели не найдены</p>';
+          return;
+        }
+
+        // Фильтруем только непустые цели
+        const validGoals = goalsData.goals.filter(goal => 
+          (goal.goal && goal.goal.trim() !== '') || 
+          (goal.criteria && goal.criteria.trim() !== '') || 
+          (goal.date && goal.date !== '')
+        );
+
+        if (validGoals.length === 0) {
+          goalsSection.innerHTML = '<p style="text-align: center; color: #64748B; padding: 40px;">Цели не найдены</p>';
+          return;
+        }
+
+        let html = '';
+
+        // Показываем сравнение если есть история изменений
+        if (historyData && historyData.previousGoals) {
+          const previousGoals = historyData.previousGoals.filter(g => 
+            (g.goal && g.goal.trim() !== '') || 
+            (g.criteria && g.criteria.trim() !== '') || 
+            (g.date && g.date !== '')
+          );
+
+          // Определяем изменения
+          const deletedGoals = [];
+          const newGoals = [];
+          const modifiedGoals = [];
+
+          previousGoals.forEach((oldGoal, index) => {
+            if (index < validGoals.length) {
+              const changes = compareGoals(oldGoal, validGoals[index]);
+              if (changes.goal.changed || changes.criteria.changed || changes.date.changed) {
+                modifiedGoals.push({ index, oldGoal, newGoal: validGoals[index], changes });
+              }
+            } else {
+              deletedGoals.push({ index, oldGoal });
+            }
+          });
+
+          for (let i = previousGoals.length; i < validGoals.length; i++) {
+            newGoals.push({ index: i, newGoal: validGoals[i] });
+          }
+
+          // Показываем сводку изменений
+          if (deletedGoals.length > 0 || newGoals.length > 0 || modifiedGoals.length > 0) {
+            let summaryHtml = '<div style="background: #F8FAFC; padding: 16px; border-radius: 12px; margin-bottom: 24px;">';
+            summaryHtml += '<h3 style="font-size: 18px; margin-bottom: 12px;">📊 Сводка изменений</h3>';
+            
+            if (newGoals.length > 0) {
+              summaryHtml += `<div style="margin-bottom: 8px;"><span class="change-badge badge-new">+ Добавлено целей: ${newGoals.length}</span></div>`;
+            }
+            if (deletedGoals.length > 0) {
+              summaryHtml += `<div style="margin-bottom: 8px;"><span class="change-badge badge-deleted">- Удалено целей: ${deletedGoals.length}</span></div>`;
+            }
+            if (modifiedGoals.length > 0) {
+              summaryHtml += `<div style="margin-bottom: 8px;"><span class="change-badge badge-modified">✏️ Изменено целей: ${modifiedGoals.length}</span></div>`;
+            }
+            
+            summaryHtml += `<div style="font-size: 12px; color: #64748B; margin-top: 8px;">Последние изменения: ${formatDateTime(historyData.timestamp)}</div>`;
+            summaryHtml += '</div>';
+            
+            changesSummary.innerHTML = summaryHtml;
+          }
+
+          // Отображаем все цели с подсветкой изменений
+          validGoals.forEach((goal, index) => {
+            let goalClass = 'goal-form';
+            let badgeHtml = '';
+            
+            if (index >= previousGoals.length) {
+              goalClass += ' new';
+              badgeHtml = `
+                <div class="goal-header">
+                  <span class="title">Цель ${index + 1}</span>
+                  <span class="date-tag badge-new">🆕 Создана новая цель (${formatDateTime(historyData.timestamp)})</span>
+                </div>
+              `;
+              html += `
+                <div class="${goalClass}">
+                  ${badgeHtml}
+                  <div class="form-row">
+                    <div class="field-group">
+                      <div class="title">Цель</div>
+                      <div class="text-field">${goal.goal || '—'}</div>
+                    </div>
+                    <div class="date-group">
+                      <div class="title">Срок выполнения</div>
+                      <div class="date-field">${goal.date ? formatDate(goal.date) : '—'}</div>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="field-group">
+                      <div class="title">Критерии достижения</div>
+                      <div class="text-field">${goal.criteria || '—'}</div>
+                    </div>
+                  </div>
+                </div>
+              `;
+            } else {
+              const modified = modifiedGoals.find(m => m.index === index);
+              
+              if (modified) {
+                goalClass += ' modified';
+                badgeHtml = `
+                  <div class="goal-header">
+                    <span class="title">Цель ${index + 1}</span>
+                    <span class="date-tag badge-modified">✏️ Изменена (${formatDateTime(historyData.timestamp)})</span>
+                  </div>
+                `;
+                
+                html += `
+                  <div class="${goalClass}">
+                    ${badgeHtml}
+                    <div class="split-view">
+                      <div class="old-version">
+                        <div class="field-comparison">
+                          <div class="field-label">Цель</div>
+                          <div class="field-value ${modified.changes.goal.changed ? 'removed' : 'unchanged'}">${modified.oldGoal.goal || '—'}</div>
+                        </div>
+                        <div class="field-comparison">
+                          <div class="field-label">Срок выполнения</div>
+                          <div class="field-value ${modified.changes.date.changed ? 'removed' : 'unchanged'}">${modified.oldGoal.date ? formatDate(modified.oldGoal.date) : '—'}</div>
+                        </div>
+                        <div class="field-comparison">
+                          <div class="field-label">Критерии достижения</div>
+                          <div class="field-value ${modified.changes.criteria.changed ? 'removed' : 'unchanged'}">${modified.oldGoal.criteria || '—'}</div>
+                        </div>
+                      </div>
+                      <div class="new-version">
+                        <div class="field-comparison">
+                          <div class="field-label">Цель</div>
+                          <div class="field-value ${modified.changes.goal.changed ? 'added' : 'unchanged'}">${modified.newGoal.goal || '—'}</div>
+                        </div>
+                        <div class="field-comparison">
+                          <div class="field-label">Срок выполнения</div>
+                          <div class="field-value ${modified.changes.date.changed ? 'added' : 'unchanged'}">${modified.newGoal.date ? formatDate(modified.newGoal.date) : '—'}</div>
+                        </div>
+                        <div class="field-comparison">
+                          <div class="field-label">Критерии достижения</div>
+                          <div class="field-value ${modified.changes.criteria.changed ? 'added' : 'unchanged'}">${modified.newGoal.criteria || '—'}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              } else {
+                html += `
+                  <div class="goal-form">
+                    <div class="goal-header">
+                      <span class="title">Цель ${index + 1}</span>
+                    </div>
+                    <div class="form-row">
+                      <div class="field-group">
+                        <div class="title">Цель</div>
+                        <div class="text-field">${goal.goal || '—'}</div>
+                      </div>
+                      <div class="date-group">
+                        <div class="title">Срок выполнения</div>
+                        <div class="date-field">${goal.date ? formatDate(goal.date) : '—'}</div>
+                      </div>
+                    </div>
+                    <div class="form-row">
+                      <div class="field-group">
+                        <div class="title">Критерии достижения</div>
+                        <div class="text-field">${goal.criteria || '—'}</div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }
+            }
+          });
+
+          if (deletedGoals.length > 0) {
+            html += '<h3 style="margin: 20px 0 10px; color: #BE185D;">🗑️ Удаленные цели</h3>';
+            deletedGoals.forEach(({ index, oldGoal }) => {
+              html += `
+                <div class="goal-form deleted">
+                  <div class="goal-header">
+                    <span class="title">Цель ${index + 1}</span>
+                    <span class="date-tag badge-deleted">❌ Цель отменена (${formatDateTime(historyData.timestamp)})</span>
+                  </div>
+                  <div class="form-row">
+                    <div class="field-group">
+                      <div class="title">Цель</div>
+                      <div class="text-field" style="text-decoration: line-through;">${oldGoal.goal || '—'}</div>
+                    </div>
+                    <div class="date-group">
+                      <div class="title">Срок выполнения</div>
+                      <div class="date-field" style="text-decoration: line-through;">${oldGoal.date ? formatDate(oldGoal.date) : '—'}</div>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="field-group">
+                      <div class="title">Критерии достижения</div>
+                      <div class="text-field" style="text-decoration: line-through;">${oldGoal.criteria || '—'}</div>
+                    </div>
+                  </div>
+                </div>
+              `;
+            });
+          }
+        } else {
+          // Нет истории - просто показываем цели
+          validGoals.forEach((goal, index) => {
+            html += `
+              <div class="goal-form">
+                <div class="goal-header">
+                  <span class="title">Цель ${index + 1}</span>
+                </div>
+                <div class="form-row">
+                  <div class="field-group">
+                    <div class="title">Цель</div>
+                    <div class="text-field">${goal.goal || '—'}</div>
+                  </div>
+                  <div class="date-group">
+                    <div class="title">Срок выполнения</div>
+                    <div class="date-field">${goal.date ? formatDate(goal.date) : '—'}</div>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="field-group">
+                    <div class="title">Критерии достижения</div>
+                    <div class="text-field">${goal.criteria || '—'}</div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+        }
+        
+        goalsSection.innerHTML = html;
+      }
+
+      function renderButtons() {
+        const buttonGroup = document.getElementById('buttonGroup');
+        const statusMessage = document.getElementById('statusMessage');
+        
+        // Показываем кнопки только если статус "На согласовании"
+        if (currentStatus === 'review') {
+          statusMessage.style.display = 'none';
+          buttonGroup.innerHTML = `
+            <button class="btn btn-back" id="backBtn">Назад</button>
+            <button class="btn btn-rework" id="reworkBtn">Отправить на доработку</button>
+            <button class="btn btn-approve" id="approveBtn">Согласовать</button>
+          `;
+        } else {
+          // Для всех остальных статусов - только кнопка "Назад"
+          statusMessage.style.display = 'flex';
+          document.getElementById('messageTitle').textContent = 'Просмотр целей';
+          document.getElementById('messageText').textContent = `Текущий статус: ${currentStatus === 'sign' ? 'На подписании' : 
+            currentStatus === 'in-progress' ? 'На выполнении' : 
+            currentStatus === 'approved' ? 'Согласовано' : currentStatus}`;
+          
+          buttonGroup.innerHTML = `
+            <button class="btn btn-back" id="backBtn">Назад</button>
+          `;
+        }
+
+        // Добавляем обработчики
+        const backBtn = document.getElementById('backBtn');
+        if (backBtn) {
+          backBtn.addEventListener('click', () => {
+            window.location.href = 'index.html?role=hr';
+          });
+        }
+
+        const reworkBtn = document.getElementById('reworkBtn');
+        if (reworkBtn) {
+          reworkBtn.addEventListener('click', () => {
+            document.getElementById('reworkModal').style.display = 'flex';
+            document.getElementById('reworkCommentInput').value = '';
+            document.getElementById('commentError').style.display = 'none';
+          });
+        }
+
+        const approveBtn = document.getElementById('approveBtn');
+        if (approveBtn) {
+          approveBtn.addEventListener('click', () => {
+            localStorage.setItem(statusKey, 'sign');
+            localStorage.removeItem(commentKey);
+            localStorage.removeItem(historyKey);
+            
+            alert('Цели успешно согласованы');
+            window.location.href = 'index.html?role=hr';
+          });
+        }
+      }
+
+      renderGoals();
+      renderButtons();
+
+      // Обработчики модального окна
+      document.getElementById('closeReworkModal').addEventListener('click', () => {
+        document.getElementById('reworkModal').style.display = 'none';
+      });
+
+      document.getElementById('cancelRework').addEventListener('click', () => {
+        document.getElementById('reworkModal').style.display = 'none';
+      });
+
+      document.getElementById('submitRework').addEventListener('click', () => {
+        const comment = document.getElementById('reworkCommentInput').value.trim();
+        
+        if (!comment) {
+          document.getElementById('commentError').style.display = 'block';
+          return;
+        }
+
+        localStorage.setItem(commentKey, comment);
+        localStorage.setItem(statusKey, 'draft');
+        
+        document.getElementById('reworkModal').style.display = 'none';
+        
+        alert('Цели отправлены на доработку руководителю');
+        window.location.href = 'index.html?role=hr';
+      });
+
+      window.addEventListener('click', (e) => {
+        const modal = document.getElementById('reworkModal');
+        if (e.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
+    </script>
+  </main>
+</body>
+</html>
