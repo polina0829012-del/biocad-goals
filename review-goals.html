@@ -54,7 +54,7 @@
     .page-content {
       display: flex;
       flex-direction: column;
-      padding: 40px 40px 60px 40px;
+      padding: 40px 200px 60px 40px;
       gap: 40px;
       width: 100%;
     }
@@ -65,13 +65,14 @@
       font-size: 40px;
       line-height: 42px;
       color: #0F172A;
+      margin-bottom: 20px;
     }
 
     .employee-info {
       display: flex;
       flex-wrap: wrap;
       gap: 20px;
-      margin-bottom: 40px;
+      margin-bottom: 20px;
     }
 
     .info-item {
@@ -84,19 +85,18 @@
       font-size: 16px;
       font-weight: 500;
       color: #94A3B8;
+      margin-bottom: 4px;
     }
 
     .info-item .value {
       font-size: 16px;
       font-weight: 500;
       color: #0F172A;
-      margin-top: 4px;
     }
 
     .info-item .date-range {
       display: flex;
       gap: 8px;
-      margin-top: 4px;
     }
 
     .info-item .date-range span {
@@ -105,6 +105,7 @@
       color: #0F172A;
     }
 
+    /* Status message for review and sign states */
     .status-message {
       display: flex;
       flex-direction: column;
@@ -131,13 +132,14 @@
       font-size: 14px;
       color: #3389F4;
       line-height: 1.5;
+      white-space: pre-line;
     }
 
     .goals-section {
       margin-bottom: 40px;
     }
 
-    .goal-form {
+    .goal-card {
       background: #F8FAFC;
       border-radius: 20px;
       padding: 20px;
@@ -145,58 +147,254 @@
       width: 100%;
     }
 
-    .form-row {
+    .goal-card.collapsed {
+      padding: 16px 20px;
+    }
+
+    .goal-card.collapsed .criteria-section,
+    .goal-card.collapsed .evaluation-section,
+    .goal-card.collapsed .comment-section {
+      display: none;
+    }
+
+    .goal-header-row {
       display: flex;
-      gap: 20px;
-      margin-bottom: 20px;
-      width: 100%;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #E2E8F0;
+      cursor: pointer;
     }
 
-    .form-row .field-group {
-      flex: 2;
+    .goal-header-row .goal-title {
+      font-weight: 700;
+      font-size: 20px;
+      color: #1E293B;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .form-row .date-group {
+    .goal-header-row .goal-date {
+      font-weight: 700;
+      font-size: 16px;
+      color: #0066CC;
+      margin-right: 16px;
+      white-space: nowrap;
+    }
+
+    .collapse-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+      color: #64748B;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+    }
+
+    .collapse-btn.collapsed {
+      transform: rotate(-90deg);
+    }
+
+    .collapse-btn:hover {
+      color: #3389F4;
+    }
+
+    /* Criteria section */
+    .criteria-section {
+      margin-top: 16px;
+    }
+
+    .criteria-label {
+      font-size: 16px;
+      font-weight: 500;
+      color: #94A3B8;
+      margin-bottom: 8px;
+    }
+
+    .criteria-text {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #0F172A;
+      background: #FFFFFF;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid #E2E8F0;
+      white-space: pre-wrap;
+      margin-bottom: 16px;
+    }
+
+    /* Evaluation section */
+    .evaluation-section {
+      margin-top: 16px;
+      margin-bottom: 16px;
+    }
+
+    .evaluation-row {
+      display: flex;
+      gap: 40px;
+      margin-bottom: 16px;
+    }
+
+    .evaluation-item {
       flex: 1;
     }
 
-    .form-row .field-group .title,
-    .form-row .date-group .title {
+    .evaluation-label {
       font-size: 14px;
-      font-weight: 400;
+      color: #475569;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .evaluation-value {
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .evaluation-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .badge-green {
+      background: #D9F2E7;
+      color: #2E9264;
+    }
+
+    .badge-orange {
+      background: #FEF3C7;
+      color: #B45309;
+    }
+
+    .badge-red {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+
+    .badge-default {
+      background: #F1F5F9;
+      color: #64748B;
+    }
+
+    /* Manager evaluation dropdown */
+    .evaluation-menu {
+      position: relative;
+      display: inline-block;
+    }
+
+    .evaluation-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      min-width: 240px;
+      margin-top: 4px;
+    }
+
+    .evaluation-dropdown.show {
+      display: block;
+    }
+
+    .evaluation-option {
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      border-bottom: 1px solid #F1F5F9;
+    }
+
+    .evaluation-option:last-child {
+      border-bottom: none;
+    }
+
+    .evaluation-option:hover {
+      background: #F1F5F9;
+    }
+
+    .evaluation-option .badge-preview {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* Select dropdown for employee */
+    .evaluation-select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #CBD5E1;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #0F172A;
+      background: #FFFFFF;
+      cursor: pointer;
+    }
+
+    .evaluation-select:focus {
+      outline: none;
+      border-color: #3389F4;
+      box-shadow: 0 0 0 3px rgba(51, 137, 244, 0.1);
+    }
+
+    /* Comment section */
+    .comment-section {
+      margin-top: 16px;
+    }
+
+    .comment-label {
+      font-size: 14px;
+      font-weight: 500;
       color: #475569;
       margin-bottom: 8px;
     }
 
-    .form-row .field-group .text-field {
+    .comment-field {
       width: 100%;
-      min-height: 40px;
-      background: #F8FAFC;
-      border: 1px solid #E2E8F0;
-      border-radius: 8px;
+      min-height: 58px;
       padding: 8px 12px;
-      font-size: 16px;
-      color: #0F172A;
+      border: 1px solid #CBD5E1;
+      border-radius: 8px;
       font-family: 'Inter', sans-serif;
-      cursor: default;
+      font-size: 14px;
+      line-height: 1.5;
+      resize: vertical;
+      background: #FFFFFF;
     }
 
-    .form-row .date-group .date-field {
-      width: 100%;
-      height: 40px;
+    .comment-field:focus {
+      outline: none;
+      border-color: #3389F4;
+      box-shadow: 0 0 0 3px rgba(51, 137, 244, 0.1);
+    }
+
+    .comment-field[readonly] {
       background: #F8FAFC;
-      border: 1px solid #E2E8F0;
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 16px;
-      color: #0F172A;
+      border-color: #E2E8F0;
       cursor: default;
     }
 
+    /* Button group */
     .button-group {
       display: flex;
-      justify-content: flex-start;
-      gap: 16px;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
       margin-top: 40px;
       flex-wrap: wrap;
     }
@@ -210,9 +408,10 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      min-width: 120px;
+      min-width: 100px;
       justify-content: center;
       transition: all 0.2s ease;
+      border: none;
     }
 
     .btn:disabled {
@@ -250,10 +449,57 @@
       border: none;
     }
 
-    .btn:hover:not(:disabled) {
-      opacity: 0.8;
+    .btn-save {
+      background: #0066CC;
+      color: white;
     }
 
+    .btn-process {
+      background: #FFFFFF;
+      border: 1px solid #8B5CF6;
+      color: #8B5CF6;
+    }
+
+    .btn-documents {
+      background: #FFFFFF;
+      border: 1px solid #EC4899;
+      color: #EC4899;
+    }
+
+    .btn-summary {
+      background: #059669;
+      color: white;
+      border: none;
+    }
+
+    .btn-rework {
+      background: #FFFFFF;
+      border: 1px solid #EE4A3F;
+      color: #EE4A3F;
+    }
+
+    .btn-approve {
+      background: #0066CC;
+      color: white;
+      border: none;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .left-buttons {
+      display: flex;
+      gap: 16px;
+    }
+
+    .right-buttons {
+      display: flex;
+      gap: 16px;
+    }
+
+    /* Footer */
     .footer {
       display: flex;
       align-items: center;
@@ -273,7 +519,7 @@
     }
 
     .footer-logo span {
-      color: white;
+      color: #171717;
       font-weight: 700;
       font-size: 18px;
       letter-spacing: -0.5px;
@@ -285,7 +531,7 @@
       font-size: 14px;
     }
 
-    /* Модальные окна */
+    /* Modal */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -301,7 +547,7 @@
 
     .modal-content {
       background: white;
-      border-radius: 10px;
+      border-radius: 16px;
       width: 500px;
       max-width: 90%;
       padding: 24px;
@@ -339,7 +585,7 @@
       padding: 8px 16px;
       background: #FFFFFF;
       border: 1px solid #CBD5E1;
-      border-radius: 6px;
+      border-radius: 8px;
       color: #475569;
       font-size: 14px;
       font-weight: 500;
@@ -351,13 +597,13 @@
       background: #F59E0B;
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 14px;
       font-weight: 500;
       cursor: pointer;
     }
 
-    /* Область для загрузки файла */
+    /* Upload area */
     .upload-area {
       border: 2px dashed #CBD5E1;
       border-radius: 12px;
@@ -447,37 +693,29 @@
             <span>09.02.2026</span>
           </div>
         </div>
-        <div class="info-item">
+        <div class="info-item" id="functionalManagerItem">
           <div class="label">Функциональный руководитель</div>
           <div class="value">Иванов Иван Иваныч</div>
         </div>
-        <div class="info-item">
+        <div class="info-item" id="legalManagerItem">
           <div class="label">Руководитель по юридической ОШС</div>
           <div class="value">Петров Петр Петрович</div>
         </div>
-        <div class="info-item">
-          <div class="label">Согласовать до</div>
-          <div class="value">13.10.2025</div>
-        </div>
-        <div class="info-item">
-          <div class="label">Подписать до</div>
-          <div class="value">20.10.2025</div>
-        </div>
       </div>
 
-      <!-- Сообщение в зависимости от статуса -->
+      <!-- Status message for review and sign states -->
       <div class="status-message" id="statusMessage" style="display: none;">
         <div class="title" id="messageTitle"></div>
         <div class="text" id="messageText"></div>
       </div>
 
-      <!-- Цели -->
+      <!-- Goals section -->
       <div class="goals-section" id="goalsSection"></div>
 
-      <!-- Кнопки в зависимости от статуса и роли -->
+      <!-- Button group -->
       <div class="button-group" id="buttonGroup"></div>
 
-      <!-- Область загрузки файла -->
+      <!-- Upload section for sign state -->
       <div id="uploadSection" style="display: none;">
         <div class="upload-area" id="uploadArea">
           <svg class="icon" viewBox="0 0 24 24">
@@ -502,7 +740,7 @@
       <div class="footer-text">© 2016 - 2023. Все права защищены</div>
     </footer>
 
-    <!-- Модальное окно подтверждения изменения целей -->
+    <!-- Modal for edit confirmation -->
     <div class="modal-overlay" id="editConfirmModal">
       <div class="modal-content">
         <div class="modal-header">
@@ -518,17 +756,18 @@
     </div>
 
     <script>
-      // Получаем параметры URL
+      // Get URL parameters
       const urlParams = new URLSearchParams(window.location.search);
       const employeeName = urlParams.get('employee') || 'Котова Вероника';
       const status = urlParams.get('status') || 'approved';
       const role = urlParams.get('role') || 'manager';
       const employeeKey = employeeName.replace(/\s+/g, '-');
       
+      // Set page title and employee name
       document.getElementById('pageTitle').textContent = `Цели на испытательный срок для ${employeeName}`;
       document.getElementById('employeeName').textContent = employeeName;
       
-      // Устанавливаем текст статуса
+      // Set status text
       let statusText = '';
       if (status === 'approved') statusText = 'Согласовано';
       else if (status === 'sign') statusText = 'На подписании';
@@ -538,28 +777,144 @@
       else statusText = status;
       document.getElementById('statusValue').textContent = statusText;
 
+      // LocalStorage keys
       const draftKey = `goals-draft-${employeeKey}`;
       const statusKey = `goals-status-${employeeKey}`;
       const documentKey = `goals-document-${employeeKey}`;
       const downloadFlagKey = `goals-downloaded-${employeeKey}`;
+      const evaluationKey = `goals-evaluation-${employeeKey}`;
+      const signGoalsKey = `goals-sign-${employeeKey}`;
+      const historyKey = `goals-history-${employeeKey}`;
+      const originalGoalsKey = `goals-original-${employeeKey}`;
 
-      // Загружаем данные
-      let goalsData = JSON.parse(localStorage.getItem(draftKey));
-      
+      // Load goals based on status
+      let goalsData = null;
+
+      // For in-progress state, use ONLY signed goals
+      if (status === 'in-progress') {
+        const signedGoals = localStorage.getItem(signGoalsKey);
+        if (signedGoals) {
+          goalsData = JSON.parse(signedGoals);
+          console.log('Loaded signed goals:', goalsData);
+        }
+      }
+
+      // For other states, use draft
+      if (!goalsData) {
+        const draftGoals = localStorage.getItem(draftKey);
+        if (draftGoals) {
+          goalsData = JSON.parse(draftGoals);
+        }
+      }
+
+      // Fallback protection
       if (!goalsData || !goalsData.goals || !Array.isArray(goalsData.goals)) {
         goalsData = { goals: [] };
       }
 
-      // Переменные для отслеживания состояния загрузки
+      // Save goals from sign state when moving to in-progress
+      if (status === 'in-progress' && !localStorage.getItem(signGoalsKey)) {
+        const draftGoals = localStorage.getItem(draftKey);
+        if (draftGoals) {
+          localStorage.setItem(signGoalsKey, draftGoals);
+          goalsData = JSON.parse(draftGoals);
+        }
+      }
+
+      // Load evaluations and comments
+      let evaluationsData = JSON.parse(localStorage.getItem(evaluationKey)) || {};
+
+      // State variables
       let isDownloaded = localStorage.getItem(downloadFlagKey) === 'true';
       let uploadedFile = localStorage.getItem(documentKey);
+      let collapsedStates = {};
+      let activeDropdown = null;
 
+      // Evaluation options
+      const evaluationOptions = [
+        { value: 'completed', label: 'Выполнено', color: 'badge-green' },
+        { value: 'partially', label: 'Частично выполнено', color: 'badge-orange' },
+        { value: 'delayed', label: 'Просрочено', color: 'badge-red' },
+        { value: 'failed', label: 'Не выполнено', color: 'badge-red' }
+      ];
+
+      // Format date from YYYY-MM-DD to DD.MM.YYYY
       function formatDate(dateString) {
         if (!dateString) return '—';
         const [year, month, day] = dateString.split('-');
         return `${day}.${month}.${year}`;
       }
 
+      // Toggle collapse state for a goal
+      function toggleCollapse(index) {
+        collapsedStates[index] = !collapsedStates[index];
+        renderGoals();
+      }
+
+      // Get evaluation badge HTML
+      function getEvaluationBadge(value) {
+        const option = evaluationOptions.find(opt => opt.value === value);
+        if (!option) return null;
+        return `<span class="evaluation-badge ${option.color}">${option.label}</span>`;
+      }
+
+      // Toggle dropdown for manager evaluation
+      function toggleDropdown(index) {
+        if (role !== 'manager') return; // Only manager can open dropdown
+        if (activeDropdown === index) {
+          activeDropdown = null;
+        } else {
+          activeDropdown = index;
+        }
+        renderGoals();
+      }
+
+      // Set manager evaluation
+      function setManagerEvaluation(index, value) {
+        if (role !== 'manager') return; // Only manager can set evaluation
+        if (!evaluationsData[index]) evaluationsData[index] = {};
+        evaluationsData[index].managerEvaluation = value;
+        evaluationsData[index].managerEvaluatedAt = new Date().toISOString();
+        localStorage.setItem(evaluationKey, JSON.stringify(evaluationsData));
+        activeDropdown = null;
+        renderGoals();
+      }
+
+      // Set employee evaluation
+      function setEmployeeEvaluation(index, value) {
+        if (role !== 'employee') return; // Only employee can set evaluation
+        if (!evaluationsData[index]) evaluationsData[index] = {};
+        evaluationsData[index].employeeEvaluation = value;
+        evaluationsData[index].employeeEvaluatedAt = new Date().toISOString();
+        localStorage.setItem(evaluationKey, JSON.stringify(evaluationsData));
+        renderGoals();
+      }
+
+      // Save employee comment
+      function saveEmployeeComment(index, comment) {
+        if (role !== 'employee') return; // Only employee can save comment
+        if (!evaluationsData[index]) evaluationsData[index] = {};
+        evaluationsData[index].employeeComment = comment;
+        evaluationsData[index].employeeCommentedAt = new Date().toISOString();
+        localStorage.setItem(evaluationKey, JSON.stringify(evaluationsData));
+      }
+
+      // Save manager comment
+      function saveManagerComment(index, comment) {
+        if (role !== 'manager') return; // Only manager can save comment
+        if (!evaluationsData[index]) evaluationsData[index] = {};
+        evaluationsData[index].managerComment = comment;
+        evaluationsData[index].managerCommentedAt = new Date().toISOString();
+        localStorage.setItem(evaluationKey, JSON.stringify(evaluationsData));
+      }
+
+      // Save all data
+      function saveAllData() {
+        localStorage.setItem(evaluationKey, JSON.stringify(evaluationsData));
+        alert('Оценки и комментарии сохранены');
+      }
+
+      // Render goals
       function renderGoals() {
         const goalsSection = document.getElementById('goalsSection');
         
@@ -568,7 +923,7 @@
           return;
         }
 
-        // Фильтруем только непустые цели
+        // Filter out empty goals
         const validGoals = goalsData.goals.filter(goal => 
           (goal.goal && goal.goal.trim() !== '') || 
           (goal.criteria && goal.criteria.trim() !== '') || 
@@ -582,31 +937,170 @@
 
         let html = '';
         validGoals.forEach((goal, index) => {
+          const isCollapsed = collapsedStates[index] || false;
+          const goalTitle = goal.goal || 'Без названия';
+          
+          const goalEval = evaluationsData[index] || {};
+          const employeeEvaluation = goalEval.employeeEvaluation || null;
+          const managerEvaluation = goalEval.managerEvaluation || null;
+          const employeeComment = goalEval.employeeComment || '';
+          const managerComment = goalEval.managerComment || '';
+
           html += `
-            <div class="goal-form">
-              <div class="form-row">
-                <div class="field-group">
-                  <div class="title">Цель ${index + 1}</div>
-                  <div class="text-field">${goal.goal || '—'}</div>
-                </div>
-                <div class="date-group">
-                  <div class="title">Срок выполнения</div>
-                  <div class="date-field">${goal.date ? formatDate(goal.date) : '—'}</div>
-                </div>
+            <div class="goal-card ${isCollapsed ? 'collapsed' : ''}">
+              <div class="goal-header-row" onclick="toggleCollapse(${index})">
+                <div class="goal-title">${goalTitle}</div>
+                <div class="goal-date">${goal.date ? formatDate(goal.date) : '—'}</div>
+                <button class="collapse-btn ${isCollapsed ? 'collapsed' : ''}" onclick="event.stopPropagation(); toggleCollapse(${index})">▼</button>
               </div>
-              <div class="form-row">
-                <div class="field-group">
-                  <div class="title">Критерии достижения</div>
-                  <div class="text-field">${goal.criteria || '—'}</div>
-                </div>
-              </div>
-            </div>
           `;
+          
+          if (!isCollapsed) {
+            // Criteria section
+            html += `
+              <div class="criteria-section">
+                <div class="criteria-label">Критерии достижения</div>
+                <div class="criteria-text">${goal.criteria || '—'}</div>
+              </div>
+            `;
+            
+            // For in-progress state, add evaluation and comments
+            if (status === 'in-progress') {
+              // Evaluation section
+              html += `<div class="evaluation-section">`;
+              
+              if (role === 'employee') {
+                // Employee sees their own evaluation with select
+                html += `
+                  <div class="evaluation-row">
+                    <div class="evaluation-item">
+                      <div class="evaluation-label">Оценка со стороны сотрудника</div>
+                      <select class="evaluation-select" onchange="setEmployeeEvaluation(${index}, this.value)">
+                        <option value="" ${!employeeEvaluation ? 'selected' : ''}>Выберите оценку</option>
+                        <option value="completed" ${employeeEvaluation === 'completed' ? 'selected' : ''}>Выполнено</option>
+                        <option value="partially" ${employeeEvaluation === 'partially' ? 'selected' : ''}>Частично выполнено</option>
+                        <option value="delayed" ${employeeEvaluation === 'delayed' ? 'selected' : ''}>Просрочено</option>
+                        <option value="failed" ${employeeEvaluation === 'failed' ? 'selected' : ''}>Не выполнено</option>
+                      </select>
+                    </div>
+                  </div>
+                `;
+              } else if (role === 'manager') {
+                // Manager sees employee's evaluation (read-only) and their own evaluation with dropdown
+                html += `
+                  <div class="evaluation-row">
+                    <div class="evaluation-item">
+                      <div class="evaluation-label">Оценка со стороны сотрудника</div>
+                      <div class="evaluation-value">
+                        ${employeeEvaluation ? 
+                          `<span class="evaluation-badge ${evaluationOptions.find(opt => opt.value === employeeEvaluation)?.color}">${evaluationOptions.find(opt => opt.value === employeeEvaluation)?.label}</span>` : 
+                          `<span class="evaluation-badge badge-default">Не оценено</span>`
+                        }
+                      </div>
+                    </div>
+                    <div class="evaluation-item">
+                      <div class="evaluation-label">Оценка со стороны руководителя</div>
+                      <div class="evaluation-value">
+                        <div class="evaluation-menu">
+                          ${managerEvaluation ? 
+                            `<span class="evaluation-badge ${evaluationOptions.find(opt => opt.value === managerEvaluation)?.color}" onclick="toggleDropdown(${index})" style="cursor: pointer;">
+                              ${evaluationOptions.find(opt => opt.value === managerEvaluation)?.label}
+                            </span>` : 
+                            `<span class="evaluation-badge badge-default" onclick="toggleDropdown(${index})" style="cursor: pointer;">
+                              Оценить
+                            </span>`
+                          }
+                          <div class="evaluation-dropdown ${activeDropdown === index ? 'show' : ''}">
+                            ${evaluationOptions.map(opt => `
+                              <div class="evaluation-option" onclick="setManagerEvaluation(${index}, '${opt.value}')">
+                                <span class="badge-preview ${opt.color}">${opt.label}</span>
+                              </div>
+                            `).join('')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              } else {
+                // HR and Superior see both evaluations (read-only)
+                html += `
+                  <div class="evaluation-row">
+                    <div class="evaluation-item">
+                      <div class="evaluation-label">Оценка со стороны сотрудника</div>
+                      <div class="evaluation-value">
+                        ${employeeEvaluation ? 
+                          `<span class="evaluation-badge ${evaluationOptions.find(opt => opt.value === employeeEvaluation)?.color}">${evaluationOptions.find(opt => opt.value === employeeEvaluation)?.label}</span>` : 
+                          `<span class="evaluation-badge badge-default">Не оценено</span>`
+                        }
+                      </div>
+                    </div>
+                    <div class="evaluation-item">
+                      <div class="evaluation-label">Оценка со стороны руководителя</div>
+                      <div class="evaluation-value">
+                        ${managerEvaluation ? 
+                          `<span class="evaluation-badge ${evaluationOptions.find(opt => opt.value === managerEvaluation)?.color}">${evaluationOptions.find(opt => opt.value === managerEvaluation)?.label}</span>` : 
+                          `<span class="evaluation-badge badge-default">Не оценено</span>`
+                        }
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }
+              
+              html += `</div>`;
+
+              // Comment section
+              if (role === 'employee') {
+                // Employee can edit their comment
+                html += `
+                  <div class="comment-section">
+                    <div class="comment-label">Комментарий сотрудника</div>
+                    <textarea class="comment-field" 
+                              placeholder="Оставьте комментарий..."
+                              onchange="saveEmployeeComment(${index}, this.value)">${employeeComment}</textarea>
+                  </div>
+                `;
+              } else if (role === 'manager') {
+                // Manager sees employee's comment and can add their own
+                html += `
+                  <div class="comment-section">
+                    <div class="comment-label">Комментарий сотрудника</div>
+                    <textarea class="comment-field" readonly 
+                              placeholder="${employeeComment || 'Сотрудник еще не оставил комментарий'}">${employeeComment}</textarea>
+                  </div>
+                  <div class="comment-section">
+                    <div class="comment-label">Комментарий руководителя</div>
+                    <textarea class="comment-field" 
+                              placeholder="Оставьте комментарий..."
+                              onchange="saveManagerComment(${index}, this.value)">${managerComment}</textarea>
+                  </div>
+                `;
+              } else {
+                // HR and Superior see both comments (read-only)
+                html += `
+                  <div class="comment-section">
+                    <div class="comment-label">Комментарий сотрудника</div>
+                    <textarea class="comment-field" readonly 
+                              placeholder="${employeeComment || 'Сотрудник еще не оставил комментарий'}">${employeeComment}</textarea>
+                  </div>
+                  <div class="comment-section">
+                    <div class="comment-label">Комментарий руководителя</div>
+                    <textarea class="comment-field" readonly 
+                              placeholder="${managerComment || 'Руководитель еще не оставил комментарий'}">${managerComment}</textarea>
+                  </div>
+                `;
+              }
+            }
+          }
+          
+          html += `</div>`;
         });
         
         goalsSection.innerHTML = html;
       }
 
+      // Render buttons based on status and role
       function renderButtons() {
         const buttonGroup = document.getElementById('buttonGroup');
         const statusMessage = document.getElementById('statusMessage');
@@ -614,11 +1108,43 @@
         
         let buttons = '';
         
-        // Для HR и вышестоящего руководителя - только кнопка "Выйти" на всех статусах
-        if (role === 'hr' || role === 'superior') {
+        // For HR
+        if (role === 'hr') {
+          if (status === 'review') {
+            statusMessage.style.display = 'flex';
+            document.getElementById('messageTitle').textContent = 'Согласование целей';
+            document.getElementById('messageText').textContent = 'Проверьте цели и примите решение';
+            
+            buttons = `
+              <div class="left-buttons">
+                <button class="btn btn-back" id="backBtn">Назад</button>
+              </div>
+              <div class="right-buttons">
+                <button class="btn btn-rework" id="reworkBtn">Отправить на доработку</button>
+                <button class="btn btn-approve" id="approveBtn">Согласовать</button>
+              </div>
+            `;
+          } else {
+            statusMessage.style.display = 'none';
+            buttons = `
+              <div class="left-buttons">
+                <button class="btn btn-back" id="backBtn">Выйти</button>
+              </div>
+            `;
+          }
+          buttonGroup.innerHTML = buttons;
+          uploadSection.style.display = 'none';
+          addButtonHandlers();
+          return;
+        }
+        
+        // For Superior - only back button (view only)
+        if (role === 'superior') {
           statusMessage.style.display = 'none';
           buttons = `
-            <button class="btn btn-back" id="backBtn">Выйти</button>
+            <div class="left-buttons">
+              <button class="btn btn-back" id="backBtn">Выйти</button>
+            </div>
           `;
           buttonGroup.innerHTML = buttons;
           uploadSection.style.display = 'none';
@@ -626,69 +1152,114 @@
           return;
         }
         
-        // Для руководителя - разные кнопки в зависимости от статуса
-        if (status === 'sign') {
-          // Статус "На подписании"
+        // For in-progress state
+        if (status === 'in-progress') {
+          statusMessage.style.display = 'none';
+          
+          if (role === 'employee') {
+            buttons = `
+              <div class="left-buttons">
+                <button class="btn btn-back" id="backBtn">Выйти</button>
+              </div>
+              <div class="right-buttons">
+                <button class="btn btn-save" id="saveBtn">Сохранить</button>
+              </div>
+            `;
+          } else if (role === 'manager') {
+            buttons = `
+              <div class="left-buttons">
+                <button class="btn btn-back" id="backBtn">Выйти</button>
+              </div>
+              <div class="right-buttons">
+                <button class="btn btn-process" id="processBtn">Процессы</button>
+                <button class="btn btn-documents" id="documentsBtn">Посмотреть документы</button>
+                <button class="btn btn-save" id="saveBtn">Сохранить</button>
+                <button class="btn btn-summary" id="summaryBtn">Подвести итоги</button>
+              </div>
+            `;
+          }
+          buttonGroup.innerHTML = buttons;
+          uploadSection.style.display = 'none';
+          
+        } else if (role === 'employee') {
+          statusMessage.style.display = 'none';
+          buttons = `
+            <div class="left-buttons">
+              <button class="btn btn-back" id="backBtn">Выйти</button>
+            </div>
+          `;
+          buttonGroup.innerHTML = buttons;
+          uploadSection.style.display = 'none';
+          
+        } else if (status === 'review' && role === 'manager') {
+          statusMessage.style.display = 'flex';
+          document.getElementById('messageTitle').textContent = 'Цели на согласовании';
+          document.getElementById('messageText').textContent = 'Цели на согласовании у HR. После того как ваши цели согласуют, вам будет необходимо выгрузить форму с целями и загрузить его с подписями юридического руководителя и сотрудника';
+          
+          buttons = `
+            <div class="left-buttons">
+              <button class="btn btn-back" id="backBtn">Назад</button>
+            </div>
+          `;
+          buttonGroup.innerHTML = buttons;
+          uploadSection.style.display = 'none';
+          
+        } else if (status === 'sign' && role === 'manager') {
           statusMessage.style.display = 'flex';
           document.getElementById('messageTitle').textContent = 'Цели согласованы';
-          document.getElementById('messageText').textContent = 'Теперь необходимо скачать документ, подписать его и загрузить обратно';
+          document.getElementById('messageText').textContent = 'Скачайте форму завершения испытательного срока, подпишите со своей стороны и у юридического руководителя (если не совпадает) живой подписью.\n\nПеред встречей с сотрудником инициируйте встречу с HRP для обсуждения дальнейших действий.\n\nПо результатам проведенной встречи с сотрудником загрузите подписанный с двух сторон документ. В случае отказа подписи, загрузите подписанный акт об отказе.';
           
-          // Проверяем, был ли уже загружен файл
           if (uploadedFile) {
             buttons = `
-              <button class="btn btn-back" id="backBtn">Выйти</button>
-              <button class="btn btn-edit" id="editBtn">Изменить цели</button>
-              <button class="btn btn-download" id="downloadBtn">Выгрузить документ</button>
-              <button class="btn btn-upload active" id="uploadBtn">Приложить подписанный документ</button>
+              <div class="left-buttons">
+                <button class="btn btn-back" id="backBtn">Выйти</button>
+                <button class="btn btn-edit" id="editBtn">Изменить цели</button>
+              </div>
+              <div class="right-buttons">
+                <button class="btn btn-download" id="downloadBtn">Выгрузить документ</button>
+                <button class="btn btn-upload active" id="uploadBtn">Приложить подписанный документ</button>
+              </div>
             `;
             buttonGroup.innerHTML = buttons;
             uploadSection.style.display = 'block';
             document.getElementById('fileInfo').style.display = 'flex';
             document.getElementById('fileName').textContent = uploadedFile;
           } else {
-            // Определяем состояние кнопки загрузки на основе флага isDownloaded
             const uploadButtonClass = isDownloaded ? 'btn btn-upload active' : 'btn btn-upload';
             const uploadButtonText = isDownloaded ? 'Приложить подписанный документ' : 'Сначала выгрузите документ';
             const uploadButtonDisabled = !isDownloaded ? 'disabled' : '';
             
             buttons = `
-              <button class="btn btn-back" id="backBtn">Выйти</button>
-              <button class="btn btn-edit" id="editBtn">Изменить цели</button>
-              <button class="btn btn-download" id="downloadBtn">Выгрузить документ</button>
-              <button class="${uploadButtonClass}" id="uploadBtn" ${uploadButtonDisabled}>
-                ${uploadButtonText}
-              </button>
+              <div class="left-buttons">
+                <button class="btn btn-back" id="backBtn">Выйти</button>
+                <button class="btn btn-edit" id="editBtn">Изменить цели</button>
+              </div>
+              <div class="right-buttons">
+                <button class="btn btn-download" id="downloadBtn">Выгрузить документ</button>
+                <button class="${uploadButtonClass}" id="uploadBtn" ${uploadButtonDisabled}>
+                  ${uploadButtonText}
+                </button>
+              </div>
             `;
             buttonGroup.innerHTML = buttons;
             uploadSection.style.display = 'none';
           }
           
-        } else if (status === 'in-progress') {
-          // Статус "На выполнении"
-          statusMessage.style.display = 'flex';
-          document.getElementById('messageTitle').textContent = 'Цели подписаны';
-          document.getElementById('messageText').textContent = 'Документ успешно загружен. Цели переведены в статус "На выполнении"';
-          
-          buttons = `
-            <button class="btn btn-back" id="backBtn">Выйти</button>
-          `;
-          buttonGroup.innerHTML = buttons;
-          uploadSection.style.display = 'none';
-          
         } else {
-          // Для всех остальных статусов - только кнопка "Назад"
           statusMessage.style.display = 'none';
           buttons = `
-            <button class="btn btn-back" id="backBtn">Назад</button>
+            <div class="left-buttons">
+              <button class="btn btn-back" id="backBtn">Назад</button>
+            </div>
           `;
           buttonGroup.innerHTML = buttons;
           uploadSection.style.display = 'none';
         }
 
-        // Добавляем обработчики после отрисовки кнопок
         addButtonHandlers();
       }
 
+      // Add button handlers
       function addButtonHandlers() {
         const backBtn = document.getElementById('backBtn');
         if (backBtn) {
@@ -715,9 +1286,61 @@
             document.getElementById('uploadSection').style.display = 'block';
           });
         }
+
+        const saveBtn = document.getElementById('saveBtn');
+        if (saveBtn) {
+          saveBtn.addEventListener('click', saveAllData);
+        }
+
+        const processBtn = document.getElementById('processBtn');
+        if (processBtn) {
+          processBtn.addEventListener('click', () => {
+            alert('Функционал "Процессы" будет добавлен позже');
+          });
+        }
+
+        const documentsBtn = document.getElementById('documentsBtn');
+        if (documentsBtn) {
+          documentsBtn.addEventListener('click', () => {
+            alert('Функционал "Посмотреть документы" будет добавлен позже');
+          });
+        }
+
+        const summaryBtn = document.getElementById('summaryBtn');
+        if (summaryBtn) {
+          summaryBtn.addEventListener('click', () => {
+            alert('Функционал "Подвести итоги" будет добавлен позже');
+          });
+        }
+
+        // HR specific buttons
+        const reworkBtn = document.getElementById('reworkBtn');
+        if (reworkBtn) {
+          reworkBtn.addEventListener('click', () => {
+            const comment = prompt('Укажите причину доработки:');
+            if (comment) {
+              localStorage.setItem(`goals-comment-${employeeKey}`, comment);
+              localStorage.setItem(statusKey, 'draft');
+              alert('Цели отправлены на доработку');
+              window.location.href = 'index.html';
+            }
+          });
+        }
+
+        const approveBtn = document.getElementById('approveBtn');
+        if (approveBtn) {
+          approveBtn.addEventListener('click', () => {
+            localStorage.setItem(statusKey, 'sign');
+            // Clear history when approving
+            localStorage.removeItem(historyKey);
+            localStorage.removeItem(originalGoalsKey);
+            alert('Цели успешно согласованы');
+            window.location.href = 'index.html';
+          });
+        }
       }
 
-      // Функция для обновления состояния кнопки загрузки
+      // Update upload button state after download
       function updateUploadButtonState() {
         const uploadBtn = document.getElementById('uploadBtn');
         if (uploadBtn) {
@@ -726,10 +1349,10 @@
           uploadBtn.textContent = 'Приложить подписанный документ';
         }
         
-        // Также обновляем глобальную переменную
         isDownloaded = true;
+        localStorage.setItem(downloadFlagKey, 'true');
         
-        // Обновляем кнопку в UI без перезагрузки
+        // Update button in UI
         const buttonGroup = document.getElementById('buttonGroup');
         const currentHTML = buttonGroup.innerHTML;
         const newHTML = currentHTML.replace(
@@ -738,26 +1361,23 @@
         );
         buttonGroup.innerHTML = newHTML;
         
-        // Перепривязываем обработчики
         addButtonHandlers();
       }
 
+      // Handle download button click
       function handleDownload() {
         try {
-          // Создаем новый PDF документ
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF();
           
           let yPos = 20;
           const lineHeight = 7;
           
-          // Заголовок
           doc.setFontSize(16);
           doc.setFont('helvetica', 'bold');
           doc.text('Цели на испытательный срок', 20, yPos);
           yPos += lineHeight * 2;
           
-          // Информация о сотруднике
           doc.setFontSize(12);
           doc.setFont('helvetica', 'normal');
           doc.text(`Сотрудник: ${employeeName}`, 20, yPos);
@@ -765,16 +1385,13 @@
           doc.text(`Дата формирования: ${new Date().toLocaleDateString('ru-RU')}`, 20, yPos);
           yPos += lineHeight * 2;
           
-          // Фильтруем непустые цели
           const validGoals = goalsData.goals.filter(goal => 
             (goal.goal && goal.goal.trim() !== '') || 
             (goal.criteria && goal.criteria.trim() !== '') || 
             (goal.date && goal.date !== '')
           );
           
-          // Цели
           validGoals.forEach((goal, index) => {
-            // Проверяем, не выходим ли за пределы страницы
             if (yPos > 250) {
               doc.addPage();
               yPos = 20;
@@ -785,54 +1402,34 @@
             yPos += lineHeight;
             
             doc.setFont('helvetica', 'normal');
+            doc.text(goal.goal || '—', 25, yPos, { maxWidth: 170 });
+            yPos += lineHeight * 2;
             
-            // Описание цели
-            doc.text(`Описание: ${goal.goal || '—'}`, 25, yPos);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`Критерии:`, 20, yPos);
             yPos += lineHeight;
             
-            // Критерии
-            const criteria = goal.criteria || '—';
-            if (criteria.length > 80) {
-              const words = criteria.split(' ');
-              let line = 'Критерии: ';
-              let currentLine = line;
-              
-              words.forEach(word => {
-                if ((currentLine + word).length > 80) {
-                  doc.text(currentLine, 25, yPos);
-                  yPos += lineHeight;
-                  currentLine = '          ' + word;
-                } else {
-                  currentLine += (currentLine === line ? '' : ' ') + word;
-                }
-              });
-              if (currentLine) {
-                doc.text(currentLine, 25, yPos);
-                yPos += lineHeight;
-              }
-            } else {
-              doc.text(`Критерии: ${criteria}`, 25, yPos);
-              yPos += lineHeight;
-            }
+            doc.setFont('helvetica', 'normal');
+            doc.text(goal.criteria || '—', 25, yPos, { maxWidth: 170 });
+            yPos += lineHeight * 2;
             
-            // Дата
-            doc.text(`Срок выполнения: ${goal.date ? formatDate(goal.date) : '—'}`, 25, yPos);
-            yPos += lineHeight * 1.5;
+            doc.setFont('helvetica', 'bold');
+            doc.text(`Срок:`, 20, yPos);
+            yPos += lineHeight;
+            
+            doc.setFont('helvetica', 'normal');
+            doc.text(goal.date ? formatDate(goal.date) : '—', 25, yPos);
+            yPos += lineHeight * 2;
           });
           
-          // Подпись
           yPos += lineHeight;
           doc.line(20, yPos, 100, yPos);
           yPos += lineHeight;
           doc.text('Подпись руководителя', 20, yPos);
           
-          // Сохраняем PDF
           doc.save(`Цели_${employeeName}_${new Date().toLocaleDateString('ru-RU')}.pdf`);
           
-          // Устанавливаем флаг, что документ был скачан
           localStorage.setItem(downloadFlagKey, 'true');
-          
-          // НЕМЕДЛЕННО обновляем состояние кнопки
           updateUploadButtonState();
           
           alert('Документ успешно скачан');
@@ -842,7 +1439,7 @@
         }
       }
 
-      // Обработчики для загрузки файла
+      // File upload handlers
       const uploadArea = document.getElementById('uploadArea');
       const fileInput = document.getElementById('fileInput');
       const fileInfo = document.getElementById('fileInfo');
@@ -883,21 +1480,18 @@
         });
       }
 
+      // Handle file upload
       function handleFileUpload(file) {
-        // Сохраняем информацию о файле
         localStorage.setItem(documentKey, file.name);
         uploadedFile = file.name;
         
-        // Показываем информацию о файле
         fileName.textContent = file.name;
         fileInfo.style.display = 'flex';
         
-        // Меняем статус на "На выполнении"
         localStorage.setItem(statusKey, 'in-progress');
         
         alert('Документ успешно загружен. Цели переведены в статус "На выполнении"');
         
-        // Обновляем страницу
         setTimeout(() => {
           window.location.href = 'review-goals.html?employee=' + encodeURIComponent(employeeName) + '&status=in-progress&role=' + role;
         }, 1500);
@@ -912,7 +1506,6 @@
           uploadedFile = null;
           isDownloaded = false;
           
-          // Обновляем кнопку загрузки
           const uploadBtn = document.getElementById('uploadBtn');
           if (uploadBtn) {
             uploadBtn.disabled = true;
@@ -922,7 +1515,7 @@
         });
       }
 
-      // Обработчики модального окна
+      // Edit confirmation modal handlers
       document.getElementById('closeEditModal').addEventListener('click', () => {
         document.getElementById('editConfirmModal').style.display = 'none';
       });
@@ -932,11 +1525,8 @@
       });
 
       document.getElementById('confirmEdit').addEventListener('click', () => {
-        // Возвращаем в черновик
         localStorage.setItem(statusKey, 'draft');
-        // Удаляем флаг скачивания
         localStorage.removeItem(downloadFlagKey);
-        // Удаляем загруженный документ
         localStorage.removeItem(documentKey);
         
         document.getElementById('editConfirmModal').style.display = 'none';
@@ -952,9 +1542,17 @@
         }
       });
 
-      // Инициализация
+      // Initialize
       renderGoals();
       renderButtons();
+
+      // Export functions to global scope
+      window.toggleCollapse = toggleCollapse;
+      window.toggleDropdown = toggleDropdown;
+      window.setManagerEvaluation = setManagerEvaluation;
+      window.setEmployeeEvaluation = setEmployeeEvaluation;
+      window.saveEmployeeComment = saveEmployeeComment;
+      window.saveManagerComment = saveManagerComment;
     </script>
   </main>
 </body>

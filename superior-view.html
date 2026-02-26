@@ -141,6 +141,59 @@
       padding: 20px;
       margin-bottom: 20px;
       width: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .goal-form.collapsed {
+      padding: 16px 20px;
+    }
+
+    .goal-form.collapsed .form-row:not(.goal-header-row) {
+      display: none;
+    }
+
+    .goal-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0;
+      cursor: pointer;
+    }
+
+    .goal-header-row .goal-title {
+      font-weight: 700;
+      font-size: 18px;
+      color: #0F172A;
+      flex: 1;
+    }
+
+    .goal-header-row .goal-date {
+      font-weight: 700;
+      font-size: 16px;
+      color: #3389F4;
+      margin-right: 16px;
+    }
+
+    .collapse-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+      color: #94A3B8;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+    }
+
+    .collapse-btn.collapsed {
+      transform: rotate(-90deg);
+    }
+
+    .collapse-btn:hover {
+      color: #3389F4;
     }
 
     .form-row {
@@ -156,14 +209,6 @@
 
     .form-row .date-group {
       flex: 1;
-    }
-
-    .form-row .field-group .title,
-    .form-row .date-group .title {
-      font-size: 14px;
-      font-weight: 400;
-      color: #475569;
-      margin-bottom: 8px;
     }
 
     .form-row .field-group .text-field {
@@ -342,10 +387,17 @@
         goalsData = { goals: [] };
       }
 
+      let collapsedStates = {};
+
       function formatDate(dateString) {
         if (!dateString) return '—';
         const [year, month, day] = dateString.split('-');
         return `${day}.${month}.${year}`;
+      }
+
+      function toggleCollapse(index) {
+        collapsedStates[index] = !collapsedStates[index];
+        renderGoals();
       }
 
       function renderGoals() {
@@ -370,26 +422,37 @@
 
         let html = '';
         validGoals.forEach((goal, index) => {
+          const isCollapsed = collapsedStates[index] || false;
+          const goalTitle = goal.goal ? (goal.goal.length > 50 ? goal.goal.substring(0, 50) + '...' : goal.goal) : 'Без названия';
+          
           html += `
-            <div class="goal-form">
+            <div class="goal-form ${isCollapsed ? 'collapsed' : ''}">
+              <div class="goal-header-row" onclick="toggleCollapse(${index})">
+                <div class="goal-title">${goalTitle}</div>
+                <div class="goal-date">${goal.date ? formatDate(goal.date) : '—'}</div>
+                <button class="collapse-btn ${isCollapsed ? 'collapsed' : ''}" onclick="event.stopPropagation(); toggleCollapse(${index})">▼</button>
+              </div>
+          `;
+          
+          if (!isCollapsed) {
+            html += `
               <div class="form-row">
                 <div class="field-group">
-                  <div class="title">Цель ${index + 1}</div>
                   <div class="text-field">${goal.goal || '—'}</div>
                 </div>
                 <div class="date-group">
-                  <div class="title">Срок выполнения</div>
                   <div class="date-field">${goal.date ? formatDate(goal.date) : '—'}</div>
                 </div>
               </div>
               <div class="form-row">
                 <div class="field-group">
-                  <div class="title">Критерии достижения</div>
                   <div class="text-field">${goal.criteria || '—'}</div>
                 </div>
               </div>
-            </div>
-          `;
+            `;
+          }
+          
+          html += `</div>`;
         });
         
         goalsSection.innerHTML = html;
@@ -400,6 +463,9 @@
       document.getElementById('backBtn').addEventListener('click', () => {
         window.location.href = 'index.html?role=superior';
       });
+
+      // Добавляем функцию toggleCollapse в глобальную область
+      window.toggleCollapse = toggleCollapse;
     </script>
   </main>
 </body>

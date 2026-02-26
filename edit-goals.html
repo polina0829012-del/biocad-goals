@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Цели на испытательный срок</title>
   <style>
     * {
@@ -136,6 +137,7 @@
       margin-bottom: 20px;
       width: 100%;
       position: relative;
+      border: 1px solid transparent;
     }
 
     .goal-form .delete-btn {
@@ -149,6 +151,42 @@
       cursor: pointer;
       font-weight: 700;
       line-height: 1;
+      z-index: 20;
+    }
+
+    .goal-controls {
+      position: absolute;
+      top: 12px;
+      right: 45px;
+      display: flex;
+      gap: 4px;
+      z-index: 10;
+    }
+
+    .move-btn {
+      background: #FFFFFF;
+      border: 1px solid #94A3B8;
+      border-radius: 4px;
+      cursor: pointer;
+      color: #475569;
+      font-size: 16px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .move-btn:hover:not(:disabled) {
+      background: #3389F4;
+      border-color: #3389F4;
+      color: white;
+    }
+
+    .move-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
     }
 
     .form-row {
@@ -188,6 +226,11 @@
       resize: vertical;
     }
 
+    .form-row .field-group .text-field.error {
+      border-color: #EE4A3F;
+      box-shadow: 0px 0px 0px 2px rgba(238, 74, 63, 0.2);
+    }
+
     .form-row .date-group .date-field {
       width: 100%;
       height: 40px;
@@ -199,6 +242,11 @@
       font-size: 16px;
       color: #0F172A;
       cursor: pointer;
+    }
+
+    .form-row .date-group .date-field.error {
+      border-color: #EE4A3F;
+      box-shadow: 0px 0px 0px 2px rgba(238, 74, 63, 0.2);
     }
 
     .add-goal-btn {
@@ -361,8 +409,25 @@
       margin-bottom: 16px;
       text-align: center;
     }
+
+    .validation-summary {
+      background: #FEF2F2;
+      border: 1px solid #EE4A3F;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 20px;
+      color: #EE4A3F;
+      font-size: 14px;
+      display: none;
+      white-space: pre-line;
+    }
+
+    .validation-summary.show {
+      display: block;
+    }
   </style>
 </head>
+
 <body>
   <aside class="sidebar">
     <div class="logo">BIOCAD</div>
@@ -397,12 +462,16 @@
           <div class="label">Руководитель по юридической ОШС</div>
           <div class="value">Петров Петр Петрович</div>
         </div>
-        <div class="info-item">
+        <div class="info-item" id="agreeDateItem">
           <div class="label">Согласовать до</div>
           <div class="value">13.10.2025</div>
         </div>
-        <div class="info-item">
+        <div class="info-item" id="signDateItem">
           <div class="label">Подписать до</div>
+          <div class="value">20.10.2025</div>
+        </div>
+        <div class="info-item" id="summaryDateItem" style="display: none;">
+          <div class="label">Подвести итоги до</div>
           <div class="value">20.10.2025</div>
         </div>
       </div>
@@ -412,33 +481,15 @@
         <div class="text" id="reworkComment"></div>
       </div>
 
-      <div class="goals-section">
-        <div class="goal-form" id="goalForm1">
-          <button class="delete-btn" onclick="deleteGoal(this)" style="display: none;">✕</button>
-
-          <div class="form-row">
-            <div class="field-group">
-              <div class="title">Цель</div>
-              <textarea class="text-field goal-field" data-field="goal" placeholder="Введите цель"></textarea>
-            </div>
-            <div class="date-group">
-              <div class="title">Срок выполнения</div>
-              <input type="date" class="date-field goal-date" data-field="date" />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="field-group">
-              <div class="title">Критерии достижения</div>
-              <textarea class="text-field goal-field" data-field="criteria" placeholder="Введите критерии"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <button class="add-goal-btn" id="addGoalBtn">
-          Добавить цель
-        </button>
+      <div class="validation-summary" id="validationSummary">
+        ⚠️ Исправьте ошибки перед отправкой
       </div>
+
+      <div class="goals-section" id="goalsContainer"></div>
+
+      <button class="add-goal-btn" id="addGoalBtn">
+        Добавить цель
+      </button>
 
       <div class="button-group">
         <button class="btn btn-cancel" id="exitBtn">Выйти</button>
@@ -454,7 +505,6 @@
       <div class="footer-text">© 2016 - 2023. Все права защищены</div>
     </footer>
 
-    <!-- Модальное окно для сохранения черновика -->
     <div class="modal-overlay" id="saveModal">
       <div class="modal-content">
         <div class="modal-header">
@@ -468,7 +518,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно для отправки на согласование -->
     <div class="modal-overlay" id="submitModal">
       <div class="modal-content">
         <div class="modal-header">
@@ -482,14 +531,14 @@
       </div>
     </div>
 
-    <!-- Модальное окно для предупреждения об отсутствии изменений -->
     <div class="modal-overlay" id="warningModal">
       <div class="modal-content">
         <div class="modal-header">
           <h3>Внимание</h3>
           <button class="close-modal" id="closeWarning">✕</button>
         </div>
-        <p class="warning-message">⚠️ Перед тем как отправить цели на согласование, внесите изменения в соответствии с комментарием от HR</p>
+        <p class="warning-message">⚠️ Перед тем как отправить цели на согласование, внесите изменения в соответствии с
+          комментарием от HR</p>
         <div class="modal-actions">
           <button class="btn-ok" id="okWarning">Понятно</button>
         </div>
@@ -500,44 +549,58 @@
       const urlParams = new URLSearchParams(window.location.search);
       const employeeName = urlParams.get('employee') || 'Котова Вероника';
       const employeeKey = employeeName.replace(/\s+/g, '-');
-      
+
       document.getElementById('pageTitle').textContent = `Цели на испытательный срок для ${employeeName}`;
 
       const draftKey = `goals-draft-${employeeKey}`;
       const statusKey = `goals-status-${employeeKey}`;
       const commentKey = `goals-comment-${employeeKey}`;
       const historyKey = `goals-history-${employeeKey}`;
-      const originalGoalsKey = `goals-original-${employeeKey}`; // Новый ключ для хранения оригинальных целей
+      const originalGoalsKey = `goals-original-${employeeKey}`;
 
       // Загружаем данные
       let goalsData = JSON.parse(localStorage.getItem(draftKey));
-      
+
       if (!goalsData || !goalsData.goals || !Array.isArray(goalsData.goals)) {
         goalsData = { goals: [] };
       }
-      
+
       if (goalsData.goals.length === 0) {
         goalsData.goals.push({ goal: '', criteria: '', date: '' });
         localStorage.setItem(draftKey, JSON.stringify(goalsData));
       }
 
-      // Получаем предыдущий статус перед изменениями
       const previousStatus = localStorage.getItem(statusKey);
 
-      // ВАЖНО: Сохраняем оригинальные цели (те, которые были до изменений)
-      // Если это первая загрузка после возврата из статуса "На подписании",
-      // то сохраняем текущие цели как оригинальные для сравнения
+      // ---------- ИСПРАВЛЕННЫЙ БЛОК ЗАГРУЗКИ ОРИГИНАЛОВ ----------
+      // ---------- ИСПРАВЛЕННЫЙ БЛОК ЗАГРУЗКИ ОРИГИНАЛОВ ----------
       let originalGoals;
+
       const savedOriginalGoals = localStorage.getItem(originalGoalsKey);
-      
+
       if (savedOriginalGoals) {
-        // Если уже есть сохраненные оригинальные цели, используем их
+        // Если есть сохраненные оригиналы - используем их
         originalGoals = JSON.parse(savedOriginalGoals);
+        console.log('Загружены оригиналы:', originalGoals);
       } else {
-        // Иначе сохраняем текущие как оригинальные
-        originalGoals = JSON.parse(JSON.stringify(goalsData));
+        // ✅ Берём только непустые цели из goalsData
+        const nonEmptyGoals = goalsData.goals.filter(g =>
+          (g.goal && g.goal.trim() !== '') ||
+          (g.criteria && g.criteria.trim() !== '') ||
+          (g.date && g.date !== '')
+        );
+
+        // Если непустых целей нет, оставляем одну пустую для черновика
+        if (nonEmptyGoals.length === 0) {
+          originalGoals = { goals: [{ goal: '', criteria: '', date: '' }] };
+        } else {
+          originalGoals = { goals: nonEmptyGoals };
+        }
+
         localStorage.setItem(originalGoalsKey, JSON.stringify(originalGoals));
+        console.log('Установлены новые оригиналы (без пустых):', originalGoals);
       }
+      // -----------------------------------------------------------------------------------------------
 
       const hrComment = localStorage.getItem(commentKey);
       if (hrComment) {
@@ -547,23 +610,136 @@
 
       const savedStatus = localStorage.getItem(statusKey);
       if (savedStatus) {
-        document.getElementById('statusValue').textContent = 
-          savedStatus === 'draft' ? 'Черновик' : 
-          savedStatus === 'review' ? 'На согласовании' : 
-          savedStatus === 'approved' ? 'Согласовано' : 
-          savedStatus === 'sign' ? 'На подписании' :
-          savedStatus === 'in-progress' ? 'На выполнении' : savedStatus;
+        document.getElementById('statusValue').textContent =
+          savedStatus === 'draft' ? 'Черновик' :
+            savedStatus === 'review' ? 'На согласовании' :
+              savedStatus === 'approved' ? 'Согласовано' :
+                savedStatus === 'sign' ? 'На подписании' :
+                  savedStatus === 'in-progress' ? 'На выполнении' : savedStatus;
+      }
+
+      // Функция проверки даты (не в прошлом)
+      function isValidDate(dateString) {
+        if (!dateString) return false;
+        const selectedDate = new Date(dateString);
+        selectedDate.setHours(0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return selectedDate >= today;
+      }
+
+      // Функция проверки всех целей
+      function validateAllGoals() {
+        const forms = document.querySelectorAll('.goal-form');
+        let isValid = true;
+        let hasAnyContent = false;
+        let errors = [];
+
+        // Сначала снимаем все ошибки
+        document.querySelectorAll('.text-field, .date-field').forEach(el => {
+          el.classList.remove('error');
+        });
+
+        forms.forEach((form, index) => {
+          const goalField = form.querySelector('.goal-field[data-field="goal"]');
+          const criteriaField = form.querySelector('.goal-field[data-field="criteria"]');
+          const dateField = form.querySelector('.goal-date');
+
+          const goalValue = goalField ? goalField.value.trim() : '';
+          const criteriaValue = criteriaField ? criteriaField.value.trim() : '';
+          const dateValue = dateField ? dateField.value : '';
+
+          // Проверяем, есть ли хоть что-то заполненное
+          if (goalValue || criteriaValue || dateValue) {
+            hasAnyContent = true;
+
+            // Проверка цели
+            if (!goalValue) {
+              isValid = false;
+              if (goalField) goalField.classList.add('error');
+              errors.push(`• Цель ${index + 1}: заполните поле "Цель"`);
+            } else if (goalValue.length < 5) {
+              isValid = false;
+              if (goalField) goalField.classList.add('error');
+              errors.push(`• Цель ${index + 1}: поле "Цель" должно содержать минимум 5 символов`);
+            }
+
+            // Проверка критериев
+            if (!criteriaValue) {
+              isValid = false;
+              if (criteriaField) criteriaField.classList.add('error');
+              errors.push(`• Цель ${index + 1}: заполните поле "Критерии"`);
+            } else if (criteriaValue.length < 5) {
+              isValid = false;
+              if (criteriaField) criteriaField.classList.add('error');
+              errors.push(`• Цель ${index + 1}: поле "Критерии" должно содержать минимум 5 символов`);
+            }
+
+            // Проверка даты
+            if (!dateValue) {
+              isValid = false;
+              if (dateField) dateField.classList.add('error');
+              errors.push(`• Цель ${index + 1}: укажите срок выполнения`);
+            } else if (!isValidDate(dateValue)) {
+              isValid = false;
+              if (dateField) dateField.classList.add('error');
+              errors.push(`• Цель ${index + 1}: срок выполнения не может быть в прошлом`);
+            }
+          }
+        });
+
+        if (!hasAnyContent) {
+          isValid = false;
+          errors.push('• Добавьте хотя бы одну цель');
+        }
+
+        // Показываем сводку ошибок
+        const summary = document.getElementById('validationSummary');
+        if (!isValid) {
+          summary.innerHTML = '⚠️ Исправьте следующие ошибки:\n' + errors.join('\n');
+          summary.classList.add('show');
+        } else {
+          summary.classList.remove('show');
+        }
+
+        return isValid;
+      }
+
+      // Функция перемещения цели вверх
+      window.moveGoalUp = function (index) {
+        if (index === 0) return;
+
+        [goalsData.goals[index - 1], goalsData.goals[index]] = [goalsData.goals[index], goalsData.goals[index - 1]];
+        localStorage.setItem(draftKey, JSON.stringify(goalsData));
+        renderGoals();
+      };
+
+      // Функция перемещения цели вниз
+      window.moveGoalDown = function (index) {
+        if (index === goalsData.goals.length - 1) return;
+
+        [goalsData.goals[index], goalsData.goals[index + 1]] = [goalsData.goals[index + 1], goalsData.goals[index]];
+        localStorage.setItem(draftKey, JSON.stringify(goalsData));
+        renderGoals();
+      };
+      // Функция для нормализации целей (убираем лишние пробелы, приводим к одному виду)
+      function normalizeGoal(goal) {
+        return {
+          goal: goal.goal ? goal.goal.trim().replace(/\s+/g, ' ') : '',
+          criteria: goal.criteria ? goal.criteria.trim().replace(/\s+/g, ' ') : '',
+          date: goal.date || ''
+        };
       }
 
       function hasGoalsChanged() {
         const forms = document.querySelectorAll('.goal-form');
         const currentGoals = [];
-        
+
         forms.forEach(form => {
           const goalField = form.querySelector('.goal-field[data-field="goal"]');
           const criteriaField = form.querySelector('.goal-field[data-field="criteria"]');
           const dateField = form.querySelector('.goal-date');
-          
+
           currentGoals.push({
             goal: goalField ? goalField.value.trim() : '',
             criteria: criteriaField ? criteriaField.value.trim() : '',
@@ -571,13 +747,13 @@
           });
         });
 
-        const nonEmptyCurrentGoals = currentGoals.filter(g => 
+        const nonEmptyCurrentGoals = currentGoals.filter(g =>
           g.goal !== '' || g.criteria !== '' || g.date !== ''
         );
 
-        const nonEmptyOriginalGoals = originalGoals.goals.filter(g => 
-          (g.goal && g.goal.trim() !== '') || 
-          (g.criteria && g.criteria.trim() !== '') || 
+        const nonEmptyOriginalGoals = originalGoals.goals.filter(g =>
+          (g.goal && g.goal.trim() !== '') ||
+          (g.criteria && g.criteria.trim() !== '') ||
           (g.date && g.date !== '')
         );
 
@@ -586,12 +762,12 @@
         }
 
         for (let i = 0; i < nonEmptyCurrentGoals.length; i++) {
-          const current = nonEmptyCurrentGoals[i];
-          const original = nonEmptyOriginalGoals[i] || { goal: '', criteria: '', date: '' };
-          
-          if (current.goal !== (original.goal || '').trim() ||
-              current.criteria !== (original.criteria || '').trim() ||
-              current.date !== (original.date || '')) {
+          const current = normalizeGoal(nonEmptyCurrentGoals[i]);
+          const original = normalizeGoal(nonEmptyOriginalGoals[i] || { goal: '', criteria: '', date: '' });
+
+          if (current.goal !== original.goal ||
+            current.criteria !== original.criteria ||
+            current.date !== original.date) {
             return true;
           }
         }
@@ -599,16 +775,18 @@
         return false;
       }
 
-      // Функция для создания истории изменений
+      // Функция создания истории изменений
       function createChangeHistory() {
+        console.log('originalGoals.goals:', originalGoals.goals);
+
         const forms = document.querySelectorAll('.goal-form');
         const currentGoals = [];
-        
+
         forms.forEach(form => {
           const goalField = form.querySelector('.goal-field[data-field="goal"]');
           const criteriaField = form.querySelector('.goal-field[data-field="criteria"]');
           const dateField = form.querySelector('.goal-date');
-          
+
           currentGoals.push({
             goal: goalField ? goalField.value.trim() : '',
             criteria: criteriaField ? criteriaField.value.trim() : '',
@@ -616,110 +794,117 @@
           });
         });
 
+        // ✅ Фильтруем пустые цели из текущих
+        const nonEmptyCurrentGoals = currentGoals.filter(g =>
+          g.goal !== '' || g.criteria !== '' || g.date !== ''
+        );
+
+        // ✅ Фильтруем пустые цели из оригиналов
+        let nonEmptyOriginalGoals = originalGoals.goals.filter(g =>
+          (g.goal && g.goal.trim() !== '') ||
+          (g.criteria && g.criteria.trim() !== '') ||
+          (g.date && g.date !== '')
+        );
+
+        // ✅ Если после фильтрации ничего не осталось — берём текущие как предыдущие
+        if (nonEmptyOriginalGoals.length === 0 && nonEmptyCurrentGoals.length > 0) {
+          console.log('⚠️ originalGoals был пуст, используем текущие как предыдущие');
+          nonEmptyOriginalGoals = [...nonEmptyCurrentGoals];
+        }
+
         const history = {
           timestamp: new Date().toISOString(),
-          previousGoals: originalGoals.goals, // Используем сохраненные оригинальные цели
-          currentGoals: currentGoals
+          previousGoals: nonEmptyOriginalGoals,
+          currentGoals: nonEmptyCurrentGoals
         };
 
-        console.log('Создаем историю изменений:', history);
         localStorage.setItem(historyKey, JSON.stringify(history));
-        
-        // После создания истории очищаем сохраненные оригинальные цели
-        localStorage.removeItem(originalGoalsKey);
+        console.log('✅ Сохранена история:', history);
+
+        // Теперь текущие цели становятся новым оригиналом
+        localStorage.setItem(originalGoalsKey, JSON.stringify({
+          goals: nonEmptyCurrentGoals
+        }));
+        console.log('✅ Обновлены оригиналы:', nonEmptyCurrentGoals);
       }
 
-      function initGoals() {
-        const goalForms = document.querySelectorAll('.goal-form');
-        
-        for (let i = 1; i < goalForms.length; i++) {
-          goalForms[i].remove();
-        }
-        
-        const updatedGoalForms = document.querySelectorAll('.goal-form');
-        
+      function renderGoals() {
+        const container = document.getElementById('goalsContainer');
+        const totalGoals = goalsData.goals.length;
+        const showMoveButtons = totalGoals > 1;
+
+        let html = '';
+
         goalsData.goals.forEach((goal, index) => {
-          let form;
-          
-          if (index === 0) {
-            form = updatedGoalForms[0];
-            const deleteBtn = form.querySelector('.delete-btn');
-            deleteBtn.style.display = 'none';
-          } else {
-            const goalFormsContainer = document.querySelector('.goals-section');
-            form = document.createElement('div');
-            form.className = 'goal-form';
-            form.id = `goalForm${index + 1}`;
-            form.innerHTML = `
-              <button class="delete-btn" onclick="deleteGoal(this)">✕</button>
+          const canMoveUp = index > 0;
+          const canMoveDown = index < totalGoals - 1;
+          const canDelete = totalGoals > 1;
+
+          html += `
+            <div class="goal-form" id="goalForm${index}">
+              ${canDelete ? `<button class="delete-btn" onclick="deleteGoal(${index})">✕</button>` : ''}
+              ${showMoveButtons ? `
+                <div class="goal-controls">
+                  <button class="move-btn" onclick="moveGoalUp(${index})" ${!canMoveUp ? 'disabled' : ''}>↑</button>
+                  <button class="move-btn" onclick="moveGoalDown(${index})" ${!canMoveDown ? 'disabled' : ''}>↓</button>
+                </div>
+              ` : ''}
+
               <div class="form-row">
                 <div class="field-group">
                   <div class="title">Цель</div>
-                  <textarea class="text-field goal-field" data-field="goal" placeholder="Введите цель"></textarea>
+                  <textarea class="text-field goal-field" data-field="goal" data-index="${index}" 
+                    placeholder="Введите цель (минимум 5 символов)">${goal.goal || ''}</textarea>
                 </div>
                 <div class="date-group">
                   <div class="title">Срок выполнения</div>
-                  <input type="date" class="date-field goal-date" data-field="date" />
+                  <input type="date" class="date-field goal-date" data-field="date" data-index="${index}" 
+                    value="${goal.date || ''}" />
                 </div>
               </div>
+
               <div class="form-row">
                 <div class="field-group">
                   <div class="title">Критерии достижения</div>
-                  <textarea class="text-field goal-field" data-field="criteria" placeholder="Введите критерии"></textarea>
+                  <textarea class="text-field goal-field" data-field="criteria" data-index="${index}" 
+                    placeholder="Введите критерии (минимум 5 символов)">${goal.criteria || ''}</textarea>
                 </div>
               </div>
-            `;
-            goalFormsContainer.insertBefore(form, document.getElementById('addGoalBtn'));
-          }
-          
-          const goalField = form.querySelector('.goal-field[data-field="goal"]');
-          const criteriaField = form.querySelector('.goal-field[data-field="criteria"]');
-          const dateField = form.querySelector('.goal-date');
-
-          if (goalField) goalField.value = goal.goal || '';
-          if (criteriaField) criteriaField.value = goal.criteria || '';
-          if (dateField) dateField.value = goal.date || '';
+            </div>
+          `;
         });
+
+        container.innerHTML = html;
       }
 
+      // Автосохранение при вводе
       document.addEventListener('input', (e) => {
         if (e.target.classList.contains('goal-field') || e.target.classList.contains('goal-date')) {
-          const forms = document.querySelectorAll('.goal-form');
-          const newGoals = [];
-          
-          forms.forEach(form => {
-            const goalField = form.querySelector('.goal-field[data-field="goal"]');
-            const criteriaField = form.querySelector('.goal-field[data-field="criteria"]');
-            const dateField = form.querySelector('.goal-date');
-            
-            newGoals.push({
-              goal: goalField ? goalField.value : '',
-              criteria: criteriaField ? criteriaField.value : '',
-              date: dateField ? dateField.value : ''
-            });
-          });
-          
-          goalsData.goals = newGoals;
-          localStorage.setItem(draftKey, JSON.stringify(goalsData));
+          const index = e.target.dataset.index;
+          const field = e.target.dataset.field;
+          if (index !== undefined && field) {
+            goalsData.goals[index][field] = e.target.value;
+            localStorage.setItem(draftKey, JSON.stringify(goalsData));
+          }
+          // Убираем ошибку при вводе
+          e.target.classList.remove('error');
+          document.getElementById('validationSummary').classList.remove('show');
         }
       });
+
+      window.deleteGoal = function (index) {
+        if (goalsData.goals.length <= 1) return;
+
+        goalsData.goals.splice(index, 1);
+        localStorage.setItem(draftKey, JSON.stringify(goalsData));
+        renderGoals();
+      };
 
       document.getElementById('addGoalBtn').addEventListener('click', () => {
         goalsData.goals.push({ goal: '', criteria: '', date: '' });
         localStorage.setItem(draftKey, JSON.stringify(goalsData));
-        initGoals();
+        renderGoals();
       });
-
-      window.deleteGoal = function(button) {
-        const form = button.closest('.goal-form');
-        const index = Array.from(document.querySelectorAll('.goal-form')).indexOf(form);
-        
-        if (index === 0) return;
-        
-        goalsData.goals.splice(index, 1);
-        localStorage.setItem(draftKey, JSON.stringify(goalsData));
-        initGoals();
-      };
 
       document.getElementById('saveDraftBtn').addEventListener('click', () => {
         localStorage.setItem(draftKey, JSON.stringify(goalsData));
@@ -727,25 +912,60 @@
       });
 
       document.getElementById('submitBtn').addEventListener('click', () => {
+        // Проверяем валидацию
+        if (!validateAllGoals()) {
+          return;
+        }
+
         const hasHRComment = localStorage.getItem(commentKey);
-        
-        // Создаем историю изменений если:
-        // 1. Есть комментарий HR (повторная отправка после доработки)
-        // 2. ИЛИ есть сохраненные оригинальные цели (возврат из статуса "На подписании")
-        const shouldCreateHistory = hasHRComment || localStorage.getItem(originalGoalsKey) !== null;
-        
+        const previousStatus = localStorage.getItem(statusKey);
+
+        const shouldCreateHistory = hasHRComment || previousStatus === 'sign' || previousStatus === 'approved';
+
         if (shouldCreateHistory) {
           if (!hasGoalsChanged()) {
             document.getElementById('warningModal').style.display = 'flex';
             return;
           }
-          // Создаем историю ДО изменения статуса
+          alert('📝 Повторная отправка — создаём историю изменений');
           createChangeHistory();
         } else {
-          // При первой отправке удаляем историю, если она вдруг осталась
-          localStorage.removeItem(historyKey);
+          // ✅ Первая отправка — тоже сохраняем историю, но без сравнения
+          //alert('📝 Первая отправка — сохраняем цели как базовую версию');
+
+          // Собираем текущие цели
+          const forms = document.querySelectorAll('.goal-form');
+          const currentGoals = [];
+          forms.forEach(form => {
+            const goalField = form.querySelector('.goal-field[data-field="goal"]');
+            const criteriaField = form.querySelector('.goal-field[data-field="criteria"]');
+            const dateField = form.querySelector('.goal-date');
+            currentGoals.push({
+              goal: goalField ? goalField.value.trim() : '',
+              criteria: criteriaField ? criteriaField.value.trim() : '',
+              date: dateField ? dateField.value : ''
+            });
+          });
+
+          // Фильтруем пустые
+          const nonEmptyCurrentGoals = currentGoals.filter(g =>
+            g.goal !== '' || g.criteria !== '' || g.date !== ''
+          );
+
+          // Сохраняем как историю
+          const history = {
+            timestamp: new Date().toISOString(),
+            previousGoals: [], // при первой отправке предыдущих нет
+            currentGoals: nonEmptyCurrentGoals
+          };
+          localStorage.setItem(historyKey, JSON.stringify(history));
+
+          // И как оригинал
+          localStorage.setItem(originalGoalsKey, JSON.stringify({
+            goals: nonEmptyCurrentGoals
+          }));
         }
-        
+
         localStorage.setItem(draftKey, JSON.stringify(goalsData));
         localStorage.setItem(statusKey, 'review');
         localStorage.removeItem(commentKey);
@@ -793,8 +1013,9 @@
         window.location.href = 'index.html';
       });
 
-      document.addEventListener('DOMContentLoaded', initGoals);
+      renderGoals();
     </script>
   </main>
 </body>
+
 </html>

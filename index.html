@@ -307,6 +307,9 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding-right: 8px;
     }
 
     .checkbox-item {
@@ -314,11 +317,12 @@
       align-items: center;
       gap: 8px;
       cursor: pointer;
+      padding: 4px 0;
     }
 
     .checkbox-item input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       border: 1px solid #CBD5E1;
       border-radius: 4px;
       cursor: pointer;
@@ -327,6 +331,22 @@
     .checkbox-item label {
       font-size: 14px;
       color: #475569;
+      cursor: pointer;
+    }
+
+    .filter-search {
+      width: 100%;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    
+    .filter-search:focus {
+      outline: none;
+      border-color: #3389F4;
+      box-shadow: 0 0 0 3px rgba(51, 137, 244, 0.1);
     }
 
     .filter-input {
@@ -574,6 +594,23 @@
       font-weight: 500;
       cursor: pointer;
     }
+
+    .close-date {
+      font-size: 14px;
+      color: #64748B;
+    }
+    
+    .close-date.filled {
+      color: #0F172A;
+      font-weight: 500;
+    }
+
+    .search-count {
+      font-size: 12px;
+      color: #64748B;
+      margin-top: 8px;
+      text-align: right;
+    }
   </style>
 </head>
 <body>
@@ -620,7 +657,6 @@
         Добавить фильтр
       </div>
       
-      <!-- Кнопка сброса до черновика (только для руководителя) -->
       <button class="reset-button" id="resetBtn" style="display: flex;">
         <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M1 4V10H7" stroke="#EE4A3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -638,6 +674,7 @@
         </div>
         <div class="filter-content" id="statusContent">
           <div class="filter-group">
+            <input type="text" class="filter-search" id="statusSearch" placeholder="Поиск статусов..." />
             <div class="filter-checkboxes" id="statusFilters">
               <label class="checkbox-item"><input type="checkbox" value="draft"> Черновик</label>
               <label class="checkbox-item"><input type="checkbox" value="review"> На согласовании</label>
@@ -649,6 +686,7 @@
               <label class="checkbox-item"><input type="checkbox" value="failed"> Ис не пройден</label>
               <label class="checkbox-item"><input type="checkbox" value="closed"> Закрыта</label>
             </div>
+            <div class="search-count" id="statusSearchCount"></div>
           </div>
         </div>
       </div>
@@ -660,13 +698,14 @@
         </div>
         <div class="filter-content" id="positionContent">
           <div class="filter-group">
-            <input type="text" class="filter-input" id="positionSearch" placeholder="Поиск должностей..." />
+            <input type="text" class="filter-search" id="positionSearch" placeholder="Поиск должностей..." />
             <div class="filter-checkboxes" id="positionFilters">
               <label class="checkbox-item"><input type="checkbox" value="k2"> Бизнес-аналитик К2</label>
               <label class="checkbox-item"><input type="checkbox" value="k3"> Бизнес-аналитик К3</label>
               <label class="checkbox-item"><input type="checkbox" value="k4"> Бизнес-аналитик К4</label>
               <label class="checkbox-item"><input type="checkbox" value="analyst"> Аналитик</label>
             </div>
+            <div class="search-count" id="positionSearchCount"></div>
           </div>
         </div>
       </div>
@@ -712,14 +751,13 @@
       </div>
     </div>
 
-    <!-- Модальное окно подтверждения сброса -->
     <div class="modal-overlay" id="resetModal">
       <div class="modal-content">
         <div class="modal-header">
           <h3>Сброс целей</h3>
           <button class="close-modal" id="closeResetModal">✕</button>
         </div>
-        <p>Вы уверены, что хотите сбросить цели всех сотрудников до статуса "Черновик"? Это действие нельзя отменить.</p>
+        <p>Вы уверены, что хотите сбросить цели всех сотрудников до статуса "Черновик"? Это действие нельзя отменить. Все сохраненные цели будут удалены.</p>
         <div class="modal-actions">
           <button class="btn-cancel" id="cancelReset">Отмена</button>
           <button class="btn-confirm" id="confirmReset">Сбросить</button>
@@ -749,38 +787,10 @@
 
     <script>
       const employees = [
-        {
-          name: 'Котова Вероника',
-          position: 'Бизнес-аналитик К4',
-          positionCode: 'k4',
-          status: 'draft',
-          endDate: '2026-02-09',
-          closeDate: null
-        },
-        {
-          name: 'Круглов Кирилл',
-          position: 'Бизнес-аналитик К2',
-          positionCode: 'k2',
-          status: 'review',
-          endDate: '2026-03-13',
-          closeDate: null
-        },
-        {
-          name: 'Крылов Кирилл',
-          position: 'Бизнес-аналитик К2',
-          positionCode: 'k2',
-          status: 'failed',
-          endDate: '2025-12-22',
-          closeDate: '2025-12-22'
-        },
-        {
-          name: 'Шевелев Георгий',
-          position: 'Бизнес-аналитик К3',
-          positionCode: 'k3',
-          status: 'passed',
-          endDate: '2025-12-22',
-          closeDate: '2025-12-22'
-        }
+        { name: 'Котова Вероника', position: 'Бизнес-аналитик К4', positionCode: 'k4', status: 'draft', endDate: '2026-02-09', closeDate: null },
+        { name: 'Круглов Кирилл', position: 'Бизнес-аналитик К2', positionCode: 'k2', status: 'review', endDate: '2026-03-13', closeDate: null },
+        { name: 'Крылов Кирилл', position: 'Бизнес-аналитик К2', positionCode: 'k2', status: 'failed', endDate: '2025-12-22', closeDate: '2025-12-22' },
+        { name: 'Шевелев Георгий', position: 'Бизнес-аналитик К3', positionCode: 'k3', status: 'passed', endDate: '2025-12-22', closeDate: '2025-12-22' }
       ];
 
       let currentRole = 'manager';
@@ -793,10 +803,7 @@
         let updatedEmployees = employees.map(emp => {
           const statusKey = `goals-status-${emp.name.replace(/\s+/g, '-')}`;
           const savedStatus = localStorage.getItem(statusKey);
-          if (savedStatus) {
-            return { ...emp, status: savedStatus };
-          }
-          return emp;
+          return savedStatus ? { ...emp, status: savedStatus } : emp;
         });
         
         if (currentRole === 'hr') {
@@ -818,14 +825,19 @@
         noResults.style.display = 'none';
         
         tableBody.innerHTML = updatedEmployees.map(emp => {
-          const closeDate = emp.closeDate ? formatDate(emp.closeDate) : '–';
+          let closeDateDisplay = '–';
+          let closeDateClass = 'close-date';
+          
+          if ((emp.status === 'passed' || emp.status === 'failed') && emp.closeDate) {
+            closeDateDisplay = formatDate(emp.closeDate);
+            closeDateClass += ' filled';
+          }
+          
           const commentKey = `goals-comment-${emp.name.replace(/\s+/g, '-')}`;
           const hasComment = localStorage.getItem(commentKey);
           
-          // Статус с возможным колокольчиком
           let statusDisplay = `<span class="status-badge status-${emp.status}">${getStatusText(emp.status)}`;
           
-          // Добавляем колокольчик только для руководителя, если статус "draft" и есть комментарий
           if (currentRole === 'manager' && emp.status === 'draft' && hasComment) {
             statusDisplay += `
               <span class="tooltip bell-icon">
@@ -840,20 +852,16 @@
           
           statusDisplay += '</span>';
           
-          // Выбираем иконку действия
-          let iconSvg = '';
-          if (emp.status === 'draft' && currentRole === 'manager') {
-            iconSvg = '<svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-          } else {
-            iconSvg = '<svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 12C1 12 5.5 4 12 4C18.5 4 23 12 23 12C23 12 18.5 20 12 20C5.5 20 1 12 1 12Z" stroke="#94A3B8" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="#94A3B8" stroke-width="1.5"/></svg>';
-          }
+          let iconSvg = emp.status === 'draft' && currentRole === 'manager'
+            ? '<svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+            : '<svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 12C1 12 5.5 4 12 4C18.5 4 23 12 23 12C23 12 18.5 20 12 20C5.5 20 1 12 1 12Z" stroke="#94A3B8" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="#94A3B8" stroke-width="1.5"/></svg>';
           
           return `
             <tr class="employee-row" data-status="${emp.status}" data-position="${emp.positionCode}" data-end-date="${emp.endDate}" data-close-date="${emp.closeDate || ''}">
               <td>${emp.name}</td>
               <td>${emp.position}</td>
               <td>${formatDate(emp.endDate)}</td>
-              <td>${closeDate}</td>
+              <td><span class="${closeDateClass}">${closeDateDisplay}</span></td>
               <td>${statusDisplay}</td>
               <td><button class="action-btn" onclick="handleAction('${emp.name}', '${emp.status}')">${iconSvg}</button></td>
             </tr>
@@ -871,141 +879,91 @@
         const showDirect = document.getElementById('directReports').checked;
 
         return employees.filter(emp => {
-          if (statusFilters.length > 0 && !statusFilters.includes(emp.status)) return false;
-          if (positionFilters.length > 0 && !positionFilters.includes(emp.positionCode)) return false;
-          
+          if (statusFilters.length && !statusFilters.includes(emp.status)) return false;
+          if (positionFilters.length && !positionFilters.includes(emp.positionCode)) return false;
           if (endDateFrom && emp.endDate < endDateFrom) return false;
           if (endDateTo && emp.endDate > endDateTo) return false;
-          
-          if (formCloseFrom || formCloseTo) {
-            if (!emp.closeDate) return false;
-            if (formCloseFrom && emp.closeDate < formCloseFrom) return false;
-            if (formCloseTo && emp.closeDate > formCloseTo) return false;
-          }
-          
+          if ((formCloseFrom || formCloseTo) && (!emp.closeDate || (formCloseFrom && emp.closeDate < formCloseFrom) || (formCloseTo && emp.closeDate > formCloseTo))) return false;
           if (showDirect && emp.positionCode !== 'k4') return false;
-          
           return true;
         });
       }
 
       function formatDate(dateString) {
-        if (!dateString) return '–';
-        const [year, month, day] = dateString.split('-');
-        return `${day}.${month}.${year}`;
+        return dateString ? dateString.split('-').reverse().join('.') : '–';
       }
 
       function getStatusText(status) {
-        const statusMap = {
-          'draft': 'Черновик',
-          'review': 'На согласовании',
-          'approved': 'Согласовано',
-          'sign': 'На подписании',
-          'in-progress': 'На выполнении',
-          'rework': 'На доработке',
-          'passed': 'Ис пройден',
-          'failed': 'Ис не пройден',
-          'closed': 'Закрыта'
+        const map = {
+          'draft': 'Черновик', 'review': 'На согласовании', 'approved': 'Согласовано',
+          'sign': 'На подписании', 'in-progress': 'На выполнении', 'rework': 'На доработке',
+          'passed': 'Ис пройден', 'failed': 'Ис не пройден', 'closed': 'Закрыта'
         };
-        return statusMap[status] || status;
+        return map[status] || status;
       }
 
       window.handleAction = function(employeeName, status) {
-        console.log('Переход для:', employeeName, 'статус:', status, 'роль:', currentRole);
-        
         switch(currentRole) {
           case 'manager':
-            if (status === 'draft') {
-              window.location.href = 'edit-goals.html?employee=' + encodeURIComponent(employeeName);
-            } else {
-              window.location.href = 'review-goals.html?employee=' + encodeURIComponent(employeeName) + '&status=' + encodeURIComponent(status) + '&role=manager';
-            }
+            window.location.href = status === 'draft'
+              ? 'edit-goals.html?employee=' + encodeURIComponent(employeeName)
+              : 'review-goals.html?employee=' + encodeURIComponent(employeeName) + '&status=' + encodeURIComponent(status) + '&role=manager';
             break;
-            
           case 'employee':
             window.location.href = 'employee-view.html?employee=' + encodeURIComponent(employeeName) + '&status=' + encodeURIComponent(status);
             break;
-            
           case 'hr':
-            if (status === 'review') {
-              window.location.href = 'hr-review.html?employee=' + encodeURIComponent(employeeName);
-            } else {
-              window.location.href = 'hr-review.html?employee=' + encodeURIComponent(employeeName) + '&view=readonly';
-            }
+            window.location.href = 'hr-review.html?employee=' + encodeURIComponent(employeeName) + (status !== 'review' ? '&view=readonly' : '');
             break;
-            
           case 'superior':
-            // Для вышестоящего руководителя - всегда открываем superior-view.html
             window.location.href = 'superior-view.html?employee=' + encodeURIComponent(employeeName);
             break;
         }
       };
 
-      // Функция сброса всех целей до черновика
+      // ---------- ИСПРАВЛЕННАЯ ФУНКЦИЯ СБРОСА ----------
       function resetAllToDraft() {
         employees.forEach(emp => {
-          const statusKey = `goals-status-${emp.name.replace(/\s+/g, '-')}`;
-          const commentKey = `goals-comment-${emp.name.replace(/\s+/g, '-')}`;
-          const documentKey = `goals-document-${emp.name.replace(/\s+/g, '-')}`;
-          const downloadFlagKey = `goals-downloaded-${emp.name.replace(/\s+/g, '-')}`;
-          const historyKey = `goals-history-${emp.name.replace(/\s+/g, '-')}`;
+          const base = emp.name.replace(/\s+/g, '-');
           
-          // Сбрасываем статус на draft
-          localStorage.setItem(statusKey, 'draft');
+          // Сбрасываем статус
+          localStorage.setItem(`goals-status-${base}`, 'draft');
           
-          // Удаляем все вспомогательные данные
-          localStorage.removeItem(commentKey);
-          localStorage.removeItem(documentKey);
-          localStorage.removeItem(downloadFlagKey);
-          localStorage.removeItem(historyKey);
+          // Создаем пустой draft
+          localStorage.setItem(`goals-draft-${base}`, JSON.stringify({
+            goals: [{ goal: '', criteria: '', date: '' }]
+          }));
+          
+          // Удаляем все временные данные
+          localStorage.removeItem(`goals-comment-${base}`);
+          localStorage.removeItem(`goals-document-${base}`);
+          localStorage.removeItem(`goals-downloaded-${base}`);
+          localStorage.removeItem(`goals-sign-${base}`);
+          localStorage.removeItem(`goals-evaluation-${base}`);
+          
+          // ВАЖНО: Удаляем историю и оригиналы, чтобы при следующей отправке не было старых данных
+          localStorage.removeItem(`goals-history-${base}`);
+          localStorage.removeItem(`goals-original-${base}`);
         });
         
-        // Обновляем таблицу
         renderTable();
         
         alert('Все цели успешно сброшены до статуса "Черновик"');
       }
+      // -------------------------------------------------
 
-      // Обработчики для кнопки сброса
-      const resetBtn = document.getElementById('resetBtn');
-      const resetModal = document.getElementById('resetModal');
-      const closeResetModal = document.getElementById('closeResetModal');
-      const cancelReset = document.getElementById('cancelReset');
-      const confirmReset = document.getElementById('confirmReset');
-
-      resetBtn.addEventListener('click', () => {
-        resetModal.style.display = 'flex';
-      });
-
-      closeResetModal.addEventListener('click', () => {
-        resetModal.style.display = 'none';
-      });
-
-      cancelReset.addEventListener('click', () => {
-        resetModal.style.display = 'none';
-      });
-
-      confirmReset.addEventListener('click', () => {
-        resetAllToDraft();
-        resetModal.style.display = 'none';
-      });
-
-      window.addEventListener('click', (e) => {
-        if (e.target === resetModal) {
-          resetModal.style.display = 'none';
-        }
-      });
+      document.getElementById('resetBtn')?.addEventListener('click', () => document.getElementById('resetModal').style.display = 'flex');
+      document.getElementById('closeResetModal')?.addEventListener('click', () => document.getElementById('resetModal').style.display = 'none');
+      document.getElementById('cancelReset')?.addEventListener('click', () => document.getElementById('resetModal').style.display = 'none');
+      document.getElementById('confirmReset')?.addEventListener('click', () => { resetAllToDraft(); document.getElementById('resetModal').style.display = 'none'; });
+      window.addEventListener('click', (e) => { if (e.target === document.getElementById('resetModal')) document.getElementById('resetModal').style.display = 'none'; });
 
       document.querySelectorAll('.role-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           currentRole = btn.dataset.role;
-          
-          if (currentRole === 'hr') {
-            currentHRTab = 'review';
-          }
-          
+          if (currentRole === 'hr') currentHRTab = 'review';
           updateUIForRole(currentRole);
           renderTable();
         });
@@ -1020,147 +978,96 @@
         switch(role) {
           case 'manager':
             title.textContent = 'Цели моей команды';
-            tabs.innerHTML = `
-              <div class="tab active" data-tab="team">Цели моей команды</div>
-              <div class="tab" data-tab="my">Мои цели</div>
-            `;
+            tabs.innerHTML = '<div class="tab active" data-tab="team">Цели моей команды</div><div class="tab" data-tab="my">Мои цели</div>';
             filterBar.style.display = 'flex';
-            resetBtn.style.display = 'flex';
+            if (resetBtn) resetBtn.style.display = 'flex';
             break;
-            
           case 'hr':
             title.textContent = 'Цели на согласовании';
-            tabs.innerHTML = `
-              <div class="tab ${currentHRTab === 'review' ? 'active' : ''}" data-tab="review">Цели на согласовании</div>
-              <div class="tab ${currentHRTab === 'all' ? 'active' : ''}" data-tab="all">Все цели</div>
-            `;
+            tabs.innerHTML = `<div class="tab ${currentHRTab === 'review' ? 'active' : ''}" data-tab="review">Цели на согласовании</div><div class="tab ${currentHRTab === 'all' ? 'active' : ''}" data-tab="all">Все цели</div>`;
             filterBar.style.display = 'flex';
-            resetBtn.style.display = 'none';
-            
-            setTimeout(() => {
-              document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                  tab.classList.add('active');
-                  currentHRTab = tab.dataset.tab;
-                  renderTable();
-                });
-              });
-            }, 100);
+            if (resetBtn) resetBtn.style.display = 'none';
+            setTimeout(() => document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => {
+              document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+              tab.classList.add('active');
+              currentHRTab = tab.dataset.tab;
+              renderTable();
+            })), 100);
             break;
-            
           case 'superior':
             title.textContent = 'Цели подразделения';
-            tabs.innerHTML = `
-              <div class="tab active" data-tab="subordinates">Цели подчиненных</div>
-              <div class="tab" data-tab="reports">Отчеты</div>
-            `;
+            tabs.innerHTML = '<div class="tab active" data-tab="subordinates">Цели подчиненных</div><div class="tab" data-tab="reports">Отчеты</div>';
             filterBar.style.display = 'flex';
-            resetBtn.style.display = 'none';
+            if (resetBtn) resetBtn.style.display = 'none';
             break;
-            
           case 'employee':
             title.textContent = 'Мои цели';
-            tabs.innerHTML = `
-              <div class="tab active" data-tab="my">Мои цели</div>
-            `;
+            tabs.innerHTML = '<div class="tab active" data-tab="my">Мои цели</div>';
             filterBar.style.display = 'none';
-            resetBtn.style.display = 'none';
+            if (resetBtn) resetBtn.style.display = 'none';
             break;
         }
       }
 
-      const filterBtn = document.getElementById('filterBtn');
-      const filterPanel = document.getElementById('filterPanel');
-      const applyFilters = document.getElementById('applyFilters');
-      const clearFilters = document.getElementById('clearFilters');
-
-      filterBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        filterPanel.style.display = 'block';
-      });
-
-      document.addEventListener('click', (e) => {
-        if (!filterPanel.contains(e.target) && e.target !== filterBtn) {
-          filterPanel.style.display = 'none';
-        }
-      });
-
-      document.querySelectorAll('.filter-header').forEach(header => {
-        header.addEventListener('click', () => {
-          const content = header.nextElementSibling;
-          const chevron = header.querySelector('.chevron-down');
-          content.classList.toggle('show');
-          chevron.classList.toggle('rotated');
-        });
-      });
-
-      applyFilters.addEventListener('click', () => {
-        renderTable();
-        filterPanel.style.display = 'none';
-      });
-
-      clearFilters.addEventListener('click', () => {
+      document.getElementById('filterBtn')?.addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('filterPanel').style.display = 'block'; });
+      document.addEventListener('click', (e) => { if (!document.getElementById('filterPanel').contains(e.target) && e.target !== document.getElementById('filterBtn')) document.getElementById('filterPanel').style.display = 'none'; });
+      document.querySelectorAll('.filter-header').forEach(header => header.addEventListener('click', () => {
+        header.nextElementSibling.classList.toggle('show');
+        header.querySelector('.chevron-down').classList.toggle('rotated');
+      }));
+      document.getElementById('applyFilters')?.addEventListener('click', () => { renderTable(); document.getElementById('filterPanel').style.display = 'none'; });
+      document.getElementById('clearFilters')?.addEventListener('click', () => {
         document.querySelectorAll('#statusFilters input, #positionFilters input').forEach(el => el.checked = false);
-        document.getElementById('endDateFrom').value = '';
-        document.getElementById('endDateTo').value = '';
-        document.getElementById('formCloseFrom').value = '';
-        document.getElementById('formCloseTo').value = '';
+        ['endDateFrom', 'endDateTo', 'formCloseFrom', 'formCloseTo'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('directReports').checked = false;
         renderTable();
-        filterPanel.style.display = 'none';
+        document.getElementById('filterPanel').style.display = 'none';
       });
 
-      document.getElementById('positionSearch').addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase();
-        document.querySelectorAll('#positionFilters .checkbox-item').forEach(item => {
-          const label = item.querySelector('label').textContent.toLowerCase();
-          item.style.display = label.includes(query) ? 'flex' : 'none';
+      // Поиск в фильтрах
+      function setupFilterSearch(inputId, containerId, countId) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        input.addEventListener('input', function() {
+          const query = this.value.toLowerCase().trim();
+          const items = document.querySelectorAll(`#${containerId} .checkbox-item`);
+          let visible = 0;
+          items.forEach(item => {
+            const label = item.querySelector('label').textContent.toLowerCase();
+            if (label.includes(query)) {
+              item.style.display = 'flex';
+              visible++;
+            } else item.style.display = 'none';
+          });
+          const countEl = document.getElementById(countId);
+          if (countEl) countEl.textContent = query ? `Найдено: ${visible}` : '';
         });
-      });
+      }
+      setupFilterSearch('statusSearch', 'statusFilters', 'statusSearchCount');
+      setupFilterSearch('positionSearch', 'positionFilters', 'positionSearchCount');
 
       let sortState = 0;
-      document.getElementById('statusSortIcon').addEventListener('click', () => {
+      document.getElementById('statusSortIcon')?.addEventListener('click', () => {
         sortState = (sortState + 1) % 3;
-        const icon = document.getElementById('statusSortIcon');
-        icon.textContent = sortState === 0 ? '↓' : (sortState === 1 ? '↑' : '↓');
+        document.getElementById('statusSortIcon').textContent = sortState === 0 ? '↓' : (sortState === 1 ? '↑' : '↓');
         sortTable(sortState);
       });
 
       function sortTable(state) {
+        if (state === 0) { renderTable(); return; }
         const tbody = document.getElementById('tableBody');
         const rows = Array.from(tbody.children);
-        
-        if (state === 0) {
-          renderTable();
-          return;
-        }
-        
-        const statusOrder = ['draft', 'review', 'approved', 'sign', 'in-progress', 'rework', 'passed', 'failed', 'closed'];
-        
+        const order = ['draft', 'review', 'approved', 'sign', 'in-progress', 'rework', 'passed', 'failed', 'closed'];
         rows.sort((a, b) => {
-          const aStatus = a.dataset.status;
-          const bStatus = b.dataset.status;
-          const aIndex = statusOrder.indexOf(aStatus);
-          const bIndex = statusOrder.indexOf(bStatus);
-          
-          return state === 1 ? aIndex - bIndex : bIndex - aIndex;
+          const aIdx = order.indexOf(a.dataset.status), bIdx = order.indexOf(b.dataset.status);
+          return state === 1 ? aIdx - bIdx : bIdx - aIdx;
         });
-        
         tbody.innerHTML = '';
         rows.forEach(row => tbody.appendChild(row));
       }
 
-      document.addEventListener('DOMContentLoaded', () => {
-        updateUIForRole('manager');
-        renderTable();
-      });
-
-      window.addEventListener('storage', (e) => {
-        if (e.key && e.key.startsWith('goals-status-')) {
-          renderTable();
-        }
-      });
+      document.addEventListener('DOMContentLoaded', () => { updateUIForRole('manager'); renderTable(); });
+      window.addEventListener('storage', (e) => { if (e.key?.startsWith('goals-status-')) renderTable(); });
     </script>
   </main>
 </body>
