@@ -446,6 +446,31 @@
     .status-failed { background: #FCE7F3; color: #EE4A3F; }
     .status-closed { background: #F1F5F9; color: #64748B; }
 
+    .process-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 4px;
+    }
+
+    .process-indicator-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background-color: #FF8D28;
+      display: inline-block;
+    }
+
+    .process-link-btn {
+      border: none;
+      background: transparent;
+      padding: 0 4px;
+      font-size: 12px;
+      color: #2563EB;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
     .bell-icon {
       width: 16px;
       height: 16px;
@@ -611,6 +636,229 @@
       margin-top: 8px;
       text-align: right;
     }
+
+    /* Модалка процессов в реестре */
+    .modal-overlay-process {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .modal-content-process {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 24px;
+      gap: 20px;
+      position: relative;
+      width: 1112px;
+      max-width: 95%;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #FFFFFF;
+      box-shadow: 0px 2px 35px rgba(148, 163, 184, 0.12);
+      border-radius: 10px;
+    }
+
+    .modal-header-process {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      height: 28px;
+    }
+
+    .modal-header-process h3 {
+      font-weight: 700;
+      font-size: 24px;
+      line-height: 28px;
+      color: #0F172A;
+      margin: 0;
+    }
+
+    .close-modal-process {
+      width: 28px;
+      height: 28px;
+      background: #F1F5F9;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .close-modal-process::before,
+    .close-modal-process::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 1.5px;
+      background: #94A3B8;
+    }
+
+    .close-modal-process::before {
+      transform: rotate(45deg);
+    }
+
+    .close-modal-process::after {
+      transform: rotate(-45deg);
+    }
+
+    .processes-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 1px;
+      background: #E2E8F0;
+      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .process-item {
+      display: flex;
+      flex-direction: column;
+      background: #FFFFFF;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    .process-item:last-child {
+      border-bottom: none;
+    }
+
+    .process-header {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 13px 17px 12px 13px;
+      gap: 16px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .process-header:hover {
+      background: #F8FAFC;
+    }
+
+    .process-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 0;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .process-title-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 0;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .process-name {
+      font-weight: 500;
+      font-size: 16px;
+      color: #0F172A;
+    }
+
+    .process-status {
+      font-weight: 500;
+      font-size: 16px;
+    }
+
+    .process-status.review {
+      color: #FF8D28;
+    }
+
+    .process-status.rejected {
+      color: #FF383C;
+    }
+
+    .process-status.completed {
+      color: #34C759;
+    }
+
+    .process-status.active {
+      color: #2563EB;
+    }
+
+    .process-reason {
+      font-weight: 500;
+      font-size: 16px;
+      text-align: right;
+      color: #000000;
+      margin-left: auto;
+    }
+
+    .process-link {
+      font-weight: 500;
+      font-size: 16px;
+      color: #0066CC;
+      cursor: pointer;
+      min-width: 120px;
+      text-align: right;
+    }
+
+    .process-link:hover {
+      text-decoration: underline;
+    }
+
+    .process-details {
+      display: none;
+      flex-direction: column;
+      padding: 0 13px 13px 13px;
+      gap: 16px;
+      border-top: 1px solid #E2E8F0;
+    }
+
+    .process-details.expanded {
+      display: flex;
+    }
+
+    .details-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 16px 0;
+    }
+
+    .details-label {
+      font-weight: 500;
+      font-size: 14px;
+      color: #94A3B8;
+    }
+
+    .details-content {
+      font-weight: 400;
+      font-size: 14px;
+      color: #475569;
+      background: #F8FAFC;
+      padding: 12px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+    }
+
+    .empty-processes {
+      padding: 40px;
+      text-align: center;
+      color: #64748B;
+      font-size: 16px;
+      background: #FFFFFF;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
@@ -761,6 +1009,19 @@
       </div>
     </div>
 
+    <!-- Модалка процессов из реестра -->
+    <div class="modal-overlay-process" id="registryProcessesModal">
+      <div class="modal-content-process">
+        <div class="modal-header-process">
+          <h3>Процессы</h3>
+          <button class="close-modal-process" id="closeRegistryProcessesModal"></button>
+        </div>
+        <div class="processes-container" id="registryProcessesContainer">
+          <div class="empty-processes">Нет активных процессов</div>
+        </div>
+      </div>
+    </div>
+
     <div class="table-container">
       <table class="employee-table">
         <thead>
@@ -806,11 +1067,12 @@
           if (currentHRTab === 'review') {
             updatedEmployees = updatedEmployees.filter(emp => emp.status === 'review');
           }
-        } else if (currentRole === 'employee') {
-          updatedEmployees = updatedEmployees.filter(emp => emp.name === 'Котова Вероника');
         }
         
-        updatedEmployees = applyFilterPanelFilters(updatedEmployees);
+        // Фильтры не применяем для роли сотрудника, чтобы он всегда видел всех сотрудников
+        if (currentRole !== 'employee') {
+          updatedEmployees = applyFilterPanelFilters(updatedEmployees);
+        }
         
         if (updatedEmployees.length === 0) {
           noResults.style.display = 'block';
@@ -832,7 +1094,16 @@
           const commentKey = `goals-comment-${emp.name.replace(/\s+/g, '-')}`;
           const hasComment = localStorage.getItem(commentKey);
           
-          let statusDisplay = `<span class="status-badge status-${emp.status}">${getStatusText(emp.status)}`;
+          const hasActiveProcess = checkActiveProcess(emp.name);
+
+          // Базовый текст статуса
+          let statusText = getStatusText(emp.status);
+          // Для руководителя, когда цели на согласовании после изменений, показываем "На выполнении"
+          if (currentRole === 'manager' && emp.status === 'review' && hasActiveProcess) {
+            statusText = 'На выполнении';
+          }
+
+          let statusDisplay = `<span class="status-badge status-${emp.status}">${statusText}`;
           
           if (currentRole === 'manager' && emp.status === 'draft' && hasComment) {
             statusDisplay += `
@@ -843,6 +1114,20 @@
                 </svg>
                 <span class="tooltip-text">Цели были возвращены HR на доработку</span>
               </span>
+            `;
+          }
+
+          if (hasActiveProcess && currentRole !== 'employee') {
+            statusDisplay += `
+              <span class="tooltip process-indicator">
+                <span class="process-indicator-dot"></span>
+                <span class="tooltip-text">
+                  Есть активный процесс по целям (на согласовании у HR или отклонён)
+                </span>
+              </span>
+              <button class="process-link-btn" type="button" onclick="openProcessesFromRegistry('${emp.name}', '${emp.status}')">
+                Процессы
+              </button>
             `;
           }
           
@@ -863,6 +1148,16 @@
             </tr>
           `;
         }).join('');
+      }
+
+      function checkActiveProcess(employeeName) {
+        const key = employeeName.replace(/\s+/g, '-');
+        const history = localStorage.getItem(`goals-history-${key}`);
+        if (history) {
+          const data = JSON.parse(history);
+          return data.status === 'review' || data.status === 'rejected' || data.status === 'completed';
+        }
+        return false;
       }
 
       function applyFilterPanelFilters(employees) {
@@ -901,12 +1196,24 @@
       window.handleAction = function(employeeName, status) {
         switch(currentRole) {
           case 'manager':
-            window.location.href = status === 'draft'
-              ? 'edit-goals.html?employee=' + encodeURIComponent(employeeName)
-              : 'review-goals.html?employee=' + encodeURIComponent(employeeName) + '&status=' + encodeURIComponent(status) + '&role=manager';
+            if (status === 'draft') {
+              window.location.href = 'edit-goals.html?employee=' + encodeURIComponent(employeeName);
+              break;
+            }
+            // Если цели формально "На согласовании" из-за процесса изменений, руководителю нужно показывать "На выполнении"
+            if (status === 'review' && checkActiveProcess(employeeName)) {
+              window.location.href = 'review-goals.html?employee=' + encodeURIComponent(employeeName) + '&status=in-progress&role=manager';
+              break;
+            }
+            window.location.href = 'review-goals.html?employee=' + encodeURIComponent(employeeName) + '&status=' + encodeURIComponent(status) + '&role=manager';
             break;
           case 'employee':
-            window.location.href = 'employee-view.html?employee=' + encodeURIComponent(employeeName) + '&status=' + encodeURIComponent(status);
+            // Сотрудник видит цели только в статусах "На подписании", "На выполнении", "ИС пройден", "ИС не пройден"
+            if (status === 'sign' || status === 'in-progress' || status === 'passed' || status === 'failed') {
+              window.location.href = 'employee-view.html?employee=' + encodeURIComponent(employeeName) + '&status=' + encodeURIComponent(status);
+            } else {
+              alert('Цели находятся на согласовании или в черновике. Доступ появится после подписания документа.');
+            }
             break;
           case 'hr':
             window.location.href = 'hr-review.html?employee=' + encodeURIComponent(employeeName) + (status !== 'review' ? '&view=readonly' : '');
@@ -914,6 +1221,155 @@
           case 'superior':
             window.location.href = 'superior-view.html?employee=' + encodeURIComponent(employeeName);
             break;
+        }
+      };
+
+      let registryProcessesEmployee = null;
+
+      window.openProcessesFromRegistry = function(employeeName, status) {
+        registryProcessesEmployee = { name: employeeName, status };
+        openRegistryProcessesModal();
+      };
+
+      function loadRegistryProcesses() {
+        if (!registryProcessesEmployee) return [];
+
+        const name = registryProcessesEmployee.name;
+        const status = registryProcessesEmployee.status;
+        const key = name.replace(/\s+/g, '-');
+        const statusKey = `goals-status-${key}`;
+        const historyKey = `goals-history-${key}`;
+
+        const processes = [];
+
+        const currentStatus = localStorage.getItem(statusKey) || status;
+        if (currentStatus === 'in-progress') {
+          processes.push({
+            id: 'active',
+            type: 'Выполнение целей',
+            status: 'active',
+            timestamp: new Date().toISOString(),
+            managerComment: ''
+          });
+        }
+
+        const historyRaw = localStorage.getItem(historyKey);
+        if (historyRaw) {
+          const h = JSON.parse(historyRaw);
+          processes.push({
+            id: 'main',
+            type: 'Изменение целей',
+            status: h.status || 'review',
+            timestamp: h.timestamp,
+            managerComment: h.managerComment || 'Инициирован процесс изменения целей'
+          });
+        }
+
+        return processes.sort((a, b) => {
+          if (a.id === 'active') return -1;
+          if (b.id === 'active') return 1;
+          return new Date(b.timestamp || 0) - new Date(a.timestamp || 0);
+        });
+      }
+
+      function renderRegistryProcesses(processes) {
+        const container = document.getElementById('registryProcessesContainer');
+        if (!processes.length) {
+          container.innerHTML = '<div class="empty-processes">Нет активных процессов</div>';
+          return;
+        }
+
+        let html = '<div class="processes-container">';
+
+        processes.forEach((process, index) => {
+          let statusText = '';
+          let statusClass = '';
+          if (process.status === 'review') {
+            statusText = 'На согласовании у HR';
+            statusClass = 'review';
+          } else if (process.status === 'rejected') {
+            statusText = 'Отклонен HR';
+            statusClass = 'rejected';
+          } else if (process.status === 'completed') {
+            statusText = 'Успешно завершено';
+            statusClass = 'completed';
+          } else if (process.status === 'active') {
+            statusText = 'Активен';
+            statusClass = 'active';
+          } else {
+            statusText = 'Неизвестно';
+          }
+
+          const reasonText = process.managerComment || 'Нет комментария';
+          const shortReason = process.id === 'active'
+            ? reasonText
+            : (reasonText.substring(0, 60) + (reasonText.length > 60 ? '...' : ''));
+
+          html += `
+            <div class="process-item">
+              <div class="process-header" onclick="toggleRegistryProcessDetails(${index})">
+                <div class="process-info">
+                  <div class="process-title-row">
+                    <span class="process-name">${process.type}</span>
+                    <span class="process-status ${statusClass}">${statusText}</span>
+                  </div>
+                </div>
+                <div class="process-reason">${shortReason}</div>
+                <div class="process-link" onclick="event.stopPropagation(); openRegistryProcess('${process.id}', '${process.status}')">Открыть процесс →</div>
+              </div>
+              <div class="process-details" id="registry-process-details-${index}">
+                <div class="details-section">
+                  <div class="details-label">Комментарий руководителя</div>
+                  <div class="details-content">${reasonText}</div>
+                </div>
+                ${process.timestamp ? `
+                <div class="details-section">
+                  <div class="details-label">Дата создания</div>
+                  <div class="details-content">${new Date(process.timestamp).toLocaleString('ru-RU')}</div>
+                </div>` : ''}
+              </div>
+            </div>
+          `;
+        });
+
+        html += '</div>';
+        container.innerHTML = html;
+      }
+
+      function openRegistryProcessesModal() {
+        const processes = loadRegistryProcesses();
+        renderRegistryProcesses(processes);
+        document.getElementById('registryProcessesModal').style.display = 'flex';
+      }
+
+      window.toggleRegistryProcessDetails = function(index) {
+        const details = document.getElementById(`registry-process-details-${index}`);
+        if (!details) return;
+        const header = details.previousElementSibling;
+        if (details.classList.contains('expanded')) {
+          details.classList.remove('expanded');
+          header.classList.remove('expanded');
+        } else {
+          details.classList.add('expanded');
+          header.classList.add('expanded');
+        }
+      };
+
+      window.openRegistryProcess = function(processId, status) {
+        if (!registryProcessesEmployee) return;
+        const name = registryProcessesEmployee.name;
+
+        // Закрываем модалку перед переходом
+        document.getElementById('registryProcessesModal').style.display = 'none';
+
+        if (status === 'active') {
+          window.location.href = `review-goals.html?employee=${encodeURIComponent(name)}&status=in-progress&role=manager`;
+        } else if (status === 'review') {
+          window.location.href = `review-process.html?employee=${encodeURIComponent(name)}&process=${encodeURIComponent(processId)}&mode=review`;
+        } else if (status === 'rejected') {
+          window.location.href = `review-process.html?employee=${encodeURIComponent(name)}&process=${encodeURIComponent(processId)}&mode=rejected`;
+        } else if (status === 'completed') {
+          window.location.href = `review-process.html?employee=${encodeURIComponent(name)}&process=${encodeURIComponent(processId)}&mode=completed`;
         }
       };
 
@@ -936,6 +1392,7 @@
           localStorage.removeItem(`goals-downloaded-${base}`);
           localStorage.removeItem(`goals-sign-${base}`);
           localStorage.removeItem(`goals-evaluation-${base}`);
+          localStorage.removeItem(`goals-manager-rework-${base}`);
           
           // ВАЖНО: Удаляем историю и оригиналы, чтобы при следующей отправке не было старых данных
           localStorage.removeItem(`goals-history-${base}`);
@@ -953,6 +1410,15 @@
       document.getElementById('cancelReset')?.addEventListener('click', () => document.getElementById('resetModal').style.display = 'none');
       document.getElementById('confirmReset')?.addEventListener('click', () => { resetAllToDraft(); document.getElementById('resetModal').style.display = 'none'; });
       window.addEventListener('click', (e) => { if (e.target === document.getElementById('resetModal')) document.getElementById('resetModal').style.display = 'none'; });
+      document.getElementById('closeRegistryProcessesModal')?.addEventListener('click', () => {
+        document.getElementById('registryProcessesModal').style.display = 'none';
+      });
+      window.addEventListener('click', (e) => {
+        const modal = document.getElementById('registryProcessesModal');
+        if (e.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
 
       document.querySelectorAll('.role-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -960,6 +1426,16 @@
           btn.classList.add('active');
           currentRole = btn.dataset.role;
           if (currentRole === 'hr') currentHRTab = 'review';
+          // При переключении на роль сотрудника очищаем фильтры
+          if (currentRole === 'employee') {
+            document.querySelectorAll('#statusFilters input, #positionFilters input').forEach(el => el.checked = false);
+            ['endDateFrom', 'endDateTo', 'formCloseFrom', 'formCloseTo'].forEach(id => {
+              const el = document.getElementById(id);
+              if (el) el.value = '';
+            });
+            const direct = document.getElementById('directReports');
+            if (direct) direct.checked = false;
+          }
           updateUIForRole(currentRole);
           renderTable();
         });
@@ -1042,6 +1518,7 @@
 
       document.addEventListener('DOMContentLoaded', () => { updateUIForRole('manager'); renderTable(); });
       window.addEventListener('storage', (e) => { if (e.key?.startsWith('goals-status-')) renderTable(); });
+      
     </script>
   </main>
 </body>

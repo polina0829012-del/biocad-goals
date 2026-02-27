@@ -920,50 +920,15 @@
         const hasHRComment = localStorage.getItem(commentKey);
         const previousStatus = localStorage.getItem(statusKey);
 
-        const shouldCreateHistory = hasHRComment || previousStatus === 'sign' || previousStatus === 'approved';
+        const shouldCreateHistory = hasHRComment || previousStatus === 'in-progress' || previousStatus === 'sign';
 
         if (shouldCreateHistory) {
+          // Процесс создаётся только при изменении уже подписанных целей (статус "На выполнении")
           if (!hasGoalsChanged()) {
             document.getElementById('warningModal').style.display = 'flex';
             return;
           }
-          alert('📝 Повторная отправка — создаём историю изменений');
           createChangeHistory();
-        } else {
-          // ✅ Первая отправка — тоже сохраняем историю, но без сравнения
-          //alert('📝 Первая отправка — сохраняем цели как базовую версию');
-
-          // Собираем текущие цели
-          const forms = document.querySelectorAll('.goal-form');
-          const currentGoals = [];
-          forms.forEach(form => {
-            const goalField = form.querySelector('.goal-field[data-field="goal"]');
-            const criteriaField = form.querySelector('.goal-field[data-field="criteria"]');
-            const dateField = form.querySelector('.goal-date');
-            currentGoals.push({
-              goal: goalField ? goalField.value.trim() : '',
-              criteria: criteriaField ? criteriaField.value.trim() : '',
-              date: dateField ? dateField.value : ''
-            });
-          });
-
-          // Фильтруем пустые
-          const nonEmptyCurrentGoals = currentGoals.filter(g =>
-            g.goal !== '' || g.criteria !== '' || g.date !== ''
-          );
-
-          // Сохраняем как историю
-          const history = {
-            timestamp: new Date().toISOString(),
-            previousGoals: [], // при первой отправке предыдущих нет
-            currentGoals: nonEmptyCurrentGoals
-          };
-          localStorage.setItem(historyKey, JSON.stringify(history));
-
-          // И как оригинал
-          localStorage.setItem(originalGoalsKey, JSON.stringify({
-            goals: nonEmptyCurrentGoals
-          }));
         }
 
         localStorage.setItem(draftKey, JSON.stringify(goalsData));

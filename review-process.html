@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Просмотр процесса</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      display: flex;
+      background: #FFFFFF;
+      color: #0F172A;
+    }
+
+    .sidebar {
+      width: 280px;
+      height: 100vh;
+      background: #262626;
+      padding: 0;
+      position: fixed;
+      left: 0;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar .logo {
+      color: white;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: -0.3px;
+      text-transform: uppercase;
+    }
+
+    .main-content {
+      margin-left: 280px;
+      width: calc(100% - 280px);
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-content {
+      display: flex;
+      flex-direction: column;
+      padding: 40px 200px 60px 40px;
+      gap: 40px;
+      width: 100%;
+    }
+
+    .page-title {
+      font-family: 'Biocad Display', sans-serif;
+      font-weight: 700;
+      font-size: 40px;
+      line-height: 42px;
+      color: #0F172A;
+      margin-bottom: 20px;
+    }
+
+    .employee-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      min-width: 250px;
+    }
+
+    .info-item .label {
+      font-size: 16px;
+      font-weight: 500;
+      color: #94A3B8;
+      margin-bottom: 4px;
+    }
+
+    .info-item .value {
+      font-size: 16px;
+      font-weight: 500;
+      color: #0F172A;
+    }
+
+    .process-status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-left: 12px;
+    }
+
+    .badge-review {
+      background: #E7F2FF;
+      color: #FF8D28;
+    }
+
+    .badge-rejected {
+      background: #FCE7F3;
+      color: #FF383C;
+    }
+
+    .badge-completed {
+      background: #D9F2E7;
+      color: #34C759;
+    }
+
+    .process-message {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+      gap: 12px;
+      width: 100%;
+      background: #F8FAFC;
+      border-radius: 12px;
+      margin-bottom: 40px;
+      border-left: 4px solid;
+    }
+
+    .process-message.review {
+      border-left-color: #FF8D28;
+    }
+
+    .process-message.rejected {
+      border-left-color: #FF383C;
+    }
+
+    .process-message.completed {
+      border-left-color: #34C759;
+    }
+
+    .process-message .title {
+      font-family: 'Inter';
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .process-message.review .title {
+      color: #FF8D28;
+    }
+
+    .process-message.rejected .title {
+      color: #FF383C;
+    }
+
+    .process-message.completed .title {
+      color: #34C759;
+    }
+
+    .process-message .text {
+      font-family: 'Inter';
+      font-weight: 400;
+      font-size: 14px;
+      color: #475569;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    .comparison-section {
+      margin-bottom: 40px;
+    }
+
+    .comparison-title {
+      font-weight: 700;
+      font-size: 20px;
+      color: #0F172A;
+      margin-bottom: 20px;
+    }
+
+    .split-view {
+      display: flex;
+      gap: 20px;
+      margin-top: 16px;
+    }
+
+    .old-version,
+    .new-version {
+      flex: 1;
+      background: #F8FAFC;
+      padding: 20px;
+      border-radius: 16px;
+      position: relative;
+    }
+
+    .old-version::before {
+      content: "Текущая версия";
+      position: absolute;
+      top: -10px;
+      left: 16px;
+      background: #64748B;
+      color: white;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .new-version::before {
+      content: "Предлагаемые изменения";
+      position: absolute;
+      top: -10px;
+      left: 16px;
+      background: #2E9264;
+      color: white;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .goal-card-process {
+      background: #FFFFFF;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid #E2E8F0;
+    }
+
+    .goal-card-process:last-child {
+      margin-bottom: 0;
+    }
+
+    .goal-header-process {
+      font-weight: 700;
+      font-size: 18px;
+      color: #1E293B;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    .goal-field-process {
+      margin-bottom: 12px;
+    }
+
+    .goal-field-label-process {
+      font-size: 12px;
+      color: #64748B;
+      margin-bottom: 4px;
+    }
+
+    .goal-field-value-process {
+      font-size: 14px;
+      padding: 8px;
+      background: #F8FAFC;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .goal-field-value-process.added {
+      background: #D9F2E7;
+      color: #2E9264;
+    }
+
+    .goal-field-value-process.removed {
+      background: #FCE7F3;
+      color: #BE185D;
+      text-decoration: line-through;
+    }
+
+    .comment-section-process {
+      background: #F8FAFC;
+      padding: 16px;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+
+    .comment-label-process {
+      font-size: 14px;
+      font-weight: 500;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    .comment-text-process {
+      font-size: 14px;
+      color: #0F172A;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 100px;
+      justify-content: center;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-back {
+      background: #FFFFFF;
+      border: 1px solid #3389F4;
+      color: #3389F4;
+    }
+
+    .btn-return {
+      background: #FFFFFF;
+      border: 1px solid #8B5CF6;
+      color: #8B5CF6;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      padding: 20px 40px;
+      gap: 8px;
+      background: #F8FAFC;
+      border-top: 1px solid #E2E8F0;
+      margin-top: auto;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 89.69px;
+      height: 32px;
+    }
+
+    .footer-logo span {
+      color: #171717;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+    }
+
+    .footer-text {
+      color: #94A3B8;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <aside class="sidebar">
+    <div class="logo">BIOCAD</div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-content">
+      <h1 class="page-title" id="pageTitle">Просмотр процесса изменения целей</h1>
+
+      <div class="employee-info">
+        <div class="info-item">
+          <div class="label">Сотрудник</div>
+          <div class="value" id="employeeName">Котова Вероника</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Статус процесса</div>
+          <div class="value" id="processStatus"></div>
+        </div>
+        <div class="info-item">
+          <div class="label">Дата создания</div>
+          <div class="value" id="processDate"></div>
+        </div>
+      </div>
+
+      <div class="process-message" id="processMessage">
+        <div class="title" id="messageTitle"></div>
+        <div class="text" id="messageText"></div>
+      </div>
+
+      <div class="comparison-section">
+        <div class="comparison-title">Сравнение версий целей</div>
+        <div class="split-view">
+          <div class="old-version" id="oldVersion"></div>
+          <div class="new-version" id="newVersion"></div>
+        </div>
+      </div>
+
+      <div class="comment-section-process" id="commentSection">
+        <div class="comment-label-process">Комментарий руководителя</div>
+        <div class="comment-text-process" id="managerComment"></div>
+      </div>
+
+      <div class="button-group">
+        <div class="left-buttons">
+          <button class="btn btn-back" id="backBtn">Назад</button>
+        </div>
+        <div class="right-buttons">
+          <button class="btn btn-return" id="returnBtn" style="display: none;">Перейти к подписанным целям</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-logo">
+        <span>BIOCAD</span>
+      </div>
+      <div class="footer-text">© 2016 - 2023. Все права защищены</div>
+    </footer>
+
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const employeeName = urlParams.get('employee') || 'Котова Вероника';
+      const processId = urlParams.get('process') || 'main';
+      const mode = urlParams.get('mode') || 'review'; // review, rejected, completed
+      const employeeKey = employeeName.replace(/\s+/g, '-');
+
+      document.getElementById('employeeName').textContent = employeeName;
+
+      const historyKey = `goals-history-${employeeKey}`;
+      const signedGoalsKey = `goals-signed-${employeeKey}`;
+
+      // Загружаем данные процесса
+      const historyData = JSON.parse(localStorage.getItem(historyKey));
+
+      if (!historyData) {
+        alert('Данные процесса не найдены');
+        window.location.href = 'index.html';
+      }
+
+      // Устанавливаем статус
+      let statusText = '';
+      let statusClass = '';
+      let messageTitle = '';
+      let messageText = '';
+
+      if (mode === 'review') {
+        statusText = 'На согласовании у HR';
+        statusClass = 'badge-review';
+        messageTitle = 'Процесс на согласовании';
+        messageText = 'Изменения целей находятся на рассмотрении у HR. Вы можете просмотреть предлагаемые изменения.';
+        document.getElementById('returnBtn').style.display = 'block';
+      } else if (mode === 'rejected') {
+        statusText = 'Отклонен HR';
+        statusClass = 'badge-rejected';
+        messageTitle = 'Процесс отклонен';
+        messageText = 'HR отклонил предложенные изменения. Вы можете вернуться к подписанным целям.';
+        document.getElementById('returnBtn').style.display = 'block';
+      } else if (mode === 'completed') {
+        statusText = 'Успешно завершено';
+        statusClass = 'badge-completed';
+        messageTitle = 'Процесс успешно завершен';
+        messageText = 'Изменения были согласованы и подписаны. Теперь это действующая версия целей.';
+        document.getElementById('returnBtn').style.display = 'none';
+      }
+
+      document.getElementById('processStatus').innerHTML = `<span class="process-status-badge ${statusClass}">${statusText}</span>`;
+      document.getElementById('processMessage').className = `process-message ${mode}`;
+      document.getElementById('messageTitle').textContent = messageTitle;
+      document.getElementById('messageText').textContent = messageText;
+
+      // Устанавливаем дату
+      if (historyData.timestamp) {
+        document.getElementById('processDate').textContent = new Date(historyData.timestamp).toLocaleString('ru-RU');
+      }
+
+      // Устанавливаем комментарий
+      document.getElementById('managerComment').textContent = historyData.managerComment || 'Комментарий отсутствует';
+
+      // Рендерим версии
+      renderOldVersion(historyData.previousGoals || []);
+      renderNewVersion(historyData.currentGoals || []);
+
+      function formatDate(dateString) {
+        if (!dateString) return '—';
+        const [year, month, day] = dateString.split('-');
+        return `${day}.${month}.${year}`;
+      }
+
+      function renderOldVersion(goals) {
+        const container = document.getElementById('oldVersion');
+        
+        if (!goals || goals.length === 0) {
+          container.innerHTML = '<div style="color: #64748B; text-align: center; padding: 20px;">Нет целей</div>';
+          return;
+        }
+
+        let html = '';
+        goals.forEach((goal, idx) => {
+          html += `
+            <div class="goal-card-process">
+              <div class="goal-header-process">Цель ${idx + 1}</div>
+              <div class="goal-field-process">
+                <div class="goal-field-label-process">Описание цели</div>
+                <div class="goal-field-value-process">${goal.goal || '—'}</div>
+              </div>
+              <div class="goal-field-process">
+                <div class="goal-field-label-process">Критерии достижения</div>
+                <div class="goal-field-value-process">${goal.criteria || '—'}</div>
+              </div>
+              <div class="goal-field-process">
+                <div class="goal-field-label-process">Срок выполнения</div>
+                <div class="goal-field-value-process">${goal.date ? formatDate(goal.date) : '—'}</div>
+              </div>
+            </div>
+          `;
+        });
+        
+        container.innerHTML = html;
+      }
+
+      function renderNewVersion(goals) {
+        const container = document.getElementById('newVersion');
+        
+        if (!goals || goals.length === 0) {
+          container.innerHTML = '<div style="color: #64748B; text-align: center; padding: 20px;">Нет целей</div>';
+          return;
+        }
+
+        let html = '';
+        goals.forEach((goal, idx) => {
+          html += `
+            <div class="goal-card-process">
+              <div class="goal-header-process">Цель ${idx + 1}</div>
+              <div class="goal-field-process">
+                <div class="goal-field-label-process">Описание цели</div>
+                <div class="goal-field-value-process">${goal.goal || '—'}</div>
+              </div>
+              <div class="goal-field-process">
+                <div class="goal-field-label-process">Критерии достижения</div>
+                <div class="goal-field-value-process">${goal.criteria || '—'}</div>
+              </div>
+              <div class="goal-field-process">
+                <div class="goal-field-label-process">Срок выполнения</div>
+                <div class="goal-field-value-process">${goal.date ? formatDate(goal.date) : '—'}</div>
+              </div>
+            </div>
+          `;
+        });
+        
+        container.innerHTML = html;
+      }
+
+      document.getElementById('backBtn').addEventListener('click', () => {
+        if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          window.location.href = 'index.html';
+        }
+      });
+
+      document.getElementById('returnBtn').addEventListener('click', () => {
+        // Возвращаемся к подписанным целям
+        window.location.href = 'review-goals.html?employee=' + encodeURIComponent(employeeName) + '&status=in-progress&role=manager';
+      });
+    </script>
+  </main>
+</body>
+
+</html>

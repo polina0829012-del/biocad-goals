@@ -106,6 +106,36 @@
       color: #0F172A;
     }
 
+    /* Rework message from manager - visible only to HR */
+    .rework-message {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+      gap: 12px;
+      width: 100%;
+      background: #E7F2FF;
+      border-radius: 12px;
+      margin-bottom: 40px;
+    }
+
+    .rework-message .title {
+      font-family: 'Inter';
+      font-weight: 700;
+      font-size: 16px;
+      color: #3389F4;
+    }
+
+    .rework-message .text {
+      font-family: 'Inter';
+      font-weight: 400;
+      font-size: 14px;
+      color: #3389F4;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
     /* Status message for review and sign states */
     .status-message {
       display: flex;
@@ -146,6 +176,7 @@
       padding: 20px;
       margin-bottom: 20px;
       width: 100%;
+      position: relative;
     }
 
     .goal-card.collapsed {
@@ -154,8 +185,68 @@
 
     .goal-card.collapsed .criteria-section,
     .goal-card.collapsed .evaluation-section,
-    .goal-card.collapsed .comment-section {
+    .goal-card.collapsed .comment-section,
+    .goal-card.collapsed .edit-controls {
       display: none;
+    }
+
+    .goal-card .delete-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: none;
+      border: none;
+      color: #EE4A3F;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 700;
+      line-height: 1;
+      z-index: 20;
+      display: none;
+    }
+
+    .goal-card.edit-mode .delete-btn {
+      display: block;
+    }
+
+    .goal-controls {
+      position: absolute;
+      top: 12px;
+      right: 45px;
+      display: flex;
+      gap: 4px;
+      z-index: 10;
+      display: none;
+    }
+
+    .goal-card.edit-mode .goal-controls {
+      display: flex;
+    }
+
+    .move-btn {
+      background: #FFFFFF;
+      border: 1px solid #94A3B8;
+      border-radius: 4px;
+      cursor: pointer;
+      color: #475569;
+      font-size: 16px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .move-btn:hover:not(:disabled) {
+      background: #3389F4;
+      border-color: #3389F4;
+      color: white;
+    }
+
+    .move-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
     }
 
     .goal-header-row {
@@ -176,6 +267,11 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .goal-card.edit-mode .goal-header-row .goal-title {
+      white-space: normal;
+      word-break: break-word;
     }
 
     .goal-header-row .goal-date {
@@ -230,6 +326,34 @@
       border: 1px solid #E2E8F0;
       white-space: pre-wrap;
       margin-bottom: 16px;
+    }
+
+    /* Edit mode fields */
+    .edit-field {
+      width: 100%;
+      min-height: 40px;
+      background: #FFFFFF;
+      border: 1px solid #3389F4;
+      box-shadow: 0px 0px 0px 2px rgba(51, 137, 244, 0.4);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 16px;
+      color: #0F172A;
+      font-family: 'Inter', sans-serif;
+      resize: vertical;
+      margin-bottom: 16px;
+    }
+
+    .edit-date {
+      width: 100%;
+      height: 40px;
+      background: #FFFFFF;
+      border: 1px solid #3389F4;
+      box-shadow: 0px 0px 0px 2px rgba(51, 137, 244, 0.4);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 16px;
+      color: #0F172A;
     }
 
     /* Evaluation section */
@@ -390,6 +514,28 @@
       cursor: default;
     }
 
+    /* Add goal button in edit mode */
+    .add-goal-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: none;
+      border: 1px solid #94A3B8;
+      border-radius: 6px;
+      color: #94A3B8;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 20px;
+      margin-left: 0;
+      width: fit-content;
+    }
+
+    .add-goal-btn:hover {
+      background: #F1F5F9;
+    }
+
     /* Button group */
     .button-group {
       display: flex;
@@ -532,7 +678,293 @@
       font-size: 14px;
     }
 
-    /* Modal */
+    /* Modal for edit in in-progress state */
+    .modal-overlay-edit {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .modal-content-edit {
+      background: white;
+      border-radius: 10px;
+      width: 456px;
+      max-width: 90%;
+      padding: 24px;
+      box-shadow: 0px 2px 20px rgba(148, 163, 184, 0.25);
+    }
+
+    .modal-header-edit {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
+    .modal-header-edit h3 {
+      font-family: 'Inter';
+      font-weight: 700;
+      font-size: 24px;
+      line-height: 28px;
+      color: #0F172A;
+      max-width: 360px;
+    }
+
+    .close-modal-edit {
+      width: 28px;
+      height: 28px;
+      background: #F1F5F9;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .close-modal-edit::before,
+    .close-modal-edit::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 1.5px;
+      background: #94A3B8;
+    }
+
+    .close-modal-edit::before {
+      transform: rotate(45deg);
+    }
+
+    .close-modal-edit::after {
+      transform: rotate(-45deg);
+    }
+
+    .modal-text-edit {
+      font-family: 'Inter';
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 20px;
+      color: #475569;
+      margin-bottom: 24px;
+    }
+
+    .modal-actions-edit {
+      display: flex;
+      justify-content: flex-end;
+      gap: 20px;
+    }
+
+    .btn-cancel-edit {
+      padding: 8px 16px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      color: #94A3B8;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      min-width: 106px;
+    }
+
+    .btn-confirm-edit {
+      padding: 8px 16px;
+      background: #0066CC;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      min-width: 138px;
+    }
+
+    /* Modal for rework comment (when submitting changes) */
+    .modal-overlay-rework {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .modal-content-rework {
+      background: white;
+      border-radius: 16px;
+      width: 500px;
+      max-width: 90%;
+      padding: 24px;
+      box-shadow: 0px 2px 20px rgba(148, 163, 184, 0.25);
+    }
+
+    .modal-header-rework {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header-rework h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+    }
+
+    .close-modal-rework {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #64748B;
+    }
+
+    .modal-textarea-rework {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      border: 1px solid #CBD5E1;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      margin-bottom: 16px;
+      resize: vertical;
+    }
+
+    .modal-textarea-rework:focus {
+      outline: none;
+      border-color: #3389F4;
+      box-shadow: 0px 0px 0px 2px rgba(51, 137, 244, 0.2);
+    }
+
+    .error-message {
+      color: #EE4A3F;
+      font-size: 12px;
+      margin-top: -12px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .modal-actions-rework {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .btn-cancel-rework {
+      padding: 8px 16px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-submit-rework {
+      padding: 8px 16px;
+      background: #0066CC;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    /* Info tooltip */
+    .info-tooltip {
+      position: relative;
+      display: inline-block;
+      cursor: help;
+      margin-left: 8px;
+    }
+
+    .info-tooltip .info-icon {
+      width: 20px;
+      height: 20px;
+      background: #E7F2FF;
+      color: #3389F4;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .info-tooltip .tooltip-text {
+      visibility: hidden;
+      width: 280px;
+      background-color: #1E293B;
+      color: #fff;
+      text-align: center;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      position: absolute;
+      z-index: 1000;
+      bottom: 150%;
+      left: 50%;
+      margin-left: -140px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      white-space: normal;
+      line-height: 1.5;
+      pointer-events: none;
+      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .info-tooltip .tooltip-text::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #1E293B transparent transparent transparent;
+    }
+
+    .info-tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* Read-only fields in edit mode */
+    .evaluation-value.readonly {
+      background: #F8FAFC;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #E2E8F0;
+      color: #64748B;
+    }
+
+    .comment-field.readonly {
+      background: #F8FAFC;
+      border-color: #E2E8F0;
+      color: #64748B;
+      cursor: default;
+    }
+
+    .comment-field.readonly:focus {
+      outline: none;
+      border-color: #E2E8F0;
+      box-shadow: none;
+    }
+
     .modal-overlay {
       display: none;
       position: fixed;
@@ -662,6 +1094,355 @@
       cursor: pointer;
       font-size: 12px;
     }
+
+    /* Modal for Processes (История изменений) */
+    .modal-overlay-process {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .modal-content-process {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 24px;
+      gap: 20px;
+      position: relative;
+      width: 1112px;
+      max-width: 95%;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #FFFFFF;
+      box-shadow: 0px 2px 35px rgba(148, 163, 184, 0.12);
+      border-radius: 10px;
+    }
+
+    .modal-header-process {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      height: 28px;
+    }
+
+    .modal-header-process h3 {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 700;
+      font-size: 24px;
+      line-height: 28px;
+      color: #0F172A;
+      margin: 0;
+    }
+
+    .close-modal-process {
+      width: 28px;
+      height: 28px;
+      background: #F1F5F9;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .close-modal-process::before,
+    .close-modal-process::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 1.5px;
+      background: #94A3B8;
+    }
+
+    .close-modal-process::before {
+      transform: rotate(45deg);
+    }
+
+    .close-modal-process::after {
+      transform: rotate(-45deg);
+    }
+
+    .processes-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 1px;
+      background: #E2E8F0;
+      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .process-item {
+      display: flex;
+      flex-direction: column;
+      background: #FFFFFF;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    .process-item:last-child {
+      border-bottom: none;
+    }
+
+    .process-header {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 13px 17px 12px 13px;
+      gap: 16px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .process-header:hover {
+      background: #F8FAFC;
+    }
+
+    .process-header.expanded {
+      background: #F8FAFC;
+    }
+
+    .process-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 0px;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .process-title-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 0px;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .process-name {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 20px;
+      color: #0F172A;
+    }
+
+    .process-status {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 20px;
+    }
+
+    .process-status.review {
+      color: #FF8D28;
+    }
+
+    .process-status.rejected {
+      color: #FF383C;
+    }
+
+    .process-status.completed {
+      color: #34C759;
+    }
+
+    .process-reason {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 20px;
+      text-align: right;
+      color: #000000;
+      margin-left: auto;
+    }
+
+    .process-link {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 20px;
+      color: #0066CC;
+      cursor: pointer;
+      min-width: 120px;
+      text-align: right;
+    }
+
+    .process-link:hover {
+      text-decoration: underline;
+    }
+
+    .process-details {
+      display: none;
+      flex-direction: column;
+      padding: 0px 13px 13px 13px;
+      gap: 16px;
+      border-top: 1px solid #E2E8F0;
+    }
+
+    .process-details.expanded {
+      display: flex;
+    }
+
+    .details-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 16px 0;
+    }
+
+    .details-label {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 20px;
+      color: #94A3B8;
+    }
+
+    .details-content {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 20px;
+      color: #475569;
+      background: #F8FAFC;
+      padding: 12px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+    }
+
+    .process-action-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      background: #0066CC;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      align-self: flex-start;
+      margin-top: 8px;
+    }
+
+    .process-action-btn:hover {
+      background: #0052a3;
+    }
+
+    .process-action-btn.secondary {
+      background: #FFFFFF;
+      border: 1px solid #3389F4;
+      color: #3389F4;
+    }
+
+    .process-action-btn.secondary:hover {
+      background: #F0F7FF;
+    }
+
+    .empty-processes {
+      padding: 40px;
+      text-align: center;
+      color: #64748B;
+      font-size: 16px;
+      background: #FFFFFF;
+    }
+
+    .loading-processes {
+      padding: 40px;
+      text-align: center;
+      color: #64748B;
+      font-size: 16px;
+      background: #FFFFFF;
+    }
+
+    /* Comparison view in process details */
+    .comparison-view {
+      display: flex;
+      gap: 20px;
+      margin-top: 16px;
+    }
+
+    .old-version-process,
+    .new-version-process {
+      flex: 1;
+      background: #F8FAFC;
+      padding: 16px;
+      border-radius: 12px;
+      position: relative;
+    }
+
+    .old-version-process::before {
+      content: "Предыдущая версия";
+      position: absolute;
+      top: -10px;
+      left: 16px;
+      background: #64748B;
+      color: white;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .new-version-process::before {
+      content: "Новая версия";
+      position: absolute;
+      top: -10px;
+      left: 16px;
+      background: #2E9264;
+      color: white;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .goal-item-process {
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    .goal-item-process:last-child {
+      border-bottom: none;
+    }
+
+    .goal-field-process {
+      margin-bottom: 8px;
+    }
+
+    .goal-field-label-process {
+      font-size: 12px;
+      color: #64748B;
+      margin-bottom: 4px;
+    }
+
+    .goal-field-value-process {
+      font-size: 14px;
+      padding: 8px;
+      background: #FFFFFF;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
   </style>
 </head>
 
@@ -681,7 +1462,15 @@
         </div>
         <div class="info-item">
           <div class="label">Статус</div>
-          <div class="value" id="statusValue">На согласовании</div>
+          <div class="value" id="statusValue">
+            На выполнении
+            <!-- Тултип для статуса "На доработке" -->
+            <span class="info-tooltip" id="statusTooltip" style="display: none;">
+              <span class="info-icon">i</span>
+              <span class="tooltip-text">Создана новая версия целей. Она заменит текущие только после подписания. А пока
+                действуют те, что вы подписали раньше.</span>
+            </span>
+          </div>
         </div>
         <div class="info-item">
           <div class="label">Должность</div>
@@ -705,6 +1494,12 @@
         </div>
       </div>
 
+      <!-- Сообщение о комментарии руководителя - показываем ТОЛЬКО HR в статусе "На согласовании" -->
+      <div class="rework-message" id="managerReworkMessage" style="display: none;">
+        <div class="title">Комментарий руководителя к изменениям:</div>
+        <div class="text" id="managerReworkComment"></div>
+      </div>
+
       <!-- Status message for review and sign states -->
       <div class="status-message" id="statusMessage" style="display: none;">
         <div class="title" id="messageTitle"></div>
@@ -713,6 +1508,9 @@
 
       <!-- Goals section -->
       <div class="goals-section" id="goalsSection"></div>
+
+      <!-- Add goal button (visible only in edit mode) -->
+      <button class="add-goal-btn" id="addGoalBtn" style="display: none;">+ Добавить цель</button>
 
       <!-- Button group -->
       <div class="button-group" id="buttonGroup"></div>
@@ -757,6 +1555,83 @@
       </div>
     </div>
 
+    <!-- Modal for edit in in-progress state -->
+    <div class="modal-overlay-edit" id="editInProgressModal">
+      <div class="modal-content-edit">
+        <div class="modal-header-edit">
+          <h3>Вы уверенны, что хотите изменить цели?</h3>
+          <button class="close-modal-edit" id="closeEditInProgressModal"></button>
+        </div>
+        <div class="modal-text-edit">
+          Их будет необходимо заново согласовать с HR. Текущие оценки и комментарии сохранятся, но будут недоступны для
+          редактирования.
+        </div>
+        <div class="modal-actions-edit">
+          <button class="btn-cancel-edit" id="cancelEditInProgress">Отмена</button>
+          <button class="btn-confirm-edit" id="confirmEditInProgress">Изменить</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for rework comment (when submitting changes) -->
+    <div class="modal-overlay-rework" id="reworkCommentModal">
+      <div class="modal-content-rework">
+        <div class="modal-header-rework">
+          <h3>Обоснование изменений</h3>
+          <button class="close-modal-rework" id="closeReworkCommentModal">✕</button>
+        </div>
+        <p>Пожалуйста, укажите причину изменений целей</p>
+        <textarea class="modal-textarea-rework" id="reworkCommentInput"
+          placeholder="Опишите, что было изменено и почему..."></textarea>
+        <div class="error-message" id="reworkCommentError">Пожалуйста, укажите комментарий</div>
+        <div class="modal-actions-rework">
+          <button class="btn-cancel-rework" id="cancelReworkComment">Отмена</button>
+          <button class="btn-submit-rework" id="submitReworkComment">Отправить</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Processes (История изменений) -->
+    <div class="modal-overlay-process" id="processesModal">
+      <div class="modal-content-process">
+        <div class="modal-header-process">
+          <h3>Процессы</h3>
+          <button class="close-modal-process" id="closeProcessesModal"></button>
+        </div>
+        
+        <div class="processes-container" id="processesContainer">
+          <!-- Здесь будут отображаться процессы -->
+          <div class="loading-processes">Загрузка процессов...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for probation summary (Подвести итоги) -->
+    <div class="modal-overlay" id="summaryModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Подведение итогов</h3>
+          <button class="close-modal" id="closeSummaryModal">✕</button>
+        </div>
+        <p>Сотрудник прошёл испытательный срок?</p>
+        <div class="modal-actions">
+          <button class="btn-cancel" id="summaryNoBtn">Нет</button>
+          <button class="btn-confirm" id="summaryYesBtn">Да</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for documents list (Просмотр документов) -->
+    <div class="modal-overlay" id="documentsModal">
+      <div class="modal-content" style="width: 592px; max-width: 95%; box-shadow: 0px 2px 35px rgba(148, 163, 184, 0.12); border-radius: 10px;">
+        <div class="modal-header">
+          <h3>Выгрузить документы</h3>
+          <button class="close-modal" id="closeDocumentsModal">✕</button>
+        </div>
+        <div id="documentsList"></div>
+      </div>
+    </div>
+
     <script>
       // Get URL parameters
       const urlParams = new URLSearchParams(window.location.search);
@@ -769,16 +1644,6 @@
       document.getElementById('pageTitle').textContent = `Цели на испытательный срок для ${employeeName}`;
       document.getElementById('employeeName').textContent = employeeName;
 
-      // Set status text
-      let statusText = '';
-      if (status === 'approved') statusText = 'Согласовано';
-      else if (status === 'sign') statusText = 'На подписании';
-      else if (status === 'in-progress') statusText = 'На выполнении';
-      else if (status === 'review') statusText = 'На согласовании';
-      else if (status === 'draft') statusText = 'Черновик';
-      else statusText = status;
-      document.getElementById('statusValue').textContent = statusText;
-
       // LocalStorage keys
       const draftKey = `goals-draft-${employeeKey}`;
       const statusKey = `goals-status-${employeeKey}`;
@@ -786,17 +1651,21 @@
       const downloadFlagKey = `goals-downloaded-${employeeKey}`;
       const evaluationKey = `goals-evaluation-${employeeKey}`;
       const signGoalsKey = `goals-sign-${employeeKey}`;
+      const signedGoalsKey = `goals-signed-${employeeKey}`; // для хранения оригинальных подписанных целей
       const historyKey = `goals-history-${employeeKey}`;
       const originalGoalsKey = `goals-original-${employeeKey}`;
+      const managerReworkCommentKey = `goals-manager-rework-${employeeKey}`; // для комментария руководителя
 
       // Load goals based on status
       let goalsData = null;
+      let signedGoalsData = null; // для хранения оригинальных подписанных целей
 
-      // For in-progress state, use ONLY signed goals
-      if (status === 'in-progress') {
-        const signedGoals = localStorage.getItem(signGoalsKey);
+      // For in-progress and final states, use ONLY signed goals
+      if (status === 'in-progress' || status === 'passed' || status === 'failed') {
+        const signedGoals = localStorage.getItem(signedGoalsKey) || localStorage.getItem(signGoalsKey);
         if (signedGoals) {
           goalsData = JSON.parse(signedGoals);
+          signedGoalsData = JSON.parse(signedGoals); // сохраняем оригинал
           console.log('Loaded signed goals:', goalsData);
         }
       }
@@ -814,23 +1683,32 @@
         goalsData = { goals: [] };
       }
 
-      // Save goals from sign state when moving to in-progress
-      if (status === 'in-progress' && !localStorage.getItem(signGoalsKey)) {
-        const draftGoals = localStorage.getItem(draftKey);
-        if (draftGoals) {
-          localStorage.setItem(signGoalsKey, draftGoals);
-          goalsData = JSON.parse(draftGoals);
-        }
-      }
-
       // Load evaluations and comments
       let evaluationsData = JSON.parse(localStorage.getItem(evaluationKey)) || {};
+
+      // Load manager rework comment if exists and show only for HR in review status
+      const savedManagerReworkComment = localStorage.getItem(managerReworkCommentKey);
+      if (savedManagerReworkComment && role === 'hr' && status === 'review') {
+        document.getElementById('managerReworkMessage').style.display = 'flex';
+        document.getElementById('managerReworkComment').textContent = savedManagerReworkComment;
+      }
 
       // State variables
       let isDownloaded = localStorage.getItem(downloadFlagKey) === 'true';
       let uploadedFile = localStorage.getItem(documentKey);
       let collapsedStates = {};
       let activeDropdown = null;
+      const failurePendingKey = `goals-failure-pending-${employeeKey}`;
+      const failureDownloadedKey = `goals-failure-downloaded-${employeeKey}`;
+      const failureDocumentKey = `goals-failure-document-${employeeKey}`;
+      let isFailurePending = localStorage.getItem(failurePendingKey) === 'true';
+      let isFailureDownloaded = localStorage.getItem(failureDownloadedKey) === 'true';
+      let failureUploadedFile = localStorage.getItem(failureDocumentKey);
+      // New state for edit mode in in-progress
+      let isEditMode = false; // Режим редактирования в статусе "На выполнении"
+      let originalInProgressGoals = null; // Оригинальные цели до изменений
+      let originalInProgressEvaluations = null; // Оригинальные оценки до изменений
+
 
       // Evaluation options
       const evaluationOptions = [
@@ -874,6 +1752,7 @@
       // Set manager evaluation
       function setManagerEvaluation(index, value) {
         if (role !== 'manager') return; // Only manager can set evaluation
+        if (isFailurePending || status === 'passed' || status === 'failed') return;
         if (!evaluationsData[index]) evaluationsData[index] = {};
         evaluationsData[index].managerEvaluation = value;
         evaluationsData[index].managerEvaluatedAt = new Date().toISOString();
@@ -885,6 +1764,7 @@
       // Set employee evaluation
       function setEmployeeEvaluation(index, value) {
         if (role !== 'employee') return; // Only employee can set evaluation
+        if (isFailurePending || status === 'passed' || status === 'failed') return;
         if (!evaluationsData[index]) evaluationsData[index] = {};
         evaluationsData[index].employeeEvaluation = value;
         evaluationsData[index].employeeEvaluatedAt = new Date().toISOString();
@@ -895,6 +1775,7 @@
       // Save employee comment
       function saveEmployeeComment(index, comment) {
         if (role !== 'employee') return; // Only employee can save comment
+        if (isFailurePending || status === 'passed' || status === 'failed') return;
         if (!evaluationsData[index]) evaluationsData[index] = {};
         evaluationsData[index].employeeComment = comment;
         evaluationsData[index].employeeCommentedAt = new Date().toISOString();
@@ -904,6 +1785,7 @@
       // Save manager comment
       function saveManagerComment(index, comment) {
         if (role !== 'manager') return; // Only manager can save comment
+        if (isFailurePending || status === 'passed' || status === 'failed') return;
         if (!evaluationsData[index]) evaluationsData[index] = {};
         evaluationsData[index].managerComment = comment;
         evaluationsData[index].managerCommentedAt = new Date().toISOString();
@@ -916,9 +1798,47 @@
         alert('Оценки и комментарии сохранены');
       }
 
+      // Move goal up
+      function moveGoalUp(index) {
+        if (index === 0 || !isEditMode) return;
+
+        [goalsData.goals[index - 1], goalsData.goals[index]] = [goalsData.goals[index], goalsData.goals[index - 1]];
+        renderGoals();
+      }
+
+      // Move goal down
+      function moveGoalDown(index) {
+        if (index === goalsData.goals.length - 1 || !isEditMode) return;
+
+        [goalsData.goals[index], goalsData.goals[index + 1]] = [goalsData.goals[index + 1], goalsData.goals[index]];
+        renderGoals();
+      }
+
+      // Delete goal
+      function deleteGoal(index) {
+        if (goalsData.goals.length <= 1 || !isEditMode) return;
+
+        goalsData.goals.splice(index, 1);
+        renderGoals();
+      }
+
+      // Update goal field
+      function updateGoalField(index, field, value) {
+        if (!isEditMode) return;
+        goalsData.goals[index][field] = value;
+      }
+
+      // Add new goal
+      function addGoal() {
+        if (!isEditMode) return;
+        goalsData.goals.push({ goal: '', criteria: '', date: '' });
+        renderGoals();
+      }
+
       // Render goals
       function renderGoals() {
         const goalsSection = document.getElementById('goalsSection');
+        const addGoalBtn = document.getElementById('addGoalBtn');
 
         if (!goalsData.goals || goalsData.goals.length === 0) {
           goalsSection.innerHTML = '<p style="text-align: center; color: #64748B; padding: 40px;">Цели не найдены</p>';
@@ -932,15 +1852,21 @@
           (goal.date && goal.date !== '')
         );
 
-        if (validGoals.length === 0) {
+        if (validGoals.length === 0 && !isEditMode) {
           goalsSection.innerHTML = '<p style="text-align: center; color: #64748B; padding: 40px;">Цели не найдены</p>';
           return;
         }
 
+        // Показываем кнопку добавления только в режиме редактирования
+        addGoalBtn.style.display = isEditMode ? 'flex' : 'none';
+
         let html = '';
-        validGoals.forEach((goal, index) => {
+        goalsData.goals.forEach((goal, index) => {
           const isCollapsed = collapsedStates[index] || false;
           const goalTitle = goal.goal || 'Без названия';
+          const totalGoals = goalsData.goals.length;
+          const canMoveUp = index > 0;
+          const canMoveDown = index < totalGoals - 1;
 
           const goalEval = evaluationsData[index] || {};
           const employeeEvaluation = goalEval.employeeEvaluation || null;
@@ -949,8 +1875,19 @@
           const managerComment = goalEval.managerComment || '';
 
           html += `
-            <div class="goal-card ${isCollapsed ? 'collapsed' : ''}">
+            <div class="goal-card ${isCollapsed ? 'collapsed' : ''} ${isEditMode ? 'edit-mode' : ''}">
           `;
+
+          // Кнопки управления (только в режиме редактирования)
+          if (isEditMode) {
+            html += `
+              ${totalGoals > 1 ? `<button class="delete-btn" onclick="deleteGoal(${index})">✕</button>` : ''}
+              <div class="goal-controls">
+                <button class="move-btn" onclick="moveGoalUp(${index})" ${!canMoveUp ? 'disabled' : ''}>↑</button>
+                <button class="move-btn" onclick="moveGoalDown(${index})" ${!canMoveDown ? 'disabled' : ''}>↓</button>
+              </div>
+            `;
+          }
 
           // Для статуса "На выполнении" добавляем оценки ПЕРЕД заголовком
           if (status === 'in-progress' && !isCollapsed) {
@@ -960,13 +1897,21 @@
                   <div class="evaluation-row">
                     <div class="evaluation-item">
                       <div class="evaluation-label">Сотрудник</div>
-                      <select class="evaluation-select" onchange="setEmployeeEvaluation(${index}, this.value)">
-                        <option value="" ${!employeeEvaluation ? 'selected' : ''}>Выберите оценку</option>
-                        <option value="completed" ${employeeEvaluation === 'completed' ? 'selected' : ''}>Выполнено</option>
-                        <option value="partially" ${employeeEvaluation === 'partially' ? 'selected' : ''}>Частично выполнено</option>
-                        <option value="delayed" ${employeeEvaluation === 'delayed' ? 'selected' : ''}>Просрочено</option>
-                        <option value="failed" ${employeeEvaluation === 'failed' ? 'selected' : ''}>Не выполнено</option>
-                      </select>
+                      ${isEditMode ? `
+                        <div class="evaluation-value">
+                          <span class="evaluation-badge ${employeeEvaluation ? evaluationOptions.find(opt => opt.value === employeeEvaluation)?.color : 'badge-default'}">
+                            ${employeeEvaluation ? evaluationOptions.find(opt => opt.value === employeeEvaluation)?.label : 'Не оценено'}
+                          </span>
+                        </div>
+                      ` : `
+                        <select class="evaluation-select" onchange="setEmployeeEvaluation(${index}, this.value)" ${isFailurePending || status === 'passed' || status === 'failed' ? 'disabled' : ''}>
+                          <option value="" ${!employeeEvaluation ? 'selected' : ''}>Выберите оценку</option>
+                          <option value="completed" ${employeeEvaluation === 'completed' ? 'selected' : ''}>Выполнено</option>
+                          <option value="partially" ${employeeEvaluation === 'partially' ? 'selected' : ''}>Частично выполнено</option>
+                          <option value="delayed" ${employeeEvaluation === 'delayed' ? 'selected' : ''}>Просрочено</option>
+                          <option value="failed" ${employeeEvaluation === 'failed' ? 'selected' : ''}>Не выполнено</option>
+                        </select>
+                      `}
                     </div>
                   </div>
                 </div>
@@ -987,8 +1932,13 @@
                     <div class="evaluation-item">
                       <div class="evaluation-label">Руководитель</div>
                       <div class="evaluation-value">
-                        <div class="evaluation-menu">
-                          ${managerEvaluation ?
+                        ${isEditMode ? `
+                          <span class="evaluation-badge ${managerEvaluation ? evaluationOptions.find(opt => opt.value === managerEvaluation)?.color : 'badge-default'}">
+                            ${managerEvaluation ? evaluationOptions.find(opt => opt.value === managerEvaluation)?.label : 'Не оценено'}
+                          </span>
+                        ` : `
+                          <div class="evaluation-menu">
+                            ${managerEvaluation ?
                   `<span class="evaluation-badge ${evaluationOptions.find(opt => opt.value === managerEvaluation)?.color}" onclick="toggleDropdown(${index})" style="cursor: pointer;">
                               ${evaluationOptions.find(opt => opt.value === managerEvaluation)?.label}
                             </span>` :
@@ -996,14 +1946,15 @@
                               Оценить
                             </span>`
                 }
-                          <div class="evaluation-dropdown ${activeDropdown === index ? 'show' : ''}">
-                            ${evaluationOptions.map(opt => `
-                              <div class="evaluation-option" onclick="setManagerEvaluation(${index}, '${opt.value}')">
-                                <span class="badge-preview ${opt.color}">${opt.label}</span>
-                              </div>
-                            `).join('')}
+                            <div class="evaluation-dropdown ${activeDropdown === index ? 'show' : ''}">
+                              ${evaluationOptions.map(opt => `
+                                <div class="evaluation-option" onclick="setManagerEvaluation(${index}, '${opt.value}')">
+                                  <span class="badge-preview ${opt.color}">${opt.label}</span>
+                                </div>
+                              `).join('')}
+                            </div>
                           </div>
-                        </div>
+                        `}
                       </div>
                     </div>
                   </div>
@@ -1038,17 +1989,46 @@
             }
           }
 
-          // Заголовок цели (после оценок)
-          html += `
-            <div class="goal-header-row" onclick="toggleCollapse(${index})">
-              <div class="goal-title">${goalTitle}</div>
-              <div class="goal-date">${goal.date ? formatDate(goal.date) : '—'}</div>
-              <button class="collapse-btn ${isCollapsed ? 'collapsed' : ''}" onclick="event.stopPropagation(); toggleCollapse(${index})">▼</button>
-            </div>
-          `;
+          // Заголовок цели и редактируемые поля
+          if (isEditMode) {
+            // В режиме редактирования показываем поля для ввода
+            html += `
+              <div class="form-row" style="margin-top: ${status === 'in-progress' ? '20px' : '0'};">
+                <div class="field-group" style="flex: 2;">
+                  <div class="title">Цель</div>
+                  <textarea class="edit-field" 
+                            oninput="updateGoalField(${index}, 'goal', this.value)"
+                            placeholder="Введите цель">${goal.goal || ''}</textarea>
+                </div>
+                <div class="date-group" style="flex: 1;">
+                  <div class="title">Срок выполнения</div>
+                  <input type="date" class="edit-date" 
+                         onchange="updateGoalField(${index}, 'date', this.value)"
+                         value="${goal.date || ''}" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="field-group">
+                  <div class="title">Критерии достижения</div>
+                  <textarea class="edit-field" 
+                            oninput="updateGoalField(${index}, 'criteria', this.value)"
+                            placeholder="Введите критерии">${goal.criteria || ''}</textarea>
+                </div>
+              </div>
+            `;
+          } else {
+            // Обычный режим просмотра
+            html += `
+              <div class="goal-header-row" onclick="toggleCollapse(${index})">
+                <div class="goal-title">${goalTitle}</div>
+                <div class="goal-date">${goal.date ? formatDate(goal.date) : '—'}</div>
+                <button class="collapse-btn ${isCollapsed ? 'collapsed' : ''}" onclick="event.stopPropagation(); toggleCollapse(${index})">▼</button>
+              </div>
+            `;
+          }
 
-          if (!isCollapsed) {
-            // Criteria section
+          if (!isCollapsed && !isEditMode) {
+            // Criteria section (только в режиме просмотра)
             html += `
               <div class="criteria-section">
                 <div class="criteria-label">Критерии достижения</div>
@@ -1056,105 +2036,19 @@
               </div>
             `;
 
-            // For in-progress state, add evaluation and comments
-            if (status === 'in-progress') {
-              // Evaluation section
-              html += `<div class="evaluation-section" style="display: none;">`;
-
-              if (role === 'employee') {
-                // Employee sees their own evaluation with select
-                html += `
-                  <div class="evaluation-row">
-                    <div class="evaluation-item">
-                      <div class="evaluation-label">Сотрудник</div>
-                      <select class="evaluation-select" onchange="setEmployeeEvaluation(${index}, this.value)">
-                        <option value="" ${!employeeEvaluation ? 'selected' : ''}>Выберите оценку</option>
-                        <option value="completed" ${employeeEvaluation === 'completed' ? 'selected' : ''}>Выполнено</option>
-                        <option value="partially" ${employeeEvaluation === 'partially' ? 'selected' : ''}>Частично выполнено</option>
-                        <option value="delayed" ${employeeEvaluation === 'delayed' ? 'selected' : ''}>Просрочено</option>
-                        <option value="failed" ${employeeEvaluation === 'failed' ? 'selected' : ''}>Не выполнено</option>
-                      </select>
-                    </div>
-                  </div>
-                `;
-              } else if (role === 'manager') {
-                // Manager sees employee's evaluation (read-only) and their own evaluation with dropdown
-                html += `
-                  <div class="evaluation-row">
-                    <div class="evaluation-item">
-                      <div class="evaluation-label">Сотрудник</div>
-                      <div class="evaluation-value">
-                        ${employeeEvaluation ?
-                    `<span class="evaluation-badge ${evaluationOptions.find(opt => opt.value === employeeEvaluation)?.color}">${evaluationOptions.find(opt => opt.value === employeeEvaluation)?.label}</span>` :
-                    `<span class="evaluation-badge badge-default">Не оценено</span>`
-                  }
-                      </div>
-                    </div>
-                    <div class="evaluation-item">
-                      <div class="evaluation-label">Руководитель</div>
-                      <div class="evaluation-value">
-                        <div class="evaluation-menu">
-                          ${managerEvaluation ?
-                    `<span class="evaluation-badge ${evaluationOptions.find(opt => opt.value === managerEvaluation)?.color}" onclick="toggleDropdown(${index})" style="cursor: pointer;">
-                              ${evaluationOptions.find(opt => opt.value === managerEvaluation)?.label}
-                            </span>` :
-                    `<span class="evaluation-badge badge-default" onclick="toggleDropdown(${index})" style="cursor: pointer;">
-                              Оценить
-                            </span>`
-                  }
-                          <div class="evaluation-dropdown ${activeDropdown === index ? 'show' : ''}">
-                            ${evaluationOptions.map(opt => `
-                              <div class="evaluation-option" onclick="setManagerEvaluation(${index}, '${opt.value}')">
-                                <span class="badge-preview ${opt.color}">${opt.label}</span>
-                              </div>
-                            `).join('')}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                `;
-              } else {
-                // HR and Superior see both evaluations (read-only)
-                html += `
-                  <div class="evaluation-row">
-                    <div class="evaluation-item">
-                      <div class="evaluation-label">Сотрудник</div>
-                      <div class="evaluation-value">
-                        ${employeeEvaluation ?
-                    `<span class="evaluation-badge ${evaluationOptions.find(opt => opt.value === employeeEvaluation)?.color}">${evaluationOptions.find(opt => opt.value === employeeEvaluation)?.label}</span>` :
-                    `<span class="evaluation-badge badge-default">Не оценено</span>`
-                  }
-                      </div>
-                    </div>
-                    <div class="evaluation-item">
-                      <div class="evaluation-label">Руководитель</div>
-                      <div class="evaluation-value">
-                        ${managerEvaluation ?
-                    `<span class="evaluation-badge ${evaluationOptions.find(opt => opt.value === managerEvaluation)?.color}">${evaluationOptions.find(opt => opt.value === managerEvaluation)?.label}</span>` :
-                    `<span class="evaluation-badge badge-default">Не оценено</span>`
-                  }
-                      </div>
-                    </div>
-                  </div>
-                `;
-              }
-
-              html += `</div>`;
-
-              // Comment section
-              if (role === 'employee') {
-                // Employee can edit their comment
+          // For in-progress and final states, add comments/evaluations
+          if (status === 'in-progress' || status === 'passed' || status === 'failed') {
+            const isFinal = status === 'passed' || status === 'failed' || (status === 'in-progress' && isFailurePending);
+            if (role === 'employee') {
                 html += `
                   <div class="comment-section">
                     <div class="comment-label">Оценка со стороны сотрудника</div>
-                    <textarea class="comment-field" 
+                  <textarea class="comment-field" ${isFinal ? 'readonly' : ''} 
                               placeholder="Оставьте комментарий..."
                               onchange="saveEmployeeComment(${index}, this.value)">${employeeComment}</textarea>
                   </div>
                 `;
               } else if (role === 'manager') {
-                // Manager sees employee's comment and can add their own
                 html += `
                   <div class="comment-section">
                     <div class="comment-label">Оценка со стороны сотрудника</div>
@@ -1163,13 +2057,12 @@
                   </div>
                   <div class="comment-section">
                     <div class="comment-label">Оценка со стороны руководителя</div>
-                    <textarea class="comment-field" 
+                  <textarea class="comment-field" ${isFinal ? 'readonly' : ''} 
                               placeholder="Оставьте комментарий..."
                               onchange="saveManagerComment(${index}, this.value)">${managerComment}</textarea>
                   </div>
                 `;
               } else {
-                // HR and Superior see both comments (read-only)
                 html += `
                   <div class="comment-section">
                     <div class="comment-label">Комментарий сотрудника</div>
@@ -1197,6 +2090,8 @@
         const buttonGroup = document.getElementById('buttonGroup');
         const statusMessage = document.getElementById('statusMessage');
         const uploadSection = document.getElementById('uploadSection');
+        const statusValue = document.getElementById('statusValue');
+        const statusTooltip = document.getElementById('statusTooltip');
 
         let buttons = '';
 
@@ -1244,9 +2139,36 @@
           return;
         }
 
+        // Обновляем текст статуса в шапке для основных состояний
+        if (status === 'review') {
+          statusValue.textContent = 'На согласовании';
+        } else if (status === 'sign') {
+          statusValue.textContent = 'На подписании';
+        } else if (status === 'passed') {
+          statusValue.textContent = 'ИС пройден';
+        } else if (status === 'failed') {
+          statusValue.textContent = 'ИС не пройден';
+        } else if (status === 'in-progress') {
+          // обработается ниже с тултипами/режимами
+        }
+
         // For in-progress state
         if (status === 'in-progress') {
           statusMessage.style.display = 'none';
+
+          // Проверяем, есть ли активный процесс (отправленные на согласование изменения)
+          const historyData = JSON.parse(localStorage.getItem(historyKey));
+          const hasActiveProcess = historyData && historyData.status === 'review';
+
+          // Показываем тултип если в режиме редактирования
+          if (isEditMode) {
+            statusValue.innerHTML = 'На доработке <span class="info-tooltip" id="statusTooltip"><span class="info-icon">i</span><span class="tooltip-text">Вы создаете новую версию целей. Она заменит текущие только после подписания. А пока действуют те, что вы подписали раньше.</span></span>';
+          } else if (hasActiveProcess) {
+            // Если есть активный процесс на согласовании, показываем статус "На выполнении" с тултипом
+            statusValue.innerHTML = 'На выполнении <span class="info-tooltip" id="statusTooltip"><span class="info-icon">i</span><span class="tooltip-text">Новая версия целей заменит текущую только после подписания, а пока действительна та, что вы подписали ранее.</span></span>';
+          } else {
+            statusValue.innerHTML = 'На выполнении';
+          }
 
           if (role === 'employee') {
             buttons = `
@@ -1258,20 +2180,51 @@
               </div>
             `;
           } else if (role === 'manager') {
-            buttons = `
-              <div class="left-buttons">
-                <button class="btn btn-back" id="backBtn">Выйти</button>
-              </div>
-              <div class="right-buttons">
-                <button class="btn btn-process" id="processBtn">Процессы</button>
-                <button class="btn btn-documents" id="documentsBtn">Посмотреть документы</button>
-                <button class="btn btn-save" id="saveBtn">Сохранить</button>
-                <button class="btn btn-summary" id="summaryBtn">Подвести итоги</button>
-              </div>
-            `;
+            if (isFailurePending && !isEditMode) {
+              const uploadButtonClass = isFailureDownloaded ? 'btn btn-upload active' : 'btn btn-upload';
+              const uploadButtonText = isFailureDownloaded ? 'Приложить подписанные документы' : 'Сначала выгрузите документы';
+              const uploadButtonDisabled = !isFailureDownloaded ? 'disabled' : '';
+
+              buttons = `
+                <div class="left-buttons">
+                  <button class="btn btn-back" id="backBtn">Выйти</button>
+                </div>
+                <div class="right-buttons">
+                  <button class="btn btn-download" id="downloadFailureBtn">Выгрузить документы</button>
+                  <button class="${uploadButtonClass}" id="uploadFailureBtn" ${uploadButtonDisabled}>
+                    ${uploadButtonText}
+                  </button>
+                </div>
+              `;
+            } else if (isEditMode) {
+              // Режим редактирования - другие кнопки
+              buttons = `
+                <div class="left-buttons">
+                  <button class="btn btn-back" id="backBtn">Выйти</button>
+                  <button class="btn btn-edit" id="cancelEditModeBtn">Отменить изменения</button>
+                </div>
+                <div class="right-buttons">
+                  <button class="btn btn-submit" id="submitEditModeBtn">Отправить на согласование</button>
+                </div>
+              `;
+            } else {
+              // Обычный режим
+              buttons = `
+                <div class="left-buttons">
+                  <button class="btn btn-back" id="backBtn">Выйти</button>
+                  <button class="btn btn-edit" id="editInProgressBtn">Изменить цели</button>
+                </div>
+                <div class="right-buttons">
+                  <button class="btn btn-process" id="processBtn">Процессы</button>
+                  <button class="btn btn-documents" id="documentsBtn">Посмотреть документы</button>
+                  <button class="btn btn-save" id="saveBtn">Сохранить</button>
+                  <button class="btn btn-summary" id="summaryBtn">Подвести итоги</button>
+                </div>
+              `;
+            }
           }
           buttonGroup.innerHTML = buttons;
-          uploadSection.style.display = 'none';
+          uploadSection.style.display = (isFailurePending && role === 'manager' && !isEditMode) ? 'none' : 'none';
 
         } else if (role === 'employee') {
           statusMessage.style.display = 'none';
@@ -1337,6 +2290,18 @@
             uploadSection.style.display = 'none';
           }
 
+        } else if ((status === 'passed' || status === 'failed') && role === 'manager') {
+          statusMessage.style.display = 'none';
+          buttons = `
+            <div class="left-buttons">
+              <button class="btn btn-back" id="backBtn">Выйти</button>
+            </div>
+            <div class="right-buttons">
+              <button class="btn btn-documents" id="documentsBtn">Посмотреть документы</button>
+            </div>
+          `;
+          buttonGroup.innerHTML = buttons;
+          uploadSection.style.display = 'none';
         } else {
           statusMessage.style.display = 'none';
           buttons = `
@@ -1349,6 +2314,54 @@
         }
 
         addButtonHandlers();
+      }
+
+      function updateFailureUploadButtonState() {
+        const uploadBtn = document.getElementById('uploadFailureBtn');
+        if (uploadBtn) {
+          uploadBtn.disabled = false;
+          uploadBtn.classList.add('active');
+          uploadBtn.textContent = 'Приложить подписанные документы';
+        }
+        isFailureDownloaded = true;
+        localStorage.setItem(failureDownloadedKey, 'true');
+        addButtonHandlers();
+      }
+
+      function handleDownloadFailureAct() {
+        try {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF();
+          let yPos = 20;
+          const lineHeight = 7;
+
+          doc.setFontSize(16);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Акт об отказе от прохождения испытательного срока', 20, yPos, { maxWidth: 170 });
+          yPos += lineHeight * 2;
+
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'normal');
+          doc.text(`Сотрудник: ${employeeName}`, 20, yPos);
+          yPos += lineHeight;
+          doc.text(`Дата формирования: ${new Date().toLocaleDateString('ru-RU')}`, 20, yPos);
+          yPos += lineHeight * 2;
+
+          doc.text('Настоящим фиксируется отказ от прохождения испытательного срока.', 20, yPos, { maxWidth: 170 });
+          yPos += lineHeight * 3;
+
+          doc.line(20, yPos, 100, yPos);
+          yPos += lineHeight;
+          doc.text('Подпись руководителя', 20, yPos);
+
+          doc.save(`Акт_об_отказе_${employeeName}_${new Date().toLocaleDateString('ru-RU')}.pdf`);
+          localStorage.setItem(failureDownloadedKey, 'true');
+          updateFailureUploadButtonState();
+          alert('Документ успешно скачан');
+        } catch (e) {
+          console.error(e);
+          alert('Произошла ошибка при создании документа. Пожалуйста, попробуйте еще раз.');
+        }
       }
 
       // Add button handlers
@@ -1387,21 +2400,56 @@
         const processBtn = document.getElementById('processBtn');
         if (processBtn) {
           processBtn.addEventListener('click', () => {
-            alert('Функционал "Процессы" будет добавлен позже');
+            openProcessesModal();
           });
         }
 
         const documentsBtn = document.getElementById('documentsBtn');
         if (documentsBtn) {
           documentsBtn.addEventListener('click', () => {
-            alert('Функционал "Посмотреть документы" будет добавлен позже');
+            const list = document.getElementById('documentsList');
+            const docs = [];
+            const signed = localStorage.getItem(documentKey);
+            const failureDoc = localStorage.getItem(failureDocumentKey);
+            if (signed) {
+              docs.push({ label: 'Подписанный документ', name: signed });
+            }
+            if (failureDoc) {
+              docs.push({ label: 'Акт об отказе', name: failureDoc });
+            }
+            if (!docs.length) {
+              list.innerHTML = '<p style="color:#64748B;font-size:14px;">Документы не найдены.</p>';
+            } else {
+              list.innerHTML = docs.map(d => `
+                <div style="border:1px solid #E2E8F0;border-radius:16px;padding:13px 17px 12px 13px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+                  <div style="display:flex;flex-direction:column;gap:4px;">
+                    <div style="font-size:14px;color:#94A3B8;">${d.label}</div>
+                    <div style="font-size:16px;color:#0F172A;">${d.name}</div>
+                  </div>
+                  <button style="border:none;background:none;color:#0066CC;font-size:14px;cursor:pointer;" onclick="alert('Откройте файл ${d.name} из файловой системы')">Открыть</button>
+                </div>
+              `).join('');
+            }
+            document.getElementById('documentsModal').style.display = 'flex';
           });
         }
 
         const summaryBtn = document.getElementById('summaryBtn');
         if (summaryBtn) {
           summaryBtn.addEventListener('click', () => {
-            alert('Функционал "Подвести итоги" будет добавлен позже');
+            document.getElementById('summaryModal').style.display = 'flex';
+          });
+        }
+
+        const downloadFailureBtn = document.getElementById('downloadFailureBtn');
+        if (downloadFailureBtn) {
+          downloadFailureBtn.addEventListener('click', handleDownloadFailureAct);
+        }
+
+        const uploadFailureBtn = document.getElementById('uploadFailureBtn');
+        if (uploadFailureBtn && !uploadFailureBtn.disabled) {
+          uploadFailureBtn.addEventListener('click', () => {
+            document.getElementById('uploadSection').style.display = 'block';
           });
         }
 
@@ -1423,11 +2471,52 @@
         if (approveBtn) {
           approveBtn.addEventListener('click', () => {
             localStorage.setItem(statusKey, 'sign');
-            // Clear history when approving
+            // Clear history and manager comment when approving
             localStorage.removeItem(historyKey);
             localStorage.removeItem(originalGoalsKey);
+            localStorage.removeItem(managerReworkCommentKey);
             alert('Цели успешно согласованы');
             window.location.href = 'index.html';
+          });
+        }
+        // Edit in progress button
+        const editInProgressBtn = document.getElementById('editInProgressBtn');
+        if (editInProgressBtn) {
+          editInProgressBtn.addEventListener('click', () => {
+            document.getElementById('editInProgressModal').style.display = 'flex';
+          });
+        }
+        // Cancel edit mode button
+        const cancelEditModeBtn = document.getElementById('cancelEditModeBtn');
+        if (cancelEditModeBtn) {
+          cancelEditModeBtn.addEventListener('click', () => {
+            // Выходим из режима редактирования
+            isEditMode = false;
+
+            // Перезагружаем оригинальные данные
+            if (originalInProgressGoals) {
+              goalsData = JSON.parse(JSON.stringify(originalInProgressGoals));
+            }
+            if (originalInProgressEvaluations) {
+              evaluationsData = JSON.parse(JSON.stringify(originalInProgressEvaluations));
+            }
+
+            renderGoals();
+            renderButtons();
+          });
+        }
+
+        // Submit edit mode button
+        const submitEditModeBtn = document.getElementById('submitEditModeBtn');
+        if (submitEditModeBtn) {
+          submitEditModeBtn.addEventListener('click', () => {
+            // Проверяем, есть ли изменения в целях относительно подписанных
+            if (!hasGoalsChangedInProgress()) {
+              alert('Перед тем как отправить цели на согласование, внесите изменения.');
+              return;
+            }
+            // Открываем модалку для комментария
+            document.getElementById('reworkCommentModal').style.display = 'flex';
           });
         }
       }
@@ -1574,6 +2663,33 @@
 
       // Handle file upload
       function handleFileUpload(file) {
+        // Загрузка документов по отказу (после "ИС не пройден" -> до финального статуса)
+        if (isFailurePending && role === 'manager' && status === 'in-progress') {
+          localStorage.setItem(failureDocumentKey, file.name);
+          failureUploadedFile = file.name;
+
+          fileName.textContent = file.name;
+          fileInfo.style.display = 'flex';
+
+          // Финальный статус
+          localStorage.setItem(statusKey, 'failed');
+          localStorage.removeItem(failurePendingKey);
+          localStorage.removeItem(failureDownloadedKey);
+          isFailurePending = false;
+          isFailureDownloaded = false;
+
+          // Завершаем процесс
+          localStorage.removeItem(historyKey);
+          localStorage.removeItem(managerReworkCommentKey);
+
+          alert('Документ успешно загружен. Статус изменён на "ИС не пройден"');
+          setTimeout(() => {
+            window.location.href = 'review-goals.html?employee=' + encodeURIComponent(employeeName) + '&status=failed&role=' + role;
+          }, 800);
+          return;
+        }
+
+        // Обычная загрузка подписанного документа (статус "На подписании")
         localStorage.setItem(documentKey, file.name);
         uploadedFile = file.name;
 
@@ -1581,6 +2697,11 @@
         fileInfo.style.display = 'flex';
 
         localStorage.setItem(statusKey, 'in-progress');
+
+        // Сохраняем текущие цели как подписанные (оригинал)
+        if (goalsData) {
+          localStorage.setItem(signedGoalsKey, JSON.stringify(goalsData));
+        }
 
         alert('Документ успешно загружен. Цели переведены в статус "На выполнении"');
 
@@ -1638,6 +2759,69 @@
       renderGoals();
       renderButtons();
 
+      // Add goal button handler
+      document.getElementById('addGoalBtn').addEventListener('click', addGoal);
+
+      // Rework comment modal handlers
+      document.getElementById('closeReworkCommentModal').addEventListener('click', () => {
+        document.getElementById('reworkCommentModal').style.display = 'none';
+        document.getElementById('reworkCommentInput').value = '';
+        document.getElementById('reworkCommentError').style.display = 'none';
+      });
+
+      document.getElementById('cancelReworkComment').addEventListener('click', () => {
+        document.getElementById('reworkCommentModal').style.display = 'none';
+        document.getElementById('reworkCommentInput').value = '';
+        document.getElementById('reworkCommentError').style.display = 'none';
+      });
+
+      document.getElementById('submitReworkComment').addEventListener('click', () => {
+        const comment = document.getElementById('reworkCommentInput').value.trim();
+
+        if (!comment) {
+          document.getElementById('reworkCommentError').style.display = 'block';
+          return;
+        }
+
+        // Сохраняем комментарий руководителя
+        localStorage.setItem(managerReworkCommentKey, comment);
+
+        // Сохраняем изменения в draft
+        localStorage.setItem(draftKey, JSON.stringify(goalsData));
+
+        // Сохраняем историю изменений (сравниваем с оригинальными подписанными целями)
+        localStorage.setItem(historyKey, JSON.stringify({
+          timestamp: new Date().toISOString(),
+          previousGoals: signedGoalsData?.goals || [],
+          currentGoals: goalsData.goals,
+          managerComment: comment,
+          status: 'review' // Статус процесса - на согласовании
+        }));
+
+        // Для HR статус должен стать "На согласовании"
+        localStorage.setItem(statusKey, 'review');
+
+        // Выходим из режима редактирования
+        isEditMode = false;
+
+        // Закрываем модалку
+        document.getElementById('reworkCommentModal').style.display = 'none';
+
+        alert('Изменения отправлены на согласование HR');
+
+        // Перенаправляем на страницу просмотра актуальных целей "На выполнении"
+        window.location.href = 'review-goals.html?employee=' + encodeURIComponent(employeeName) + '&status=in-progress&role=manager';
+      });
+
+      window.addEventListener('click', (e) => {
+        const modal = document.getElementById('reworkCommentModal');
+        if (e.target === modal) {
+          modal.style.display = 'none';
+          document.getElementById('reworkCommentInput').value = '';
+          document.getElementById('reworkCommentError').style.display = 'none';
+        }
+      });
+
       // Export functions to global scope
       window.toggleCollapse = toggleCollapse;
       window.toggleDropdown = toggleDropdown;
@@ -1645,6 +2829,333 @@
       window.setEmployeeEvaluation = setEmployeeEvaluation;
       window.saveEmployeeComment = saveEmployeeComment;
       window.saveManagerComment = saveManagerComment;
+      window.moveGoalUp = moveGoalUp;
+      window.moveGoalDown = moveGoalDown;
+      window.deleteGoal = deleteGoal;
+      window.updateGoalField = updateGoalField;
+
+      // Edit in progress modal handlers
+      document.getElementById('closeEditInProgressModal').addEventListener('click', () => {
+        document.getElementById('editInProgressModal').style.display = 'none';
+      });
+
+      document.getElementById('cancelEditInProgress').addEventListener('click', () => {
+        document.getElementById('editInProgressModal').style.display = 'none';
+      });
+
+      document.getElementById('confirmEditInProgress').addEventListener('click', () => {
+        document.getElementById('editInProgressModal').style.display = 'none';
+
+        // Сохраняем оригинальные подписанные цели, если их ещё нет
+        if (!localStorage.getItem(signedGoalsKey)) {
+          localStorage.setItem(signedGoalsKey, JSON.stringify(goalsData));
+        }
+
+        // Сохраняем оригинальные данные для возможного отката
+        originalInProgressGoals = JSON.parse(JSON.stringify(goalsData));
+        originalInProgressEvaluations = JSON.parse(JSON.stringify(evaluationsData));
+
+        // Включаем режим редактирования
+        isEditMode = true;
+
+        // Перерисовываем
+        renderButtons();
+        renderGoals();
+      });
+
+      // Закрытие модального окна при клике вне его
+      window.addEventListener('click', (e) => {
+        const modal = document.getElementById('editInProgressModal');
+        if (e.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
+
+      // Processes Modal Functions
+      function openProcessesModal() {
+        const processesContainer = document.getElementById('processesContainer');
+        
+        // Загружаем все процессы из localStorage
+        const processes = loadProcesses();
+        
+        if (processes.length === 0) {
+          processesContainer.innerHTML = '<div class="empty-processes">Нет активных процессов</div>';
+        } else {
+          renderProcesses(processes);
+        }
+        
+        document.getElementById('processesModal').style.display = 'flex';
+      }
+
+      function loadProcesses() {
+        const processes = [];
+        
+        // Активный процесс "Выполнение целей"
+        if (status === 'in-progress') {
+          processes.push({
+            id: 'active',
+            timestamp: new Date().toISOString(),
+            previousGoals: [],
+            currentGoals: [],
+            managerComment: '',
+            status: 'active',
+            type: 'Выполнение целей'
+          });
+        }
+        
+        // Загружаем основную историю изменений
+        const historyData = JSON.parse(localStorage.getItem(historyKey));
+        if (historyData) {
+          processes.push({
+            id: 'main',
+            timestamp: historyData.timestamp,
+            previousGoals: historyData.previousGoals || [],
+            currentGoals: historyData.currentGoals || [],
+            managerComment: historyData.managerComment || 'Инициирован процесс изменения целей',
+            status: historyData.status || 'review', // review, rejected, completed
+            type: 'Изменение целей'
+          });
+        }
+        
+        // Сортируем по дате (активный процесс всегда первым)
+        return processes.sort((a, b) => {
+          if (a.id === 'active') return -1;
+          if (b.id === 'active') return 1;
+          return new Date(b.timestamp) - new Date(a.timestamp);
+        });
+      }
+
+      function renderProcesses(processes) {
+        const container = document.getElementById('processesContainer');
+        let html = '<div class="processes-container">';
+        
+        processes.forEach((process, index) => {
+          const statusClass = process.status === 'review' ? 'review' : 
+                             process.status === 'rejected' ? 'rejected' : 
+                             process.status === 'completed' ? 'completed' : 
+                             process.status === 'active' ? 'active' : '';
+          
+          const statusText = process.status === 'review' ? 'На согласовании у HR' :
+                            process.status === 'rejected' ? 'Отклонен HR' :
+                            process.status === 'completed' ? 'Успешно завершено' :
+                            process.status === 'active' ? 'Активен' :
+                            'Неизвестно';
+          
+          const statusColor = process.status === 'review' ? '#FF8D28' :
+                             process.status === 'rejected' ? '#FF383C' :
+                             process.status === 'completed' ? '#34C759' :
+                             process.status === 'active' ? '#2563EB' :
+                             '#64748B';
+          
+          const reasonText = process.managerComment || 'Нет комментария';
+          
+          html += `
+            <div class="process-item">
+              <div class="process-header" onclick="toggleProcessDetails(${index})">
+                <div class="process-info">
+                  <div class="process-title-row">
+                    <span class="process-name">${process.type || 'Изменение целей'}</span>
+                    <span class="process-status ${statusClass}" style="color: ${statusColor}">${statusText}</span>
+                  </div>
+                </div>
+                <div class="process-reason">${reasonText.substring(0, 30)}${reasonText.length > 30 ? '...' : ''}</div>
+                <div class="process-link" onclick="event.stopPropagation(); openProcess('${process.id}', '${process.status}')">Открыть процесс →</div>
+              </div>
+              <div class="process-details" id="process-details-${index}">
+                <div class="details-section">
+                  <div class="details-label">Комментарий руководителя</div>
+                  <div class="details-content">${reasonText}</div>
+                </div>
+                
+                <div class="details-section">
+                  <div class="details-label">Дата создания</div>
+                  <div class="details-content">${new Date(process.timestamp).toLocaleString('ru-RU')}</div>
+                </div>
+                
+                <div class="details-section">
+                  <div class="details-label">Сравнение целей</div>
+                  <div class="comparison-view">
+                    <div class="old-version-process">
+                      ${renderGoalsComparison(process.previousGoals, 'old')}
+                    </div>
+                    <div class="new-version-process">
+                      ${renderGoalsComparison(process.currentGoals, 'new')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        
+        html += '</div>';
+        container.innerHTML = html;
+      }
+
+      function renderGoalsComparison(goals, type) {
+        if (!goals || goals.length === 0) {
+          return '<div style="color: #64748B; text-align: center; padding: 20px;">Нет целей</div>';
+        }
+        
+        let html = '';
+        goals.forEach((goal, idx) => {
+          html += `
+            <div class="goal-item-process">
+              <div class="goal-field-process">
+                <div class="goal-field-label-process">Цель ${idx + 1}</div>
+                <div class="goal-field-value-process">${goal.goal || '—'}</div>
+              </div>
+              <div class="goal-field-process">
+                <div class="goal-field-label-process">Критерии</div>
+                <div class="goal-field-value-process">${goal.criteria || '—'}</div>
+              </div>
+              <div class="goal-field-process">
+                <div class="goal-field-label-process">Срок</div>
+                <div class="goal-field-value-process">${goal.date ? formatDate(goal.date) : '—'}</div>
+              </div>
+            </div>
+          `;
+        });
+        return html;
+      }
+
+      function toggleProcessDetails(index) {
+        const details = document.getElementById(`process-details-${index}`);
+        const header = details.previousElementSibling;
+        
+        if (details.classList.contains('expanded')) {
+          details.classList.remove('expanded');
+          header.classList.remove('expanded');
+        } else {
+          details.classList.add('expanded');
+          header.classList.add('expanded');
+        }
+      }
+
+      function openProcess(processId, status) {
+        // Закрываем модалку процессов
+        document.getElementById('processesModal').style.display = 'none';
+        
+        if (status === 'active') {
+          // Переход к актуальным целям "На выполнении"
+          window.location.href = `review-goals.html?employee=${encodeURIComponent(employeeName)}&status=in-progress&role=manager`;
+        } else if (status === 'review') {
+          // Статус "На согласовании" - показываем цели в режиме просмотра как у HR
+          // Перенаправляем на специальную страницу просмотра процесса
+          window.location.href = `review-process.html?employee=${encodeURIComponent(employeeName)}&process=${processId}&mode=review`;
+        } else if (status === 'rejected') {
+          // Статус "Отклонен HR" - показываем ту версию, которую хотел изменить руководитель
+          window.location.href = `review-process.html?employee=${encodeURIComponent(employeeName)}&process=${processId}&mode=rejected`;
+        } else if (status === 'completed') {
+          // Статус "Успешно завершено" - показываем итоговую версию
+          window.location.href = `review-process.html?employee=${encodeURIComponent(employeeName)}&process=${processId}&mode=completed`;
+        }
+      }
+
+      // Processes modal handlers
+      document.getElementById('closeProcessesModal').addEventListener('click', () => {
+        document.getElementById('processesModal').style.display = 'none';
+      });
+
+      window.addEventListener('click', (e) => {
+        const modal = document.getElementById('processesModal');
+        if (e.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
+
+      // Экспортируем функции для глобального доступа
+      window.toggleProcessDetails = toggleProcessDetails;
+      window.openProcess = openProcess;
+
+      // Проверка изменения целей в статусе "На выполнении"
+      function hasGoalsChangedInProgress() {
+        if (!signedGoalsData || !signedGoalsData.goals) return false;
+
+        const oldGoals = signedGoalsData.goals || [];
+        const newGoals = goalsData.goals || [];
+
+        if (oldGoals.length !== newGoals.length) return true;
+
+        const normalize = (g) => ({
+          goal: (g.goal || '').trim().replace(/\s+/g, ' '),
+          criteria: (g.criteria || '').trim().replace(/\s+/g, ' '),
+          date: g.date || ''
+        });
+
+        for (let i = 0; i < oldGoals.length; i++) {
+          const o = normalize(oldGoals[i]);
+          const n = normalize(newGoals[i]);
+          if (o.goal !== n.goal || o.criteria !== n.criteria || o.date !== n.date) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      // Если пришли из реестра с параметром openProcesses=1 — сразу открываем модалку процессов
+      if (urlParams.get('openProcesses') === '1') {
+        openProcessesModal();
+      }
+
+      // Summary (Подвести итоги) modal logic
+      const summaryModal = document.getElementById('summaryModal');
+      const summaryYesBtn = document.getElementById('summaryYesBtn');
+      const summaryNoBtn = document.getElementById('summaryNoBtn');
+      const closeSummaryModal = document.getElementById('closeSummaryModal');
+
+      if (closeSummaryModal) {
+        closeSummaryModal.addEventListener('click', () => {
+          summaryModal.style.display = 'none';
+        });
+      }
+
+      if (summaryYesBtn) {
+        summaryYesBtn.addEventListener('click', () => {
+          // ИС пройден
+          localStorage.setItem(statusKey, 'passed');
+          localStorage.removeItem(failurePendingKey);
+          localStorage.removeItem(failureDownloadedKey);
+          summaryModal.style.display = 'none';
+          // Завершаем процесс
+          localStorage.removeItem(historyKey);
+          localStorage.removeItem(managerReworkCommentKey);
+          alert('Статус сотрудника изменён на "ИС пройден"');
+          window.location.href = 'review-goals.html?employee=' + encodeURIComponent(employeeName) + '&status=passed&role=' + role;
+        });
+      }
+
+      if (summaryNoBtn) {
+        summaryNoBtn.addEventListener('click', () => {
+          // Переходим в режим выгрузки/загрузки документов по отказу (без модалки)
+          summaryModal.style.display = 'none';
+          localStorage.setItem(failurePendingKey, 'true');
+          localStorage.removeItem(failureDownloadedKey);
+          localStorage.removeItem(failureDocumentKey);
+          isFailurePending = true;
+          isFailureDownloaded = false;
+          failureUploadedFile = null;
+          renderButtons();
+        });
+      }
+
+      window.addEventListener('click', (e) => {
+        if (e.target === summaryModal) {
+          summaryModal.style.display = 'none';
+        }
+        if (e.target === document.getElementById('documentsModal')) {
+          document.getElementById('documentsModal').style.display = 'none';
+        }
+      });
+
+      const closeDocumentsModal = document.getElementById('closeDocumentsModal');
+      if (closeDocumentsModal) {
+        closeDocumentsModal.addEventListener('click', () => {
+          document.getElementById('documentsModal').style.display = 'none';
+        });
+      }
+
+      // (Режим ИС не пройден) теперь без отдельной модалки: используется блок загрузки как в "На подписании"
     </script>
   </main>
 </body>

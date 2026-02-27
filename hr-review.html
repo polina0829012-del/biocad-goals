@@ -720,6 +720,7 @@
             const statusKey = `goals-status-${employeeKey}`;
             const commentKey = `goals-comment-${employeeKey}`;
             const historyKey = `goals-history-${employeeKey}`;
+            const managerReworkCommentKey = `goals-manager-rework-${employeeKey}`;
 
             // Загружаем текущий статус
             const currentStatus = localStorage.getItem(statusKey) || 'review';
@@ -744,6 +745,19 @@
             if (savedComment) {
                 document.getElementById('reworkMessage').style.display = 'flex';
                 document.getElementById('reworkComment').textContent = savedComment;
+            }
+
+            // Комментарий руководителя к изменениям (из процесса)
+            const managerReworkComment = localStorage.getItem(managerReworkCommentKey);
+            if (managerReworkComment) {
+                const container = document.getElementById('changesSummary');
+                const block = document.createElement('div');
+                block.className = 'rework-message';
+                block.innerHTML = `
+                    <div class="title">Комментарий руководителя к изменениям:</div>
+                    <div class="text">${managerReworkComment}</div>
+                `;
+                container.parentNode.insertBefore(block, container);
             }
 
             // Состояние сворачивания целей
@@ -1128,9 +1142,19 @@
                 const approveBtn = document.getElementById('approveBtn');
                 if (approveBtn) {
                     approveBtn.addEventListener('click', () => {
+                        // Обновляем статус целей
                         localStorage.setItem(statusKey, 'sign');
                         localStorage.removeItem(commentKey);
-                        localStorage.removeItem(historyKey);
+
+                        // Обновляем статус процесса на completed, если он есть
+                        const historyData = JSON.parse(localStorage.getItem(historyKey));
+                        if (historyData) {
+                            historyData.status = 'completed';
+                            localStorage.setItem(historyKey, JSON.stringify(historyData));
+                        }
+
+                        // Очищаем комментарий руководителя к изменениям для нового цикла
+                        localStorage.removeItem(managerReworkCommentKey);
 
                         alert('Цели успешно согласованы');
                         window.location.href = 'index.html?role=hr';
@@ -1169,6 +1193,16 @@
 
                 localStorage.setItem(commentKey, comment);
                 localStorage.setItem(statusKey, 'draft');
+
+                // Обновляем статус процесса на rejected, если он есть
+                const historyData = JSON.parse(localStorage.getItem(historyKey));
+                if (historyData) {
+                    historyData.status = 'rejected';
+                    localStorage.setItem(historyKey, JSON.stringify(historyData));
+                }
+
+                // Очищаем комментарий руководителя к изменениям
+                localStorage.removeItem(managerReworkCommentKey);
 
                 document.getElementById('reworkModal').style.display = 'none';
 

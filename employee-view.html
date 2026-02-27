@@ -288,6 +288,87 @@
       color: #94A3B8;
       font-size: 14px;
     }
+
+    .evaluation-section {
+      margin-top: 16px;
+      margin-bottom: 8px;
+    }
+
+    .evaluation-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    .evaluation-select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #CBD5E1;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #0F172A;
+      background: #FFFFFF;
+      cursor: pointer;
+    }
+
+    .evaluation-select:focus {
+      outline: none;
+      border-color: #3389F4;
+      box-shadow: 0 0 0 3px rgba(51, 137, 244, 0.1);
+    }
+
+    .comment-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #475569;
+      margin-bottom: 8px;
+      margin-top: 12px;
+    }
+
+    .comment-field {
+      width: 100%;
+      min-height: 58px;
+      padding: 8px 12px;
+      border: 1px solid #CBD5E1;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      resize: vertical;
+      background: #FFFFFF;
+    }
+
+    .comment-field:focus {
+      outline: none;
+      border-color: #3389F4;
+      box-shadow: 0 0 0 3px rgba(51, 137, 244, 0.1);
+    }
+
+    .actions-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+
+    .save-button {
+      padding: 8px 16px;
+      background: #0066CC;
+      border-radius: 8px;
+      border: none;
+      color: #FFFFFF;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .save-button:hover {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 <body>
@@ -331,12 +412,15 @@
       <!-- Цели -->
       <div class="goals-section" id="goalsSection"></div>
 
-      <button class="back-button" onclick="window.location.href='index.html?role=manager'">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M15 19L8 12L15 5" stroke="#3389F4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Выйти
-      </button>
+      <div class="actions-row">
+        <button class="back-button" onclick="window.location.href='index.html?role=manager'">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 19L8 12L15 5" stroke="#3389F4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Выйти
+        </button>
+        <button class="save-button" id="saveBtn" style="display: none;">Сохранить</button>
+      </div>
     </div>
 
     <footer class="footer">
@@ -390,6 +474,7 @@
       }
 
       const draftKey = `goals-draft-${employeeKey}`;
+      const evaluationKey = `goals-evaluation-${employeeKey}`;
       
       // Загружаем данные
       let goalsData = JSON.parse(localStorage.getItem(draftKey));
@@ -399,6 +484,7 @@
       }
 
       let collapsedStates = {};
+      let evaluationsData = JSON.parse(localStorage.getItem(evaluationKey)) || {};
 
       function formatDate(dateString) {
         if (!dateString) return '—';
@@ -409,6 +495,27 @@
       function toggleCollapse(index) {
         collapsedStates[index] = !collapsedStates[index];
         renderGoals();
+      }
+
+      function setEmployeeEvaluation(index, value) {
+        if (status !== 'in-progress') return;
+        if (!evaluationsData[index]) evaluationsData[index] = {};
+        evaluationsData[index].employeeEvaluation = value;
+        evaluationsData[index].employeeEvaluatedAt = new Date().toISOString();
+        localStorage.setItem(evaluationKey, JSON.stringify(evaluationsData));
+      }
+
+      function saveEmployeeComment(index, comment) {
+        if (status !== 'in-progress') return;
+        if (!evaluationsData[index]) evaluationsData[index] = {};
+        evaluationsData[index].employeeComment = comment;
+        evaluationsData[index].employeeCommentedAt = new Date().toISOString();
+        localStorage.setItem(evaluationKey, JSON.stringify(evaluationsData));
+      }
+
+      function saveAllEvaluations() {
+        localStorage.setItem(evaluationKey, JSON.stringify(evaluationsData));
+        alert('Оценки и комментарии сохранены');
       }
 
       function renderGoals() {
@@ -435,6 +542,9 @@
         validGoals.forEach((goal, index) => {
           const isCollapsed = collapsedStates[index] || false;
           const goalTitle = goal.goal ? (goal.goal.length > 50 ? goal.goal.substring(0, 50) + '...' : goal.goal) : 'Без названия';
+          const goalEval = evaluationsData[index] || {};
+          const employeeEvaluation = goalEval.employeeEvaluation || '';
+          const employeeComment = goalEval.employeeComment || '';
           
           html += `
             <div class="goal-form ${isCollapsed ? 'collapsed' : ''}">
@@ -461,6 +571,23 @@
                 </div>
               </div>
             `;
+
+            if (status === 'in-progress') {
+              html += `
+                <div class="evaluation-section">
+                  <div class="evaluation-label">Самооценка по цели</div>
+                  <select class="evaluation-select" onchange="setEmployeeEvaluation(${index}, this.value)">
+                    <option value="" ${!employeeEvaluation ? 'selected' : ''}>Выберите оценку</option>
+                    <option value="completed" ${employeeEvaluation === 'completed' ? 'selected' : ''}>Выполнено</option>
+                    <option value="partially" ${employeeEvaluation === 'partially' ? 'selected' : ''}>Частично выполнено</option>
+                    <option value="delayed" ${employeeEvaluation === 'delayed' ? 'selected' : ''}>Просрочено</option>
+                    <option value="failed" ${employeeEvaluation === 'failed' ? 'selected' : ''}>Не выполнено</option>
+                  </select>
+                  <div class="comment-label">Комментарий</div>
+                  <textarea class="comment-field" placeholder="Оставьте комментарий..." onchange="saveEmployeeComment(${index}, this.value)">${employeeComment}</textarea>
+                </div>
+              `;
+            }
           }
           
           html += `</div>`;
@@ -471,8 +598,19 @@
 
       renderGoals();
 
-      // Добавляем функцию toggleCollapse в глобальную область
+      // Показываем кнопку сохранения только в статусе "На выполнении"
+      if (status === 'in-progress') {
+        const saveBtn = document.getElementById('saveBtn');
+        if (saveBtn) {
+          saveBtn.style.display = 'inline-flex';
+          saveBtn.addEventListener('click', saveAllEvaluations);
+        }
+      }
+
+      // Добавляем функцию в глобальную область
       window.toggleCollapse = toggleCollapse;
+      window.setEmployeeEvaluation = setEmployeeEvaluation;
+      window.saveEmployeeComment = saveEmployeeComment;
     </script>
   </main>
 </body>
