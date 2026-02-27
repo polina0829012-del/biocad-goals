@@ -674,7 +674,6 @@
         </div>
         <div class="filter-content" id="statusContent">
           <div class="filter-group">
-            <input type="text" class="filter-search" id="statusSearch" placeholder="Поиск статусов..." />
             <div class="filter-checkboxes" id="statusFilters">
               <label class="checkbox-item"><input type="checkbox" value="draft"> Черновик</label>
               <label class="checkbox-item"><input type="checkbox" value="review"> На согласовании</label>
@@ -686,7 +685,6 @@
               <label class="checkbox-item"><input type="checkbox" value="failed"> Ис не пройден</label>
               <label class="checkbox-item"><input type="checkbox" value="closed"> Закрыта</label>
             </div>
-            <div class="search-count" id="statusSearchCount"></div>
           </div>
         </div>
       </div>
@@ -698,14 +696,12 @@
         </div>
         <div class="filter-content" id="positionContent">
           <div class="filter-group">
-            <input type="text" class="filter-search" id="positionSearch" placeholder="Поиск должностей..." />
             <div class="filter-checkboxes" id="positionFilters">
               <label class="checkbox-item"><input type="checkbox" value="k2"> Бизнес-аналитик К2</label>
               <label class="checkbox-item"><input type="checkbox" value="k3"> Бизнес-аналитик К3</label>
               <label class="checkbox-item"><input type="checkbox" value="k4"> Бизнес-аналитик К4</label>
               <label class="checkbox-item"><input type="checkbox" value="analyst"> Аналитик</label>
             </div>
-            <div class="search-count" id="positionSearchCount"></div>
           </div>
         </div>
       </div>
@@ -1023,28 +1019,6 @@
         renderTable();
         document.getElementById('filterPanel').style.display = 'none';
       });
-
-      // Поиск в фильтрах
-      function setupFilterSearch(inputId, containerId, countId) {
-        const input = document.getElementById(inputId);
-        if (!input) return;
-        input.addEventListener('input', function() {
-          const query = this.value.toLowerCase().trim();
-          const items = document.querySelectorAll(`#${containerId} .checkbox-item`);
-          let visible = 0;
-          items.forEach(item => {
-            const label = item.querySelector('label').textContent.toLowerCase();
-            if (label.includes(query)) {
-              item.style.display = 'flex';
-              visible++;
-            } else item.style.display = 'none';
-          });
-          const countEl = document.getElementById(countId);
-          if (countEl) countEl.textContent = query ? `Найдено: ${visible}` : '';
-        });
-      }
-      setupFilterSearch('statusSearch', 'statusFilters', 'statusSearchCount');
-      setupFilterSearch('positionSearch', 'positionFilters', 'positionSearchCount');
 
       let sortState = 0;
       document.getElementById('statusSortIcon')?.addEventListener('click', () => {
