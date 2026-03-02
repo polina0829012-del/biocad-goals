@@ -294,6 +294,11 @@
       margin-bottom: 8px;
     }
 
+    .evaluation-badge.badge-green { background: #D9F2E7; color: #2E9264; }
+    .evaluation-badge.badge-orange { background: #FEF3C7; color: #B45309; }
+    .evaluation-badge.badge-red { background: #FEE2E2; color: #DC2626; }
+    .evaluation-badge.badge-default { background: #F1F5F9; color: #64748B; }
+
     .evaluation-label {
       font-size: 14px;
       font-weight: 500;
@@ -397,6 +402,10 @@
             <span>09.02.2026</span>
           </div>
         </div>
+        <div class="info-item" id="summaryByItem" style="display: none;">
+          <div class="label">Подвести итоги до</div>
+          <div class="value" id="summaryByDate"></div>
+        </div>
         <div class="info-item">
           <div class="label">Функциональный руководитель</div>
           <div class="value">Иванов Иван Иваныч</div>
@@ -413,7 +422,7 @@
       <div class="goals-section" id="goalsSection"></div>
 
       <div class="actions-row">
-        <button class="back-button" onclick="window.location.href='index.html?role=manager'">
+        <button class="back-button" onclick="window.location.href='index.html?role=employee'">
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M15 19L8 12L15 5" stroke="#3389F4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -432,9 +441,19 @@
 
     <script>
       const urlParams = new URLSearchParams(window.location.search);
-      const employeeName = urlParams.get('employee') || 'Котова Вероника';
+      const employeeName = urlParams.get('employee');
+      if (!employeeName) {
+        window.location.href = 'index.html?role=employee';
+        throw new Error('employee required');
+      }
       const status = urlParams.get('status') || 'review';
       const employeeKey = employeeName.replace(/\s+/g, '-');
+
+      // Финальные статусы отображаем на общем экране просмотра целей
+      // для единообразного UI и доступа к документам.
+      if (status === 'passed' || status === 'failed') {
+        window.location.href = 'review-goals.html?employee=' + encodeURIComponent(employeeName) + '&status=' + encodeURIComponent(status) + '&role=employee';
+      }
       
       document.getElementById('pageTitle').textContent = `Мои цели на испытательный срок`;
       
@@ -459,6 +478,14 @@
         statusText = 'На выполнении';
         messageTitle = 'Цели в работе';
         messageText = 'Документы подписаны, цели переведены в статус "На выполнении"';
+      } else if (status === 'passed') {
+        statusText = 'ИС пройден';
+        messageTitle = 'Испытательный срок пройден';
+        messageText = 'Вы успешно прошли испытательный срок';
+      } else if (status === 'failed') {
+        statusText = 'ИС не пройден';
+        messageTitle = 'Испытательный срок не пройден';
+        messageText = 'Испытательный срок не пройден';
       } else if (status === 'draft') {
         statusText = 'Черновик';
       } else {
@@ -474,10 +501,19 @@
       }
 
       const draftKey = `goals-draft-${employeeKey}`;
+      const signedGoalsKey = `goals-signed-${employeeKey}`;
+      const signGoalsKey = `goals-sign-${employeeKey}`;
       const evaluationKey = `goals-evaluation-${employeeKey}`;
       
-      // Загружаем данные
-      let goalsData = JSON.parse(localStorage.getItem(draftKey));
+      // Загружаем данные: для in-progress, passed, failed — подписанные цели
+      let goalsData = null;
+      if (status === 'in-progress' || status === 'passed' || status === 'failed') {
+        const signed = localStorage.getItem(signedGoalsKey) || localStorage.getItem(signGoalsKey);
+        if (signed) goalsData = JSON.parse(signed);
+      }
+      if (!goalsData) {
+        goalsData = JSON.parse(localStorage.getItem(draftKey));
+      }
       
       if (!goalsData || !goalsData.goals || !Array.isArray(goalsData.goals)) {
         goalsData = { goals: [] };
@@ -490,6 +526,13 @@
         if (!dateString) return '—';
         const [year, month, day] = dateString.split('-');
         return `${day}.${month}.${year}`;
+      }
+
+      function getProbationEndDateText() {
+        const dateNodes = document.querySelectorAll('.date-range span');
+        if (!dateNodes || dateNodes.length < 3) return '(дата)';
+        const endDateText = (dateNodes[2].textContent || '').trim();
+        return endDateText || '(дата)';
       }
 
       function toggleCollapse(index) {
@@ -539,11 +582,19 @@
         }
 
         let html = '';
+        const evaluationOptions = [
+          { value: 'completed', label: 'Выполнено', color: 'badge-green' },
+          { value: 'partially', label: 'Не выполнено полностью', color: 'badge-orange' },
+          { value: 'delayed', label: 'Не выполнено в обозначенные сроки', color: 'badge-red' },
+          { value: 'failed', label: 'Не выполнено в полном объеме', color: 'badge-red' }
+        ];
+
         validGoals.forEach((goal, index) => {
           const isCollapsed = collapsedStates[index] || false;
           const goalTitle = goal.goal ? (goal.goal.length > 50 ? goal.goal.substring(0, 50) + '...' : goal.goal) : 'Без названия';
           const goalEval = evaluationsData[index] || {};
           const employeeEvaluation = goalEval.employeeEvaluation || '';
+          const managerEvaluation = goalEval.managerEvaluation || '';
           const employeeComment = goalEval.employeeComment || '';
           
           html += `
@@ -572,7 +623,27 @@
               </div>
             `;
 
-            if (status === 'in-progress') {
+            if (status === 'passed' || status === 'failed') {
+              html += `
+                <div class="evaluation-section" style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">
+                  <div style="display:flex;gap:24px;flex-wrap:wrap;">
+                    <div>
+                      <div class="evaluation-label" style="font-size:12px;color:#64748B;margin-bottom:4px;">Сотрудник</div>
+                      <span class="evaluation-badge ${employeeEvaluation ? evaluationOptions.find(o=>o.value===employeeEvaluation)?.color || 'badge-default' : 'badge-default'}" style="display:inline-block;padding:4px 12px;border-radius:8px;font-size:14px;">
+                        ${employeeEvaluation ? evaluationOptions.find(o=>o.value===employeeEvaluation)?.label : 'Не оценено'}
+                      </span>
+                    </div>
+                    <div>
+                      <div class="evaluation-label" style="font-size:12px;color:#64748B;margin-bottom:4px;">Руководитель</div>
+                      <span class="evaluation-badge ${managerEvaluation ? evaluationOptions.find(o=>o.value===managerEvaluation)?.color || 'badge-default' : 'badge-default'}" style="display:inline-block;padding:4px 12px;border-radius:8px;font-size:14px;">
+                        ${managerEvaluation ? evaluationOptions.find(o=>o.value===managerEvaluation)?.label : 'Не оценено'}
+                      </span>
+                    </div>
+                  </div>
+                  ${employeeComment ? `<div class="comment-label">Комментарий сотрудника</div><div style="color:#475569;">${employeeComment}</div>` : ''}
+                </div>
+              `;
+            } else if (status === 'in-progress') {
               html += `
                 <div class="evaluation-section">
                   <div class="evaluation-label">Самооценка по цели</div>
@@ -597,6 +668,18 @@
       }
 
       renderGoals();
+
+      // Показываем "Подвести итоги до" для статуса "На выполнении"
+      const summaryByItem = document.getElementById('summaryByItem');
+      const summaryByDate = document.getElementById('summaryByDate');
+      if (summaryByItem && summaryByDate) {
+        if (status === 'in-progress') {
+          summaryByDate.textContent = getProbationEndDateText();
+          summaryByItem.style.display = 'flex';
+        } else {
+          summaryByItem.style.display = 'none';
+        }
+      }
 
       // Показываем кнопку сохранения только в статусе "На выполнении"
       if (status === 'in-progress') {

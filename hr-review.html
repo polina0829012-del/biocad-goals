@@ -678,6 +678,7 @@
                 </div>
                 <div class="right-buttons">
                     <button class="btn btn-rework" id="reworkBtn">Отправить на доработку</button>
+                    <button class="btn btn-rework" id="rejectChangesBtn" style="display: none;">Отклонить изменения</button>
                     <button class="btn btn-approve" id="approveBtn">Согласовать</button>
                 </div>
             </div>
@@ -710,7 +711,11 @@
 
         <script>
             const urlParams = new URLSearchParams(window.location.search);
-            const employeeName = urlParams.get('employee') || 'Котова Вероника';
+            const employeeName = urlParams.get('employee');
+            if (!employeeName) {
+                window.location.href = 'index.html?role=hr';
+                throw new Error('employee required');
+            }
             const employeeKey = employeeName.replace(/\s+/g, '-');
 
             document.getElementById('pageTitle').textContent = `HR: Согласование целей для ${employeeName}`;
@@ -721,6 +726,12 @@
             const commentKey = `goals-comment-${employeeKey}`;
             const historyKey = `goals-history-${employeeKey}`;
             const managerReworkCommentKey = `goals-manager-rework-${employeeKey}`;
+            const previousStatusKey = `goals-previous-status-${employeeKey}`;
+            const evaluationKey = `goals-evaluation-${employeeKey}`;
+            const signedGoalsKey = `goals-signed-${employeeKey}`;
+            const signGoalsKey = `goals-sign-${employeeKey}`;
+
+            const isReadOnly = urlParams.get('view') === 'readonly';
 
             // Загружаем текущий статус
             const currentStatus = localStorage.getItem(statusKey) || 'review';
@@ -730,12 +741,24 @@
                         currentStatus === 'sign' ? 'На подписании' :
                             currentStatus === 'in-progress' ? 'На выполнении' : currentStatus;
 
-            // Загружаем текущие цели
-            let goalsData = JSON.parse(localStorage.getItem(draftKey));
-
-            if (!goalsData || !goalsData.goals || !Array.isArray(goalsData.goals)) {
-                goalsData = { goals: [] };
+            // Загружаем текущие цели: для in-progress/passed/failed в режиме просмотра — подписанные
+            let goalsData = null;
+            if (isReadOnly && (currentStatus === 'in-progress' || currentStatus === 'passed' || currentStatus === 'failed')) {
+                const signed = localStorage.getItem(signedGoalsKey) || localStorage.getItem(signGoalsKey);
+                if (signed) goalsData = JSON.parse(signed);
             }
+            if (!goalsData || !goalsData.goals || !Array.isArray(goalsData.goals)) {
+                goalsData = JSON.parse(localStorage.getItem(draftKey)) || { goals: [] };
+            }
+            if (!goalsData.goals) goalsData.goals = [];
+
+            let evaluationsData = JSON.parse(localStorage.getItem(evaluationKey)) || {};
+            const evaluationOptions = [
+                { value: 'completed', label: 'Выполнено', color: '#2E9264' },
+                { value: 'partially', label: 'Не выполнено полностью', color: '#B45309' },
+                { value: 'delayed', label: 'Не выполнено в обозначенные сроки', color: '#DC2626' },
+                { value: 'failed', label: 'Не выполнено в полном объеме', color: '#DC2626' }
+            ];
 
             // Загружаем историю изменений
             //const historyData = JSON.parse(localStorage.getItem(historyKey));
@@ -1101,6 +1124,13 @@
                     // Нет истории - просто показываем цели
                     validGoals.forEach((goal, index) => {
                         const isCollapsed = collapsedStates[index] || false;
+                        const goalEval = evaluationsData[index] || {};
+                        const empEval = goalEval.employeeEvaluation || '';
+                        const mgrEval = goalEval.managerEvaluation || '';
+                        const empComment = goalEval.employeeComment || '';
+                        const mgrComment = goalEval.managerComment || '';
+                        const showEvaluations = isReadOnly && (currentStatus === 'in-progress' || currentStatus === 'passed' || currentStatus === 'failed');
+
                         html += `
                 <div class="goal-card ${isCollapsed ? 'collapsed' : ''}">
                     <div class="goal-header-row" onclick="toggleCollapse(${index})">
@@ -1113,6 +1143,16 @@
                             <div class="criteria-label">Критерии достижения</div>
                             <div class="criteria-text">${goal.criteria || '—'}</div>
                         </div>
+                        ${showEvaluations ? `
+                        <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px;">
+                            <div style="display:flex;gap:24px;flex-wrap:wrap;">
+                                <div><div style="font-size:12px;color:#64748B;margin-bottom:4px;">Сотрудник</div><span style="display:inline-block;padding:4px 12px;border-radius:8px;font-size:14px;background:#F1F5F9;color:#64748B;">${empEval ? (evaluationOptions.find(o=>o.value===empEval)?.label || empEval) : 'Не оценено'}</span></div>
+                                <div><div style="font-size:12px;color:#64748B;margin-bottom:4px;">Руководитель</div><span style="display:inline-block;padding:4px 12px;border-radius:8px;font-size:14px;background:#F1F5F9;color:#64748B;">${mgrEval ? (evaluationOptions.find(o=>o.value===mgrEval)?.label || mgrEval) : 'Не оценено'}</span></div>
+                            </div>
+                            ${empComment ? `<div><div style="font-size:12px;color:#64748B;margin-bottom:4px;">Комментарий сотрудника</div><div style="color:#475569;">${empComment}</div></div>` : ''}
+                            ${mgrComment ? `<div><div style="font-size:12px;color:#64748B;margin-bottom:4px;">Комментарий руководителя</div><div style="color:#475569;">${mgrComment}</div></div>` : ''}
+                        </div>
+                        ` : ''}
                     ` : ''}
                 </div>
             `;
@@ -1155,16 +1195,71 @@
 
                         // Очищаем комментарий руководителя к изменениям для нового цикла
                         localStorage.removeItem(managerReworkCommentKey);
+                        // Предыдущее состояние больше не нужно
+                        localStorage.removeItem(previousStatusKey);
 
                         alert('Цели успешно согласованы');
+                        window.location.href = 'index.html?role=hr';
+                    });
+                }
+
+                // Кнопка "Отклонить изменения" — доступна только, если это пересогласование уже подписанных целей
+                const rejectChangesBtn = document.getElementById('rejectChangesBtn');
+                if (rejectChangesBtn) {
+                    rejectChangesBtn.addEventListener('click', () => {
+                        const historyData = JSON.parse(localStorage.getItem(historyKey));
+                        const previousStatus = localStorage.getItem(previousStatusKey) || 'in-progress';
+
+                        // Если есть предыдущие цели в истории — возвращаем их в черновик
+                        if (historyData && Array.isArray(historyData.previousGoals)) {
+                            localStorage.setItem(draftKey, JSON.stringify({ goals: historyData.previousGoals }));
+                        }
+
+                        // Статус формы возвращаем к тому, который был до изменения целей
+                        localStorage.setItem(statusKey, previousStatus);
+
+                        // Помечаем процесс как отклонённый
+                        if (historyData) {
+                            historyData.status = 'rejected';
+                            localStorage.setItem(historyKey, JSON.stringify(historyData));
+                        }
+
+                        // Очищаем временные комментарии
+                        localStorage.removeItem(managerReworkCommentKey);
+                        localStorage.removeItem(commentKey);
+                        localStorage.removeItem(previousStatusKey);
+
+                        alert('Изменения отклонены. Цели возвращены к предыдущей версии.');
                         window.location.href = 'index.html?role=hr';
                     });
                 }
             }
             function renderButtons() {
                 const buttonGroup = document.getElementById('buttonGroup');
+                const currentStatus = localStorage.getItem(statusKey) || 'review';
+                const historyData = JSON.parse(localStorage.getItem(historyKey));
 
-                // Кнопки уже есть в HTML, просто добавляем обработчики
+                // HR в режиме просмотра (view=readonly) — только "Назад", без кнопок согласования
+                if (isReadOnly) {
+                    const rightBtns = buttonGroup.querySelector('.right-buttons');
+                    if (rightBtns) rightBtns.style.display = 'none';
+                } else {
+                    // Кнопка "Отклонить изменения" — только если цели меняли из "На подписании" или "На выполнении"
+                    const savedPreviousStatus = localStorage.getItem(previousStatusKey);
+                    const isChangeFromSigned = savedPreviousStatus === 'sign' || savedPreviousStatus === 'in-progress';
+                    const isChangeReview =
+                        currentStatus === 'review' &&
+                        historyData &&
+                        Array.isArray(historyData.previousGoals) &&
+                        historyData.previousGoals.length > 0 &&
+                        isChangeFromSigned;
+
+                    const rejectChangesBtn = document.getElementById('rejectChangesBtn');
+                    if (rejectChangesBtn) {
+                        rejectChangesBtn.style.display = isChangeReview ? 'inline-flex' : 'none';
+                    }
+                }
+
                 addButtonHandlers();
             }
 

@@ -427,7 +427,11 @@
 
     <script>
       const urlParams = new URLSearchParams(window.location.search);
-      const employeeName = urlParams.get('employee') || 'Котова Вероника';
+      const employeeName = urlParams.get('employee');
+      if (!employeeName) {
+        window.location.href = 'index.html';
+        throw new Error('employee required');
+      }
       const processId = urlParams.get('process') || 'main';
       const mode = urlParams.get('mode') || 'review'; // review, rejected, completed
       const employeeKey = employeeName.replace(/\s+/g, '-');

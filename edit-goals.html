@@ -547,7 +547,11 @@
 
     <script>
       const urlParams = new URLSearchParams(window.location.search);
-      const employeeName = urlParams.get('employee') || 'Котова Вероника';
+      const employeeName = urlParams.get('employee');
+      if (!employeeName) {
+        window.location.href = 'index.html';
+        throw new Error('employee required');
+      }
       const employeeKey = employeeName.replace(/\s+/g, '-');
 
       document.getElementById('pageTitle').textContent = `Цели на испытательный срок для ${employeeName}`;
@@ -557,6 +561,7 @@
       const commentKey = `goals-comment-${employeeKey}`;
       const historyKey = `goals-history-${employeeKey}`;
       const originalGoalsKey = `goals-original-${employeeKey}`;
+      const previousStatusKey = `goals-previous-status-${employeeKey}`;
 
       // Загружаем данные
       let goalsData = JSON.parse(localStorage.getItem(draftKey));
@@ -776,7 +781,7 @@
       }
 
       // Функция создания истории изменений
-      function createChangeHistory() {
+      function createChangeHistory(initiatedFrom) {
         console.log('originalGoals.goals:', originalGoals.goals);
 
         const forms = document.querySelectorAll('.goal-form');
@@ -806,16 +811,12 @@
           (g.date && g.date !== '')
         );
 
-        // ✅ Если после фильтрации ничего не осталось — берём текущие как предыдущие
-        if (nonEmptyOriginalGoals.length === 0 && nonEmptyCurrentGoals.length > 0) {
-          console.log('⚠️ originalGoals был пуст, используем текущие как предыдущие');
-          nonEmptyOriginalGoals = [...nonEmptyCurrentGoals];
-        }
-
         const history = {
           timestamp: new Date().toISOString(),
           previousGoals: nonEmptyOriginalGoals,
-          currentGoals: nonEmptyCurrentGoals
+          currentGoals: nonEmptyCurrentGoals,
+          status: 'review',
+          initiatedFrom: initiatedFrom || 'draft'
         };
 
         localStorage.setItem(historyKey, JSON.stringify(history));
@@ -919,8 +920,14 @@
 
         const hasHRComment = localStorage.getItem(commentKey);
         const previousStatus = localStorage.getItem(statusKey);
+        const savedPreviousStatus = localStorage.getItem(previousStatusKey);
 
-        const shouldCreateHistory = hasHRComment || previousStatus === 'in-progress' || previousStatus === 'sign';
+        // Учитываем сохранённый статус до перехода в черновик (из "На подписании" или "На выполнении")
+        const effectivePreviousStatus = savedPreviousStatus || previousStatus;
+        // История нужна в двух сценариях:
+        // 1) изменения уже подписанных целей (из "На выполнении")
+        // 2) повторная отправка после возврата HR на доработку
+        const shouldCreateHistory = hasHRComment || effectivePreviousStatus === 'in-progress';
 
         if (shouldCreateHistory) {
           // Процесс создаётся только при изменении уже подписанных целей (статус "На выполнении")
@@ -928,7 +935,16 @@
             document.getElementById('warningModal').style.display = 'flex';
             return;
           }
-          createChangeHistory();
+          createChangeHistory(effectivePreviousStatus);
+        } else {
+          // Для первого цикла (черновик -> согласование) фиксируем baseline,
+          // чтобы при доработке от HR корректно сравнивать изменения.
+          const nonEmptyCurrentGoals = (goalsData.goals || []).filter(g =>
+            (g.goal && g.goal.trim() !== '') ||
+            (g.criteria && g.criteria.trim() !== '') ||
+            (g.date && g.date !== '')
+          );
+          localStorage.setItem(originalGoalsKey, JSON.stringify({ goals: nonEmptyCurrentGoals }));
         }
 
         localStorage.setItem(draftKey, JSON.stringify(goalsData));

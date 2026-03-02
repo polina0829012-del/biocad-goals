@@ -362,7 +362,11 @@
 
     <script>
       const urlParams = new URLSearchParams(window.location.search);
-      const employeeName = urlParams.get('employee') || 'Котова Вероника';
+      const employeeName = urlParams.get('employee');
+      if (!employeeName) {
+        window.location.href = 'index.html?role=superior';
+        throw new Error('employee required');
+      }
       const employeeKey = employeeName.replace(/\s+/g, '-');
       
       document.getElementById('pageTitle').textContent = `Просмотр целей: ${employeeName}`;
@@ -370,6 +374,9 @@
 
       const draftKey = `goals-draft-${employeeKey}`;
       const statusKey = `goals-status-${employeeKey}`;
+      const signedGoalsKey = `goals-signed-${employeeKey}`;
+      const signGoalsKey = `goals-sign-${employeeKey}`;
+      const evaluationKey = `goals-evaluation-${employeeKey}`;
 
       // Загружаем текущий статус
       const currentStatus = localStorage.getItem(statusKey) || 'draft';
@@ -378,14 +385,28 @@
         currentStatus === 'review' ? 'На согласовании' :
         currentStatus === 'approved' ? 'Согласовано' :
         currentStatus === 'sign' ? 'На подписании' :
-        currentStatus === 'in-progress' ? 'На выполнении' : currentStatus;
+        currentStatus === 'in-progress' ? 'На выполнении' :
+        currentStatus === 'passed' ? 'ИС пройден' :
+        currentStatus === 'failed' ? 'ИС не пройден' : currentStatus;
 
-      // Загружаем цели
-      let goalsData = JSON.parse(localStorage.getItem(draftKey));
-      
-      if (!goalsData || !goalsData.goals || !Array.isArray(goalsData.goals)) {
-        goalsData = { goals: [] };
+      // Загружаем цели: для in-progress/passed/failed — подписанные
+      let goalsData = null;
+      if (currentStatus === 'in-progress' || currentStatus === 'passed' || currentStatus === 'failed') {
+        const signed = localStorage.getItem(signedGoalsKey) || localStorage.getItem(signGoalsKey);
+        if (signed) goalsData = JSON.parse(signed);
       }
+      if (!goalsData || !goalsData.goals || !Array.isArray(goalsData.goals)) {
+        goalsData = JSON.parse(localStorage.getItem(draftKey)) || { goals: [] };
+      }
+      if (!goalsData.goals) goalsData.goals = [];
+
+      let evaluationsData = JSON.parse(localStorage.getItem(evaluationKey)) || {};
+      const evaluationOptions = [
+        { value: 'completed', label: 'Выполнено' },
+        { value: 'partially', label: 'Не выполнено полностью' },
+        { value: 'delayed', label: 'Не выполнено в обозначенные сроки' },
+        { value: 'failed', label: 'Не выполнено в полном объеме' }
+      ];
 
       let collapsedStates = {};
 
@@ -424,6 +445,12 @@
         validGoals.forEach((goal, index) => {
           const isCollapsed = collapsedStates[index] || false;
           const goalTitle = goal.goal ? (goal.goal.length > 50 ? goal.goal.substring(0, 50) + '...' : goal.goal) : 'Без названия';
+          const goalEval = evaluationsData[index] || {};
+          const empEval = goalEval.employeeEvaluation || '';
+          const mgrEval = goalEval.managerEvaluation || '';
+          const empComment = goalEval.employeeComment || '';
+          const mgrComment = goalEval.managerComment || '';
+          const showEvaluations = currentStatus === 'in-progress' || currentStatus === 'passed' || currentStatus === 'failed';
           
           html += `
             <div class="goal-form ${isCollapsed ? 'collapsed' : ''}">
@@ -449,6 +476,16 @@
                   <div class="text-field">${goal.criteria || '—'}</div>
                 </div>
               </div>
+              ${showEvaluations ? `
+              <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px;">
+                <div style="display:flex;gap:24px;flex-wrap:wrap;">
+                  <div><div style="font-size:12px;color:#64748B;margin-bottom:4px;">Сотрудник</div><span style="display:inline-block;padding:4px 12px;border-radius:8px;font-size:14px;background:#F1F5F9;color:#64748B;">${empEval ? (evaluationOptions.find(o=>o.value===empEval)?.label || empEval) : 'Не оценено'}</span></div>
+                  <div><div style="font-size:12px;color:#64748B;margin-bottom:4px;">Руководитель</div><span style="display:inline-block;padding:4px 12px;border-radius:8px;font-size:14px;background:#F1F5F9;color:#64748B;">${mgrEval ? (evaluationOptions.find(o=>o.value===mgrEval)?.label || mgrEval) : 'Не оценено'}</span></div>
+                </div>
+                ${empComment ? `<div><div style="font-size:12px;color:#64748B;margin-bottom:4px;">Комментарий сотрудника</div><div style="color:#475569;">${empComment}</div></div>` : ''}
+                ${mgrComment ? `<div><div style="font-size:12px;color:#64748B;margin-bottom:4px;">Комментарий руководителя</div><div style="color:#475569;">${mgrComment}</div></div>` : ''}
+              </div>
+              ` : ''}
             `;
           }
           
