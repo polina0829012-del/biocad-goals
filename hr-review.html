@@ -1208,7 +1208,10 @@
                 if (rejectChangesBtn) {
                     rejectChangesBtn.addEventListener('click', () => {
                         const historyData = JSON.parse(localStorage.getItem(historyKey));
-                        const previousStatus = localStorage.getItem(previousStatusKey) || 'in-progress';
+                        const savedPreviousStatus = localStorage.getItem(previousStatusKey);
+                        const previousStatus =
+                            savedPreviousStatus ||
+                            (historyData && historyData.initiatedFrom === 'sign' ? 'sign' : 'in-progress');
 
                         // Если есть предыдущие цели в истории — возвращаем их в черновик
                         if (historyData && Array.isArray(historyData.previousGoals)) {
@@ -1244,12 +1247,14 @@
                     const rightBtns = buttonGroup.querySelector('.right-buttons');
                     if (rightBtns) rightBtns.style.display = 'none';
                 } else {
-                    // Кнопка "Отклонить изменения" — если это пересогласование с реальной историей изменений
+                    // Кнопка "Отклонить изменения" — только для изменений из статусов
+                    // "На подписании" или "На выполнении"
                     const isChangeReview =
                         currentStatus === 'review' &&
                         historyData &&
                         Array.isArray(historyData.previousGoals) &&
-                        historyData.previousGoals.length > 0;
+                        historyData.previousGoals.length > 0 &&
+                        (historyData.initiatedFrom === 'sign' || historyData.initiatedFrom === 'in-progress');
 
                     const rejectChangesBtn = document.getElementById('rejectChangesBtn');
                     if (rejectChangesBtn) {
