@@ -927,7 +927,7 @@
         // История нужна в двух сценариях:
         // 1) изменения уже подписанных целей (из "На выполнении")
         // 2) повторная отправка после возврата HR на доработку
-        const shouldCreateHistory = hasHRComment || effectivePreviousStatus === 'in-progress';
+        const shouldCreateHistory = hasHRComment || effectivePreviousStatus === 'in-progress' || effectivePreviousStatus === 'sign';
 
         if (shouldCreateHistory) {
           // Процесс создаётся только при изменении уже подписанных целей (статус "На выполнении")

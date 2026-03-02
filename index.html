@@ -1255,11 +1255,17 @@
 
       function checkActiveProcess(employeeName) {
         const key = employeeName.replace(/\s+/g, '-');
+        const statusKey = `goals-status-${key}`;
+        const currentStatus = localStorage.getItem(statusKey);
         const history = localStorage.getItem(`goals-history-${key}`);
+        if (currentStatus === 'in-progress') {
+          return true;
+        }
         if (history) {
           const data = JSON.parse(history);
           const validStatus = data.status === 'review' || data.status === 'rejected' || data.status === 'completed';
-          return validStatus && data.initiatedFrom === 'in-progress';
+          const validInitiatedFrom = data.initiatedFrom === 'in-progress' || data.initiatedFrom === 'sign';
+          return validStatus && validInitiatedFrom;
         }
         return false;
       }
@@ -1368,7 +1374,7 @@
           if (!historyRaw) return false;
           const h = JSON.parse(historyRaw);
           const validStatus = h.status === 'review' || h.status === 'rejected' || h.status === 'completed';
-          return validStatus && h.initiatedFrom === 'in-progress';
+          return validStatus && (h.initiatedFrom === 'in-progress' || h.initiatedFrom === 'sign');
         })();
 
         // Актуальный процесс "Выполнение целей" в реестре показываем,
@@ -1394,7 +1400,7 @@
         if (historyRaw) {
           const h = JSON.parse(historyRaw);
           const validStatus = h.status === 'review' || h.status === 'rejected' || h.status === 'completed';
-          if (validStatus && h.initiatedFrom === 'in-progress') {
+          if (validStatus && (h.initiatedFrom === 'in-progress' || h.initiatedFrom === 'sign')) {
             processes.push({
               id: 'main',
               type: 'Изменение целей',

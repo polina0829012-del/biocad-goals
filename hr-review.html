@@ -1244,15 +1244,12 @@
                     const rightBtns = buttonGroup.querySelector('.right-buttons');
                     if (rightBtns) rightBtns.style.display = 'none';
                 } else {
-                    // Кнопка "Отклонить изменения" — только если цели меняли из "На подписании" или "На выполнении"
-                    const savedPreviousStatus = localStorage.getItem(previousStatusKey);
-                    const isChangeFromSigned = savedPreviousStatus === 'sign' || savedPreviousStatus === 'in-progress';
+                    // Кнопка "Отклонить изменения" — если это пересогласование с реальной историей изменений
                     const isChangeReview =
                         currentStatus === 'review' &&
                         historyData &&
                         Array.isArray(historyData.previousGoals) &&
-                        historyData.previousGoals.length > 0 &&
-                        isChangeFromSigned;
+                        historyData.previousGoals.length > 0;
 
                     const rejectChangesBtn = document.getElementById('rejectChangesBtn');
                     if (rejectChangesBtn) {
