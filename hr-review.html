@@ -725,6 +725,7 @@
             const statusKey = `goals-status-${employeeKey}`;
             const commentKey = `goals-comment-${employeeKey}`;
             const historyKey = `goals-history-${employeeKey}`;
+            const historyArchiveKey = `goals-history-archive-${employeeKey}`;
             const managerReworkCommentKey = `goals-manager-rework-${employeeKey}`;
             const previousStatusKey = `goals-previous-status-${employeeKey}`;
             const evaluationKey = `goals-evaluation-${employeeKey}`;
@@ -1191,6 +1192,7 @@
                         if (historyData) {
                             historyData.status = 'completed';
                             localStorage.setItem(historyKey, JSON.stringify(historyData));
+                            localStorage.setItem(historyArchiveKey, JSON.stringify(historyData));
                         }
 
                         // Очищаем комментарий руководителя к изменениям для нового цикла
@@ -1225,6 +1227,7 @@
                         if (historyData) {
                             historyData.status = 'rejected';
                             localStorage.setItem(historyKey, JSON.stringify(historyData));
+                            localStorage.setItem(historyArchiveKey, JSON.stringify(historyData));
                         }
 
                         // Очищаем временные комментарии
@@ -1296,6 +1299,7 @@
                 if (historyData) {
                     historyData.status = 'rejected';
                     localStorage.setItem(historyKey, JSON.stringify(historyData));
+                    localStorage.setItem(historyArchiveKey, JSON.stringify(historyData));
                 }
 
                 // Очищаем комментарий руководителя к изменениям

@@ -1811,6 +1811,7 @@
       const signGoalsKey = `goals-sign-${employeeKey}`;
       const signedGoalsKey = `goals-signed-${employeeKey}`; // для хранения оригинальных подписанных целей
       const historyKey = `goals-history-${employeeKey}`;
+      const historyArchiveKey = `goals-history-archive-${employeeKey}`;
       const originalGoalsKey = `goals-original-${employeeKey}`;
       const managerReworkCommentKey = `goals-manager-rework-${employeeKey}`; // для комментария руководителя
       const previousStatusKey = `goals-previous-status-${employeeKey}`; // для отката статуса при отклонении изменений HR
@@ -1910,18 +1911,58 @@
       }
 
       function getPostSignChangeProcess() {
-        const historyData = JSON.parse(localStorage.getItem(historyKey));
+        const historyData =
+          JSON.parse(localStorage.getItem(historyKey)) ||
+          JSON.parse(localStorage.getItem(historyArchiveKey));
         if (!historyData) return null;
 
-        const hasSignedGoals = !!(localStorage.getItem(signedGoalsKey) || localStorage.getItem(signGoalsKey));
         const hasProcessStatus = historyData.status === 'review' || historyData.status === 'rejected' || historyData.status === 'completed';
-        const createdFromInProgress = historyData.initiatedFrom === 'in-progress';
+        const createdFromSignedFlow = historyData.initiatedFrom === 'in-progress' || historyData.initiatedFrom === 'sign';
 
-        if (!hasSignedGoals || !hasProcessStatus || !createdFromInProgress) {
+        if (!hasProcessStatus || !createdFromSignedFlow) {
           return null;
         }
 
         return historyData;
+      }
+
+      function getHistoryProcessForDisplay() {
+        const historyData =
+          JSON.parse(localStorage.getItem(historyKey)) ||
+          JSON.parse(localStorage.getItem(historyArchiveKey));
+        if (!historyData) return null;
+
+        const hasProcessStatus =
+          historyData.status === 'review' ||
+          historyData.status === 'rejected' ||
+          historyData.status === 'completed';
+        const hasAnyGoalsPayload =
+          Array.isArray(historyData.previousGoals) ||
+          Array.isArray(historyData.currentGoals);
+
+        if (!hasProcessStatus || !hasAnyGoalsPayload) {
+          return null;
+        }
+
+        return historyData;
+      }
+
+      function getAnySavedHistoryProcess() {
+        const historyData =
+          JSON.parse(localStorage.getItem(historyKey)) ||
+          JSON.parse(localStorage.getItem(historyArchiveKey));
+        if (!historyData) return null;
+
+        const hasPrevious = Array.isArray(historyData.previousGoals) && historyData.previousGoals.length > 0;
+        const hasCurrent = Array.isArray(historyData.currentGoals) && historyData.currentGoals.length > 0;
+        if (!hasPrevious && !hasCurrent) {
+          return null;
+        }
+
+        return {
+          ...historyData,
+          status: historyData.status || 'completed'
+        };
       }
 
       // Toggle collapse state for a goal
@@ -2305,6 +2346,8 @@
         const summaryByItem = document.getElementById('summaryByItem');
         const signByDate = document.getElementById('signByDate');
         const summaryByDate = document.getElementById('summaryByDate');
+        const processCount = loadProcesses().length;
+        const hasProcessButton = processCount >= 2;
 
         let buttons = '';
 
@@ -2344,8 +2387,7 @@
             `;
           } else if (status === 'passed' || status === 'failed') {
             statusMessage.style.display = 'none';
-            const hasChangeProcess = !!getPostSignChangeProcess();
-            const processBtnHtml = hasChangeProcess ? '<button class="btn btn-process" id="processBtn">Процессы</button>' : '';
+            const processBtnHtml = hasProcessButton ? '<button class="btn btn-process" id="processBtn">Процессы</button>' : '';
             buttons = `
               <div class="left-buttons">
                 <button class="btn btn-back" id="backBtn">Выйти</button>
@@ -2373,8 +2415,7 @@
         if (role === 'superior') {
           statusMessage.style.display = 'none';
           if (status === 'passed' || status === 'failed') {
-            const hasChangeProcess = !!getPostSignChangeProcess();
-            const processBtnHtml = hasChangeProcess ? '<button class="btn btn-process" id="processBtn">Процессы</button>' : '';
+            const processBtnHtml = hasProcessButton ? '<button class="btn btn-process" id="processBtn">Процессы</button>' : '';
             buttons = `
               <div class="left-buttons">
                 <button class="btn btn-back" id="backBtn">Выйти</button>
@@ -2564,8 +2605,7 @@
 
         } else if ((status === 'passed' || status === 'failed') && role === 'manager') {
           statusMessage.style.display = 'none';
-          const hasChangeProcess = !!getPostSignChangeProcess();
-          const processBtnHtml = hasChangeProcess ? '<button class="btn btn-process" id="processBtn">Процессы</button>' : '';
+          const processBtnHtml = hasProcessButton ? '<button class="btn btn-process" id="processBtn">Процессы</button>' : '';
           buttons = `
             <div class="left-buttons">
               <button class="btn btn-back" id="backBtn">Выйти</button>
@@ -2730,7 +2770,37 @@
         const summaryBtn = document.getElementById('summaryBtn');
         if (summaryBtn) {
           summaryBtn.addEventListener('click', () => {
-            document.getElementById('summaryModal').style.display = 'flex';
+            const summaryModalEl = document.getElementById('summaryModal');
+            const postSignProcess = getPostSignChangeProcess();
+            const hasActiveChangeProcess = !!(postSignProcess && postSignProcess.status === 'review');
+            if (hasActiveChangeProcess) {
+              const shouldCancel = confirm(
+                'У вас есть активный процесс по изменению целей. Вы точно хотите подвести итоги сейчас? В этом случае процесс изменения будет отменен.'
+              );
+              if (!shouldCancel) {
+                return;
+              }
+
+              // Отменяем активный процесс изменений, но сохраняем его как "прошлую версию"
+              // (чтобы он продолжал отображаться в конечных статусах в модалке "Процессы")
+              const activeHistoryData = JSON.parse(localStorage.getItem(historyKey));
+              if (activeHistoryData) {
+                activeHistoryData.status = 'closed';
+                localStorage.setItem(historyKey, JSON.stringify(activeHistoryData));
+                localStorage.setItem(historyArchiveKey, JSON.stringify(activeHistoryData));
+              }
+
+              // Возвращаем форму в "На выполнении" перед подведением итогов
+              localStorage.removeItem(managerReworkCommentKey);
+              localStorage.removeItem(previousStatusKey);
+              localStorage.removeItem(`goals-comment-${employeeKey}`);
+              localStorage.setItem(statusKey, 'in-progress');
+
+              // Сразу после подтверждения показываем выбор итога ИС
+              summaryModalEl.style.display = 'flex';
+              return;
+            }
+            summaryModalEl.style.display = 'flex';
           });
         }
 
@@ -2764,8 +2834,15 @@
         if (approveBtn) {
           approveBtn.addEventListener('click', () => {
             localStorage.setItem(statusKey, 'sign');
-            // Clear history and manager comment when approving
-            localStorage.removeItem(historyKey);
+            // Сохраняем историю изменений в архив (если она была), чтобы она не терялась в финальных статусах
+            const historyData = JSON.parse(localStorage.getItem(historyKey));
+            if (historyData && Array.isArray(historyData.previousGoals) && historyData.previousGoals.length > 0) {
+              historyData.status = 'completed';
+              localStorage.setItem(historyKey, JSON.stringify(historyData));
+              localStorage.setItem(historyArchiveKey, JSON.stringify(historyData));
+            } else {
+              localStorage.removeItem(historyKey);
+            }
             localStorage.removeItem(originalGoalsKey);
             localStorage.removeItem(managerReworkCommentKey);
             alert('Цели успешно согласованы');
@@ -3249,9 +3326,7 @@
         const signedParsed = signedRaw ? JSON.parse(signedRaw) : null;
         const signedGoals = signedParsed && Array.isArray(signedParsed.goals) ? signedParsed.goals : [];
 
-        const historyData = getPostSignChangeProcess();
-        if (historyData) {
-          // Актуальный процесс показываем только когда есть пост-подписный процесс изменений
+        if (signedGoals.length > 0 && (status === 'in-progress' || status === 'passed' || status === 'failed')) {
           processes.push({
             id: 'active',
             timestamp: new Date().toISOString(),
@@ -3260,7 +3335,13 @@
             status: 'active',
             type: 'Выполнение целей'
           });
+        }
 
+        let historyData = getPostSignChangeProcess();
+        if (!historyData && (status === 'passed' || status === 'failed')) {
+          historyData = getAnySavedHistoryProcess();
+        }
+        if (historyData) {
           processes.push({
             id: 'main',
             timestamp: historyData.timestamp,
@@ -3287,18 +3368,21 @@
         processes.forEach((process, index) => {
           const statusClass = process.status === 'review' ? 'review' : 
                              process.status === 'rejected' ? 'rejected' : 
-                             process.status === 'completed' ? 'completed' : 
+                             process.status === 'completed' ? 'completed' :
+                             process.status === 'closed' ? 'completed' :
                              process.status === 'active' ? 'active' : '';
           
           const statusText = process.status === 'review' ? 'На согласовании у HR' :
                             process.status === 'rejected' ? 'Отклонен HR' :
                             process.status === 'completed' ? 'Прошлая версия' :
+                            process.status === 'closed' ? 'Прошлая версия' :
                             process.status === 'active' ? 'Актуальный' :
                             'Неизвестно';
           
           const statusColor = process.status === 'review' ? '#FF8D28' :
                              process.status === 'rejected' ? '#FF383C' :
                              process.status === 'completed' ? '#2563EB' :
+                             process.status === 'closed' ? '#64748B' :
                              process.status === 'active' ? '#34C759' :
                              '#64748B';
           
@@ -3399,23 +3483,27 @@
         }
       }
 
-      function openProcess(processId, status) {
+      function openProcess(processId, processStatus) {
         // Закрываем модалку процессов
         document.getElementById('processesModal').style.display = 'none';
-        
-        if (status === 'active') {
-          // Переход к актуальным целям "На выполнении"
-          window.location.href = `review-goals.html?employee=${encodeURIComponent(employeeName)}&status=in-progress&role=manager`;
-        } else if (status === 'review') {
+        const currentFormStatus = status;
+
+        if (processId === 'active' || processStatus === 'active') {
+          // Просмотр процесса "Актуальный" в отдельном process-view экране
+          window.location.href = `review-process.html?employee=${encodeURIComponent(employeeName)}&process=${processId}&mode=active&role=${encodeURIComponent(role)}&formStatus=${encodeURIComponent(currentFormStatus)}`;
+        } else if (processStatus === 'review') {
           // Статус "На согласовании" - показываем цели в режиме просмотра как у HR
           // Перенаправляем на специальную страницу просмотра процесса
-          window.location.href = `review-process.html?employee=${encodeURIComponent(employeeName)}&process=${processId}&mode=review`;
-        } else if (status === 'rejected') {
+          window.location.href = `review-process.html?employee=${encodeURIComponent(employeeName)}&process=${processId}&mode=review&role=${encodeURIComponent(role)}&formStatus=${encodeURIComponent(currentFormStatus)}`;
+        } else if (processStatus === 'rejected') {
           // Статус "Отклонен HR" - показываем ту версию, которую хотел изменить руководитель
-          window.location.href = `review-process.html?employee=${encodeURIComponent(employeeName)}&process=${processId}&mode=rejected`;
-        } else if (status === 'completed') {
+          window.location.href = `review-process.html?employee=${encodeURIComponent(employeeName)}&process=${processId}&mode=rejected&role=${encodeURIComponent(role)}&formStatus=${encodeURIComponent(currentFormStatus)}`;
+        } else if (processStatus === 'completed') {
           // Статус "Успешно завершено" - показываем итоговую версию
-          window.location.href = `review-process.html?employee=${encodeURIComponent(employeeName)}&process=${processId}&mode=completed`;
+          window.location.href = `review-process.html?employee=${encodeURIComponent(employeeName)}&process=${processId}&mode=completed&role=${encodeURIComponent(role)}&formStatus=${encodeURIComponent(currentFormStatus)}`;
+        } else if (processStatus === 'closed') {
+          // Статус "Закрыт" - процесс завершён без согласования/подписания
+          window.location.href = `review-process.html?employee=${encodeURIComponent(employeeName)}&process=${processId}&mode=closed&role=${encodeURIComponent(role)}&formStatus=${encodeURIComponent(currentFormStatus)}`;
         }
       }
 

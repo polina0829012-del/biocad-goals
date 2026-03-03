@@ -1191,6 +1191,7 @@
           const hasComment = localStorage.getItem(commentKey);
           
           const hasActiveProcess = checkActiveProcess(emp.name);
+          const hasRegistryProcesses = hasProcessesForRegistry(emp.name, emp.status);
 
           // Базовый текст статуса
           let statusText = getStatusText(emp.status);
@@ -1217,7 +1218,7 @@
           // Кнопка "Процессы" только при изменении целей из статуса "На выполнении" (до этого цели не подписаны, нет юридической силы)
           const canShowProcesses =
             currentRole !== 'employee' &&
-            hasActiveProcess &&
+            hasRegistryProcesses &&
             emp.status !== 'passed' &&
             emp.status !== 'failed';
           if (canShowProcesses) {
@@ -1268,6 +1269,34 @@
           return validStatus && validInitiatedFrom;
         }
         return false;
+      }
+
+      function hasProcessesForRegistry(employeeName, fallbackStatus) {
+        const key = employeeName.replace(/\s+/g, '-');
+        const statusKey = `goals-status-${key}`;
+        const currentStatus = localStorage.getItem(statusKey) || fallbackStatus;
+        const historyRaw = localStorage.getItem(`goals-history-${key}`);
+        const hasSignedGoals = !!(localStorage.getItem(`goals-signed-${key}`) || localStorage.getItem(`goals-sign-${key}`));
+        let processCount = 0;
+        const hasPostSignHistory = (() => {
+          if (!historyRaw) return false;
+          const h = JSON.parse(historyRaw);
+          const validStatus = h.status === 'review' || h.status === 'rejected' || h.status === 'completed' || h.status === 'closed';
+          return validStatus && h.initiatedFrom === 'in-progress';
+        })();
+
+        // "Актуальный" процесс
+        if (hasSignedGoals && (currentStatus === 'in-progress' || currentStatus === 'passed' || currentStatus === 'failed' || hasPostSignHistory)) {
+          processCount += 1;
+        }
+
+        // Исторический процесс изменений после "На выполнении"
+        if (hasPostSignHistory) {
+          processCount += 1;
+        }
+
+        // Кнопка "Процессы" появляется только если процессов 2+
+        return processCount >= 2;
       }
 
       function applyFilterPanelFilters(employees) {
@@ -1386,7 +1415,7 @@
         const signedParsed = signedGoals ? JSON.parse(signedGoals) : null;
         const signedGoalsList = signedParsed && Array.isArray(signedParsed.goals) ? signedParsed.goals : [];
 
-        if (signedGoals && hasPostSignHistory) {
+        if (signedGoals && (currentStatus === 'in-progress' || currentStatus === 'passed' || currentStatus === 'failed' || hasPostSignHistory)) {
           processes.push({
             id: 'active',
             type: 'Выполнение целей',
@@ -1400,7 +1429,7 @@
         if (historyRaw) {
           const h = JSON.parse(historyRaw);
           const validStatus = h.status === 'review' || h.status === 'rejected' || h.status === 'completed';
-          if (validStatus && (h.initiatedFrom === 'in-progress' || h.initiatedFrom === 'sign')) {
+          if (validStatus && h.initiatedFrom === 'in-progress') {
             processes.push({
               id: 'main',
               type: 'Изменение целей',
@@ -1637,18 +1666,20 @@
       window.openRegistryProcess = function(processId, status) {
         if (!registryProcessesEmployee) return;
         const name = registryProcessesEmployee.name;
+        const key = name.replace(/\s+/g, '-');
+        const actualFormStatus = localStorage.getItem(`goals-status-${key}`) || registryProcessesEmployee.status || '';
 
         // Закрываем модалку перед переходом
         document.getElementById('registryProcessesModal').style.display = 'none';
 
-        if (status === 'active') {
-          window.location.href = `review-goals.html?employee=${encodeURIComponent(name)}&status=in-progress&role=manager`;
+        if (processId === 'active' || status === 'active') {
+          window.location.href = `review-process.html?employee=${encodeURIComponent(name)}&process=${encodeURIComponent(processId)}&mode=active&role=${encodeURIComponent(currentRole)}&formStatus=${encodeURIComponent(actualFormStatus)}`;
         } else if (status === 'review') {
-          window.location.href = `review-process.html?employee=${encodeURIComponent(name)}&process=${encodeURIComponent(processId)}&mode=review`;
+          window.location.href = `review-process.html?employee=${encodeURIComponent(name)}&process=${encodeURIComponent(processId)}&mode=review&role=${encodeURIComponent(currentRole)}&formStatus=${encodeURIComponent(actualFormStatus)}`;
         } else if (status === 'rejected') {
-          window.location.href = `review-process.html?employee=${encodeURIComponent(name)}&process=${encodeURIComponent(processId)}&mode=rejected`;
+          window.location.href = `review-process.html?employee=${encodeURIComponent(name)}&process=${encodeURIComponent(processId)}&mode=rejected&role=${encodeURIComponent(currentRole)}&formStatus=${encodeURIComponent(actualFormStatus)}`;
         } else if (status === 'completed') {
-          window.location.href = `review-process.html?employee=${encodeURIComponent(name)}&process=${encodeURIComponent(processId)}&mode=completed`;
+          window.location.href = `review-process.html?employee=${encodeURIComponent(name)}&process=${encodeURIComponent(processId)}&mode=completed&role=${encodeURIComponent(currentRole)}&formStatus=${encodeURIComponent(actualFormStatus)}`;
         }
       };
 
@@ -1680,6 +1711,7 @@
           
           // ВАЖНО: Удаляем историю и оригиналы, чтобы при следующей отправке не было старых данных
           localStorage.removeItem(`goals-history-${base}`);
+          localStorage.removeItem(`goals-history-archive-${base}`);
           localStorage.removeItem(`goals-original-${base}`);
           localStorage.removeItem(`goals-close-date-${base}`);
         });

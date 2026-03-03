@@ -117,6 +117,16 @@
       color: #34C759;
     }
 
+    .badge-closed {
+      background: #F1F5F9;
+      color: #475569;
+    }
+
+    .badge-active {
+      background: #E7F2FF;
+      color: #2563EB;
+    }
+
     .process-message {
       display: flex;
       flex-direction: column;
@@ -143,6 +153,14 @@
       border-left-color: #34C759;
     }
 
+    .process-message.closed {
+      border-left-color: #64748B;
+    }
+
+    .process-message.active {
+      border-left-color: #2563EB;
+    }
+
     .process-message .title {
       font-family: 'Inter';
       font-weight: 700;
@@ -159,6 +177,14 @@
 
     .process-message.completed .title {
       color: #34C759;
+    }
+
+    .process-message.closed .title {
+      color: #475569;
+    }
+
+    .process-message.active .title {
+      color: #2563EB;
     }
 
     .process-message .text {
@@ -218,6 +244,19 @@
       font-size: 10px;
       padding: 2px 8px;
       border-radius: 12px;
+    }
+
+    .split-view.active-mode .old-version {
+      display: none;
+    }
+
+    .split-view.active-mode .new-version {
+      flex: 1;
+    }
+
+    .split-view.active-mode .new-version::before {
+      content: "Текущая форма целей";
+      background: #2563EB;
     }
 
     .goal-card-process {
@@ -396,8 +435,8 @@
       </div>
 
       <div class="comparison-section">
-        <div class="comparison-title">Сравнение версий целей</div>
-        <div class="split-view">
+        <div class="comparison-title" id="comparisonTitle">Сравнение версий целей</div>
+        <div class="split-view" id="splitView">
           <div class="old-version" id="oldVersion"></div>
           <div class="new-version" id="newVersion"></div>
         </div>
@@ -410,10 +449,10 @@
 
       <div class="button-group">
         <div class="left-buttons">
-          <button class="btn btn-back" id="backBtn">Назад</button>
+          <button class="btn btn-back" id="backBtn">Выйти</button>
         </div>
         <div class="right-buttons">
-          <button class="btn btn-return" id="returnBtn" style="display: none;">Перейти к подписанным целям</button>
+          <button class="btn btn-return" id="returnBtn" style="display: none;">Перейти к форме с целями</button>
         </div>
       </div>
     </div>
@@ -433,18 +472,23 @@
         throw new Error('employee required');
       }
       const processId = urlParams.get('process') || 'main';
-      const mode = urlParams.get('mode') || 'review'; // review, rejected, completed
+      const mode = urlParams.get('mode') || 'review'; // active, review, rejected, completed, closed
+      const role = urlParams.get('role') || 'manager';
+      const formStatus = urlParams.get('formStatus') || '';
       const employeeKey = employeeName.replace(/\s+/g, '-');
 
       document.getElementById('employeeName').textContent = employeeName;
 
       const historyKey = `goals-history-${employeeKey}`;
+      const historyArchiveKey = `goals-history-archive-${employeeKey}`;
       const signedGoalsKey = `goals-signed-${employeeKey}`;
+      const signGoalsKey = `goals-sign-${employeeKey}`;
 
       // Загружаем данные процесса
-      const historyData = JSON.parse(localStorage.getItem(historyKey));
+      let historyData = JSON.parse(localStorage.getItem(historyKey)) || JSON.parse(localStorage.getItem(historyArchiveKey));
+      const signedData = JSON.parse(localStorage.getItem(signedGoalsKey) || localStorage.getItem(signGoalsKey) || '{"goals":[]}');
 
-      if (!historyData) {
+      if (!historyData && mode !== 'active') {
         alert('Данные процесса не найдены');
         window.location.href = 'index.html';
       }
@@ -455,7 +499,15 @@
       let messageTitle = '';
       let messageText = '';
 
-      if (mode === 'review') {
+      if (mode === 'active') {
+        statusText = 'Актуальный процесс';
+        statusClass = 'badge-active';
+        messageTitle = 'Это экран процесса, а не форма целей';
+        messageText = 'Здесь доступен только просмотр текущей версии целей. Для действий с формой используйте кнопку "Перейти к форме с целями".';
+        document.getElementById('comparisonTitle').textContent = 'Текущая версия целей';
+        document.getElementById('splitView').classList.add('active-mode');
+        document.getElementById('returnBtn').style.display = 'block';
+      } else if (mode === 'review') {
         statusText = 'На согласовании у HR';
         statusClass = 'badge-review';
         messageTitle = 'Процесс на согласовании';
@@ -472,7 +524,13 @@
         statusClass = 'badge-completed';
         messageTitle = 'Процесс успешно завершен';
         messageText = 'Изменения были согласованы и подписаны. Теперь это действующая версия целей.';
-        document.getElementById('returnBtn').style.display = 'none';
+        document.getElementById('returnBtn').style.display = 'block';
+      } else if (mode === 'closed') {
+        statusText = 'Закрыт';
+        statusClass = 'badge-closed';
+        messageTitle = 'Процесс закрыт';
+        messageText = 'Процесс изменения целей закрыт без согласования и подписания изменений.';
+        document.getElementById('returnBtn').style.display = 'block';
       }
 
       document.getElementById('processStatus').innerHTML = `<span class="process-status-badge ${statusClass}">${statusText}</span>`;
@@ -481,16 +539,30 @@
       document.getElementById('messageText').textContent = messageText;
 
       // Устанавливаем дату
-      if (historyData.timestamp) {
+      if (historyData && historyData.timestamp) {
         document.getElementById('processDate').textContent = new Date(historyData.timestamp).toLocaleString('ru-RU');
+      } else {
+        document.getElementById('processDate').textContent = new Date().toLocaleString('ru-RU');
       }
 
       // Устанавливаем комментарий
-      document.getElementById('managerComment').textContent = historyData.managerComment || 'Комментарий отсутствует';
+      const commentSection = document.getElementById('commentSection');
+      if (mode === 'active') {
+        // В "Актуальном процессе" комментарий руководителя не отображаем
+        commentSection.style.display = 'none';
+      } else {
+        commentSection.style.display = 'block';
+        document.getElementById('managerComment').textContent = (historyData && historyData.managerComment) || 'Комментарий отсутствует';
+      }
 
       // Рендерим версии
-      renderOldVersion(historyData.previousGoals || []);
-      renderNewVersion(historyData.currentGoals || []);
+      if (mode === 'active') {
+        renderOldVersion([]);
+        renderNewVersion((signedData && Array.isArray(signedData.goals)) ? signedData.goals : []);
+      } else {
+        renderOldVersion((historyData && historyData.previousGoals) || []);
+        renderNewVersion((historyData && historyData.currentGoals) || []);
+      }
 
       function formatDate(dateString) {
         if (!dateString) return '—';
@@ -562,17 +634,28 @@
         container.innerHTML = html;
       }
 
-      document.getElementById('backBtn').addEventListener('click', () => {
-        if (window.history.length > 1) {
-          window.history.back();
-        } else {
-          window.location.href = 'index.html';
+      function resolveTargetFormStatus() {
+        if (formStatus === 'passed' || formStatus === 'failed') {
+          return formStatus;
         }
+        const currentStatus = localStorage.getItem(`goals-status-${employeeKey}`) || 'in-progress';
+        return (currentStatus === 'passed' || currentStatus === 'failed') ? currentStatus : 'in-progress';
+      }
+
+      function goToForm() {
+        const targetStatus = resolveTargetFormStatus();
+        window.location.href =
+          'review-goals.html?employee=' + encodeURIComponent(employeeName) +
+          '&status=' + encodeURIComponent(targetStatus) +
+          '&role=' + encodeURIComponent(role);
+      }
+
+      document.getElementById('backBtn').addEventListener('click', () => {
+        goToForm();
       });
 
       document.getElementById('returnBtn').addEventListener('click', () => {
-        // Возвращаемся к подписанным целям
-        window.location.href = 'review-goals.html?employee=' + encodeURIComponent(employeeName) + '&status=in-progress&role=manager';
+        goToForm();
       });
     </script>
   </main>
