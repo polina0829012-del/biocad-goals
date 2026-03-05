@@ -2399,6 +2399,20 @@
         const processCount = loadProcesses().length;
         const hasProcessButton = processCount >= 2;
 
+        // Базовый статус в шапке для всех ролей.
+        // Для manager в "На выполнении" он может быть переопределен ниже тултипом.
+        if (status === 'review') {
+          statusValue.textContent = 'На согласовании';
+        } else if (status === 'sign') {
+          statusValue.textContent = 'На подписании';
+        } else if (status === 'passed') {
+          statusValue.textContent = 'ИС пройден';
+        } else if (status === 'failed') {
+          statusValue.textContent = 'ИС не пройден';
+        } else if (status === 'in-progress') {
+          statusValue.textContent = 'На выполнении';
+        }
+
         let buttons = '';
 
         if (signByItem && summaryByItem && signByDate && summaryByDate) {
