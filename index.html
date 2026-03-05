@@ -527,6 +527,31 @@
       opacity: 1;
     }
 
+    .action-tooltip .tooltip-text {
+      width: 320px;
+      margin-left: -160px;
+    }
+
+    .action-with-alert {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .action-alert-bell {
+      width: 14px;
+      height: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .action-alert-bell svg {
+      width: 14px;
+      height: 14px;
+      fill: #EE4A3F;
+    }
+
     .action-btn {
       background: none;
       border: none;
@@ -902,6 +927,11 @@
       border-radius: 12px;
     }
 
+    .new-version-process.no-version-label::before {
+      content: none;
+      display: none;
+    }
+
     .goal-item-process {
       margin-bottom: 16px;
       padding-bottom: 16px;
@@ -1195,9 +1225,9 @@
 
           // Базовый текст статуса
           let statusText = getStatusText(emp.status);
-          // Для руководителя и сотрудника: при процессе изменений из "На выполнении"
-          // отображаем статус как "На выполнении" в реестре
-          if ((currentRole === 'manager' || currentRole === 'employee') && emp.status === 'review' && hasActiveProcess) {
+          // При процессе изменений после "На выполнении"
+          // до финального статуса в реестре всегда показываем "На выполнении"
+          if (hasActiveProcess && emp.status !== 'passed' && emp.status !== 'failed') {
             statusText = 'На выполнении';
           }
 
@@ -1240,6 +1270,36 @@
           let iconSvg = emp.status === 'draft' && currentRole === 'manager'
             ? '<svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
             : '<svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 12C1 12 5.5 4 12 4C18.5 4 23 12 23 12C23 12 18.5 20 12 20C5.5 20 1 12 1 12Z" stroke="#94A3B8" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="#94A3B8" stroke-width="1.5"/></svg>';
+          const actionButtonHtml = `<button class="action-btn" onclick="handleAction('${emp.name}', '${emp.status}')">${iconSvg}</button>`;
+          const employeeKey = emp.name.replace(/\s+/g, '-');
+          const processHistoryRaw = localStorage.getItem(`goals-history-${employeeKey}`);
+          let processHistoryData = null;
+          if (processHistoryRaw) {
+            try {
+              processHistoryData = JSON.parse(processHistoryRaw);
+            } catch (e) {
+              processHistoryData = null;
+            }
+          }
+          const showHrResubmitTooltip =
+            currentRole === 'hr' &&
+            emp.status === 'review' &&
+            hasActiveProcess;
+          const showManagerSignTooltip =
+            currentRole === 'manager' &&
+            emp.status === 'sign' &&
+            !!processHistoryData &&
+            processHistoryData.initiatedFrom === 'in-progress' &&
+            (processHistoryData.status === 'completed' || processHistoryData.status === 'sign');
+          const actionTooltipText = showHrResubmitTooltip
+            ? 'Требуется действие! Руководитель изменил цели, необходимо повторное согласование'
+            : showManagerSignTooltip
+              ? 'Требуется действие! HR согласовал новую версию формы, необходимо ее подписать'
+              : '';
+          const shouldShowActionAlert = showHrResubmitTooltip || showManagerSignTooltip;
+          const actionCellHtml = shouldShowActionAlert
+            ? `<span class="tooltip action-tooltip"><span class="action-with-alert">${actionButtonHtml}<span class="action-alert-bell" aria-hidden="true"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z"/><path d="M13.73 21C13.5542 21.3031 13.3019 21.5547 12.9982 21.7295C12.6946 21.9044 12.3504 21.9965 12 21.9965C11.6496 21.9965 11.3054 21.9044 11.0018 21.7295C10.6982 21.5547 10.4458 21.3031 10.27 21"/></svg></span></span><span class="tooltip-text">${actionTooltipText}</span></span>`
+            : actionButtonHtml;
           
           return `
             <tr class="employee-row" data-status="${emp.status}" data-position="${emp.positionCode}" data-end-date="${emp.endDate}" data-close-date="${emp.closeDate || ''}">
@@ -1248,7 +1308,7 @@
               <td>${formatDate(emp.endDate)}</td>
               <td><span class="${closeDateClass}">${closeDateDisplay}</span></td>
               <td>${statusDisplay}</td>
-              <td><button class="action-btn" onclick="handleAction('${emp.name}', '${emp.status}')">${iconSvg}</button></td>
+              <td>${actionCellHtml}</td>
             </tr>
           `;
         }).join('');
@@ -1264,7 +1324,7 @@
         }
         if (history) {
           const data = JSON.parse(history);
-          const validStatus = data.status === 'review' || data.status === 'rejected' || data.status === 'completed';
+          const validStatus = data.status === 'review' || data.status === 'rejected' || data.status === 'sign' || data.status === 'completed';
           const validInitiatedFrom = data.initiatedFrom === 'in-progress';
           return validStatus && validInitiatedFrom;
         }
@@ -1281,7 +1341,7 @@
         const hasPostSignHistory = (() => {
           if (!historyRaw) return false;
           const h = JSON.parse(historyRaw);
-          const validStatus = h.status === 'review' || h.status === 'rejected' || h.status === 'completed' || h.status === 'closed';
+          const validStatus = h.status === 'review' || h.status === 'rejected' || h.status === 'sign';
           return validStatus && h.initiatedFrom === 'in-progress';
         })();
 
@@ -1402,7 +1462,7 @@
         const hasPostSignHistory = (() => {
           if (!historyRaw) return false;
           const h = JSON.parse(historyRaw);
-          const validStatus = h.status === 'review' || h.status === 'rejected' || h.status === 'completed';
+          const validStatus = h.status === 'review' || h.status === 'rejected' || h.status === 'sign' || h.status === 'completed';
           return validStatus && h.initiatedFrom === 'in-progress';
         })();
 
@@ -1416,9 +1476,13 @@
         const signedGoalsList = signedParsed && Array.isArray(signedParsed.goals) ? signedParsed.goals : [];
 
         if (signedGoals && (currentStatus === 'in-progress' || currentStatus === 'passed' || currentStatus === 'failed' || hasPostSignHistory)) {
+          const hasFinalizedProcess = !!historyRaw && (() => {
+            const h = JSON.parse(historyRaw);
+            return h && h.initiatedFrom === 'in-progress' && h.status === 'completed';
+          })();
           processes.push({
             id: 'active',
-            type: 'Выполнение целей',
+            type: hasFinalizedProcess ? 'Версия формы 2' : 'Версия формы 1',
             status: 'active',
             timestamp: new Date().toISOString(),
             managerComment: '',
@@ -1428,11 +1492,11 @@
 
         if (historyRaw) {
           const h = JSON.parse(historyRaw);
-          const validStatus = h.status === 'review' || h.status === 'rejected' || h.status === 'completed';
+          const validStatus = h.status === 'review' || h.status === 'rejected' || h.status === 'sign' || h.status === 'completed';
           if (validStatus && h.initiatedFrom === 'in-progress') {
             processes.push({
               id: 'main',
-              type: 'Изменение целей',
+              type: h.status === 'completed' ? 'Версия формы 1' : 'Версия формы 2',
               status: h.status || 'review',
               timestamp: h.timestamp,
               managerComment: h.managerComment || 'Инициирован процесс изменения целей',
@@ -1457,6 +1521,10 @@
         }
 
         let html = '<div class="processes-container">';
+        const version2IsActual = processes.some(process =>
+          process.type === 'Версия формы 2' &&
+          (process.id === 'active' || process.status === 'completed')
+        );
 
         processes.forEach((process, index) => {
           let statusText = '';
@@ -1467,13 +1535,16 @@
           } else if (process.status === 'rejected') {
             statusText = 'Отклонен HR';
             statusClass = 'rejected';
+          } else if (process.status === 'sign') {
+            statusText = 'На подписании';
+            statusClass = 'completed';
           } else if (process.status === 'completed') {
-            // Завершённый процесс изменения целей по сути описывает предыдущую версию
-            statusText = 'Прошлая версия';
+            // После подписания новой версии обе версии помечаем как успешно завершенные
+            statusText = 'Успешно завершено';
             statusClass = 'completed';
           } else if (process.status === 'active') {
             // Текущие подписанные цели
-            statusText = 'Актуальный';
+            statusText = 'Успешно завершено';
             statusClass = 'active';
           } else {
             statusText = 'Неизвестно';
@@ -1484,13 +1555,20 @@
             ? reasonText
             : (reasonText.substring(0, 60) + (reasonText.length > 60 ? '...' : ''));
 
+          const showActualTag =
+            (process.type === 'Версия формы 2' && version2IsActual) ||
+            (process.type === 'Версия формы 1' && !version2IsActual);
+          const versionTag = showActualTag
+            ? '<span style="margin-left:8px;padding:2px 8px;border-radius:10px;background:#D9F2E7;color:#2E9264;font-size:11px;font-weight:600;">Актуальная версия</span>'
+            : '';
+
           html += `
             <div class="process-item">
               <div class="process-header" onclick="toggleRegistryProcessDetails(${index})">
                 <div class="process-info">
                   <div class="process-title-row">
                     <span class="process-name">${process.type}</span>
-                    <span class="process-status ${statusClass}">${statusText}</span>
+                    <span class="process-status ${statusClass}">${statusText}</span>${versionTag}
                   </div>
                 </div>
                 <div class="process-reason">${shortReason}</div>
@@ -1513,7 +1591,7 @@
                   <div class="details-label">${process.status === 'active' ? 'Актуальная версия целей' : 'Сравнение целей'}</div>
                   ${process.status === 'active' ? `
                   <div class="comparison-view">
-                    <div class="new-version-process">
+                    <div class="new-version-process ${process.type === 'Версия формы 1' ? 'no-version-label' : ''}">
                       ${renderRegistryGoalsComparison(process.currentGoals)}
                     </div>
                   </div>
@@ -1522,7 +1600,7 @@
                     <div class="old-version-process">
                       ${renderRegistryGoalsComparison(process.previousGoals)}
                     </div>
-                    <div class="new-version-process">
+                    <div class="new-version-process ${process.type === 'Версия формы 1' ? 'no-version-label' : ''}">
                       ${renderRegistryGoalsComparison(process.currentGoals)}
                     </div>
                   </div>
@@ -1597,9 +1675,10 @@
           doc.setFont('helvetica', 'normal');
           doc.text(`Сотрудник: ${employeeName}`, 20, yPos);
           yPos += lineHeight;
-          doc.text(`Процесс: ${process.type || 'Изменение целей'}`, 20, yPos);
+          doc.text(`Процесс: ${process.type || 'Версия формы'}`, 20, yPos);
           yPos += lineHeight;
-          const statusText = process.status === 'active' ? 'Актуальный' :
+          const statusText = process.status === 'active' ? 'Успешно завершено' :
+                             process.status === 'sign' ? 'На подписании' :
                              process.status === 'completed' ? 'Прошлая версия' :
                              process.status === 'review' ? 'На согласовании у HR' :
                              process.status === 'rejected' ? 'Отклонен HR' : 'Неизвестно';
@@ -1678,6 +1757,8 @@
           window.location.href = `review-process.html?employee=${encodeURIComponent(name)}&process=${encodeURIComponent(processId)}&mode=review&role=${encodeURIComponent(currentRole)}&formStatus=${encodeURIComponent(actualFormStatus)}`;
         } else if (status === 'rejected') {
           window.location.href = `review-process.html?employee=${encodeURIComponent(name)}&process=${encodeURIComponent(processId)}&mode=rejected&role=${encodeURIComponent(currentRole)}&formStatus=${encodeURIComponent(actualFormStatus)}`;
+        } else if (status === 'sign') {
+          window.location.href = `review-process.html?employee=${encodeURIComponent(name)}&process=${encodeURIComponent(processId)}&mode=sign&role=${encodeURIComponent(currentRole)}&formStatus=${encodeURIComponent(actualFormStatus)}`;
         } else if (status === 'completed') {
           window.location.href = `review-process.html?employee=${encodeURIComponent(name)}&process=${encodeURIComponent(processId)}&mode=completed&role=${encodeURIComponent(currentRole)}&formStatus=${encodeURIComponent(actualFormStatus)}`;
         }
@@ -1702,6 +1783,7 @@
           localStorage.removeItem(`goals-downloaded-${base}`);
           localStorage.removeItem(`goals-sign-${base}`);
           localStorage.removeItem(`goals-signed-${base}`);
+          localStorage.removeItem(`goals-version1-${base}`);
           localStorage.removeItem(`goals-evaluation-${base}`);
           localStorage.removeItem(`goals-manager-rework-${base}`);
           localStorage.removeItem(`goals-previous-status-${base}`);

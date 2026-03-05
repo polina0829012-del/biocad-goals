@@ -223,7 +223,7 @@
     }
 
     .old-version::before {
-      content: "Текущая версия";
+      content: "Прошлая версия";
       position: absolute;
       top: -10px;
       left: 16px;
@@ -235,7 +235,7 @@
     }
 
     .new-version::before {
-      content: "Предлагаемые изменения";
+      content: "Новая версия";
       position: absolute;
       top: -10px;
       left: 16px;
@@ -472,10 +472,19 @@
         throw new Error('employee required');
       }
       const processId = urlParams.get('process') || 'main';
-      const mode = urlParams.get('mode') || 'review'; // active, review, rejected, completed, closed
+      const mode = urlParams.get('mode') || 'review'; // active, review, rejected, sign, snapshot, completed, closed
       const role = urlParams.get('role') || 'manager';
       const formStatus = urlParams.get('formStatus') || '';
       const employeeKey = employeeName.replace(/\s+/g, '-');
+      const currentFormStatus = localStorage.getItem(`goals-status-${employeeKey}`) || '';
+      const isFinalFormStatus =
+        formStatus === 'passed' || formStatus === 'failed' ||
+        currentFormStatus === 'passed' || currentFormStatus === 'failed';
+      const effectiveMode =
+        isFinalFormStatus && processId === 'active' ? 'completed' :
+        // Для processId=main в финальных статусах НЕ затираем фактические mode=closed/rejected.
+        isFinalFormStatus && processId === 'main' && mode === 'snapshot' ? 'snapshot' :
+        mode;
 
       document.getElementById('employeeName').textContent = employeeName;
 
@@ -488,7 +497,7 @@
       let historyData = JSON.parse(localStorage.getItem(historyKey)) || JSON.parse(localStorage.getItem(historyArchiveKey));
       const signedData = JSON.parse(localStorage.getItem(signedGoalsKey) || localStorage.getItem(signGoalsKey) || '{"goals":[]}');
 
-      if (!historyData && mode !== 'active') {
+      if (!historyData && effectiveMode !== 'active') {
         alert('Данные процесса не найдены');
         window.location.href = 'index.html';
       }
@@ -499,33 +508,47 @@
       let messageTitle = '';
       let messageText = '';
 
-      if (mode === 'active') {
-        statusText = 'Актуальный процесс';
+      if (effectiveMode === 'active') {
+        statusText = 'Успешно завершенно';
         statusClass = 'badge-active';
         messageTitle = 'Это экран процесса, а не форма целей';
         messageText = 'Здесь доступен только просмотр текущей версии целей. Для действий с формой используйте кнопку "Перейти к форме с целями".';
         document.getElementById('comparisonTitle').textContent = 'Текущая версия целей';
         document.getElementById('splitView').classList.add('active-mode');
         document.getElementById('returnBtn').style.display = 'block';
-      } else if (mode === 'review') {
+      } else if (effectiveMode === 'review') {
         statusText = 'На согласовании у HR';
         statusClass = 'badge-review';
         messageTitle = 'Процесс на согласовании';
         messageText = 'Изменения целей находятся на рассмотрении у HR. Вы можете просмотреть предлагаемые изменения.';
         document.getElementById('returnBtn').style.display = 'block';
-      } else if (mode === 'rejected') {
+      } else if (effectiveMode === 'rejected') {
         statusText = 'Отклонен HR';
         statusClass = 'badge-rejected';
         messageTitle = 'Процесс отклонен';
         messageText = 'HR отклонил предложенные изменения. Вы можете вернуться к подписанным целям.';
         document.getElementById('returnBtn').style.display = 'block';
-      } else if (mode === 'completed') {
+      } else if (effectiveMode === 'sign') {
+        statusText = 'На подписании';
+        statusClass = 'badge-active';
+        messageTitle = 'Процесс на подписании';
+        messageText = 'Изменения согласованы HR и ожидают подписания документа. После подписания процесс станет прошлой версией.';
+        document.getElementById('returnBtn').style.display = 'block';
+      } else if (effectiveMode === 'snapshot') {
+        statusText = 'Прошлая версия';
+        statusClass = 'badge-completed';
+        messageTitle = 'Прошлая версия целей';
+        messageText = 'Это версия целей, которая была актуальна до согласованных изменений.';
+        document.getElementById('comparisonTitle').textContent = 'Версия целей до изменений';
+        document.getElementById('splitView').classList.add('active-mode');
+        document.getElementById('returnBtn').style.display = 'block';
+      } else if (effectiveMode === 'completed') {
         statusText = 'Успешно завершено';
         statusClass = 'badge-completed';
         messageTitle = 'Процесс успешно завершен';
         messageText = 'Изменения были согласованы и подписаны. Теперь это действующая версия целей.';
         document.getElementById('returnBtn').style.display = 'block';
-      } else if (mode === 'closed') {
+      } else if (effectiveMode === 'closed') {
         statusText = 'Закрыт';
         statusClass = 'badge-closed';
         messageTitle = 'Процесс закрыт';
@@ -534,7 +557,7 @@
       }
 
       document.getElementById('processStatus').innerHTML = `<span class="process-status-badge ${statusClass}">${statusText}</span>`;
-      document.getElementById('processMessage').className = `process-message ${mode}`;
+      document.getElementById('processMessage').className = `process-message ${effectiveMode}`;
       document.getElementById('messageTitle').textContent = messageTitle;
       document.getElementById('messageText').textContent = messageText;
 
@@ -547,7 +570,7 @@
 
       // Устанавливаем комментарий
       const commentSection = document.getElementById('commentSection');
-      if (mode === 'active') {
+      if (effectiveMode === 'active') {
         // В "Актуальном процессе" комментарий руководителя не отображаем
         commentSection.style.display = 'none';
       } else {
@@ -556,9 +579,12 @@
       }
 
       // Рендерим версии
-      if (mode === 'active') {
+      if (effectiveMode === 'active') {
         renderOldVersion([]);
         renderNewVersion((signedData && Array.isArray(signedData.goals)) ? signedData.goals : []);
+      } else if (effectiveMode === 'snapshot') {
+        renderOldVersion([]);
+        renderNewVersion((historyData && Array.isArray(historyData.previousGoals)) ? historyData.previousGoals : []);
       } else {
         renderOldVersion((historyData && historyData.previousGoals) || []);
         renderNewVersion((historyData && historyData.currentGoals) || []);

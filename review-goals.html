@@ -982,6 +982,22 @@
       z-index: 1000;
     }
 
+    /* Поверх всех остальных модалок, чтобы кнопки Да/Нет всегда были кликабельны */
+    #summaryModal {
+      z-index: 4000;
+      pointer-events: auto !important;
+    }
+
+    #summaryModal .modal-content {
+      position: relative;
+      z-index: 4001;
+      pointer-events: auto;
+    }
+
+    #summaryModal * {
+      pointer-events: auto !important;
+    }
+
     .modal-content {
       background: white;
       border-radius: 16px;
@@ -1373,6 +1389,10 @@
       color: #34C759;
     }
 
+    .process-status.closed {
+      color: #64748B;
+    }
+
     .process-reason {
       font-family: 'Inter';
       font-style: normal;
@@ -1536,6 +1556,11 @@
       font-size: 10px;
       padding: 2px 8px;
       border-radius: 12px;
+    }
+
+    .new-version-process.no-version-label::before {
+      content: none;
+      display: none;
     }
 
     .goal-item-process {
@@ -1746,8 +1771,23 @@
         </div>
         <p>Сотрудник прошёл испытательный срок?</p>
         <div class="modal-actions">
-          <button class="btn-cancel" id="summaryNoBtn">Нет</button>
-          <button class="btn-confirm" id="summaryYesBtn">Да</button>
+          <button type="button" class="btn-cancel" id="summaryNoBtn" onclick="handleSummaryNo()">Нет</button>
+          <button type="button" class="btn-confirm" id="summaryYesBtn" onclick="handleSummaryYes()">Да</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for unfinished process warning before summary -->
+    <div class="modal-overlay" id="unfinishedProcessModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Подтверждение</h3>
+          <button class="close-modal" id="closeUnfinishedProcessModal">✕</button>
+        </div>
+        <p>У вас есть незавершенный процесс создания новой версии формы, вы уверены, что хотите подвести итоги?</p>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" id="unfinishedProcessNoBtn">Нет</button>
+          <button type="button" class="btn-confirm" id="unfinishedProcessYesBtn">Да</button>
         </div>
       </div>
     </div>
@@ -1810,6 +1850,7 @@
       const evaluationKey = `goals-evaluation-${employeeKey}`;
       const signGoalsKey = `goals-sign-${employeeKey}`;
       const signedGoalsKey = `goals-signed-${employeeKey}`; // для хранения оригинальных подписанных целей
+      const version1GoalsKey = `goals-version1-${employeeKey}`; // первая подписанная версия (неизменяемая)
       const historyKey = `goals-history-${employeeKey}`;
       const historyArchiveKey = `goals-history-archive-${employeeKey}`;
       const originalGoalsKey = `goals-original-${employeeKey}`;
@@ -1916,8 +1957,14 @@
           JSON.parse(localStorage.getItem(historyArchiveKey));
         if (!historyData) return null;
 
-        const hasProcessStatus = historyData.status === 'review' || historyData.status === 'rejected' || historyData.status === 'completed';
-        const createdFromSignedFlow = historyData.initiatedFrom === 'in-progress' || historyData.initiatedFrom === 'sign';
+        const hasProcessStatus =
+          historyData.status === 'review' ||
+          historyData.status === 'rejected' ||
+          historyData.status === 'sign' ||
+          historyData.status === 'completed' ||
+          historyData.status === 'closed';
+        // Процессы отображаем только для изменений, инициированных после "На выполнении".
+        const createdFromSignedFlow = historyData.initiatedFrom === 'in-progress';
 
         if (!hasProcessStatus || !createdFromSignedFlow) {
           return null;
@@ -1935,7 +1982,9 @@
         const hasProcessStatus =
           historyData.status === 'review' ||
           historyData.status === 'rejected' ||
-          historyData.status === 'completed';
+          historyData.status === 'sign' ||
+          historyData.status === 'completed' ||
+          historyData.status === 'closed';
         const hasAnyGoalsPayload =
           Array.isArray(historyData.previousGoals) ||
           Array.isArray(historyData.currentGoals);
@@ -1952,6 +2001,7 @@
           JSON.parse(localStorage.getItem(historyKey)) ||
           JSON.parse(localStorage.getItem(historyArchiveKey));
         if (!historyData) return null;
+        if (historyData.initiatedFrom !== 'in-progress') return null;
 
         const hasPrevious = Array.isArray(historyData.previousGoals) && historyData.previousGoals.length > 0;
         const hasCurrent = Array.isArray(historyData.currentGoals) && historyData.currentGoals.length > 0;
@@ -2461,7 +2511,7 @@
 
           // Показываем тултип если в режиме редактирования
           if (isEditMode) {
-            statusValue.innerHTML = 'На выполнении <span class="info-tooltip" id="statusTooltip"><span class="info-icon">i</span><span class="tooltip-text">Вы создаете новую версию целей. Она заменит текущие только после подписания. А пока действуют те, что вы подписали раньше.</span></span>';
+            statusValue.innerHTML = 'Создание новой версии <span class="info-tooltip" id="statusTooltip"><span class="info-icon">i</span><span class="tooltip-text">Вы создаете новую версию целей. Она заменит текущие только после подписания. А пока действуют те, что вы подписали раньше.</span></span>';
           } else if (hasChangeProcess && historyData.status === 'review') {
             // Если есть активный процесс на согласовании, показываем статус "На выполнении" с тултипом
             statusValue.innerHTML = 'На выполнении <span class="info-tooltip" id="statusTooltip"><span class="info-icon">i</span><span class="tooltip-text">Новая версия целей заменит текущую только после подписания, а пока действительна та, что вы подписали ранее.</span></span>';
@@ -2679,6 +2729,23 @@
         }
       }
 
+      function closeUnfinishedChangeProcessBeforeSummary() {
+        // Закрываем текущий процесс новой версии как "прошлую версию"
+        // (чтобы он продолжал отображаться в модалке "Процессы" в финальных статусах)
+        const activeHistoryData = JSON.parse(localStorage.getItem(historyKey));
+        if (activeHistoryData) {
+          activeHistoryData.status = 'closed';
+          localStorage.setItem(historyKey, JSON.stringify(activeHistoryData));
+          localStorage.setItem(historyArchiveKey, JSON.stringify(activeHistoryData));
+        }
+
+        // Перед подведением итогов сохраняем базовый контекст "На выполнении"
+        localStorage.removeItem(managerReworkCommentKey);
+        localStorage.removeItem(previousStatusKey);
+        localStorage.removeItem(`goals-comment-${employeeKey}`);
+        localStorage.setItem(statusKey, 'in-progress');
+      }
+
       // Add button handlers
       function addButtonHandlers() {
         const backBtn = document.getElementById('backBtn');
@@ -2770,37 +2837,30 @@
         const summaryBtn = document.getElementById('summaryBtn');
         if (summaryBtn) {
           summaryBtn.addEventListener('click', () => {
+            const processesModalEl = document.getElementById('processesModal');
+            if (processesModalEl) {
+              processesModalEl.style.display = 'none';
+            }
             const summaryModalEl = document.getElementById('summaryModal');
+            const unfinishedProcessModalEl = document.getElementById('unfinishedProcessModal');
             const postSignProcess = getPostSignChangeProcess();
-            const hasActiveChangeProcess = !!(postSignProcess && postSignProcess.status === 'review');
-            if (hasActiveChangeProcess) {
-              const shouldCancel = confirm(
-                'У вас есть активный процесс по изменению целей. Вы точно хотите подвести итоги сейчас? В этом случае процесс изменения будет отменен.'
-              );
-              if (!shouldCancel) {
-                return;
+            const hasUnfinishedChangeProcess = !!(
+              postSignProcess &&
+              postSignProcess.status !== 'completed' &&
+              postSignProcess.status !== 'closed' &&
+              postSignProcess.status !== 'rejected'
+            );
+            if (hasUnfinishedChangeProcess) {
+              if (unfinishedProcessModalEl) {
+                unfinishedProcessModalEl.style.display = 'flex';
               }
-
-              // Отменяем активный процесс изменений, но сохраняем его как "прошлую версию"
-              // (чтобы он продолжал отображаться в конечных статусах в модалке "Процессы")
-              const activeHistoryData = JSON.parse(localStorage.getItem(historyKey));
-              if (activeHistoryData) {
-                activeHistoryData.status = 'closed';
-                localStorage.setItem(historyKey, JSON.stringify(activeHistoryData));
-                localStorage.setItem(historyArchiveKey, JSON.stringify(activeHistoryData));
-              }
-
-              // Возвращаем форму в "На выполнении" перед подведением итогов
-              localStorage.removeItem(managerReworkCommentKey);
-              localStorage.removeItem(previousStatusKey);
-              localStorage.removeItem(`goals-comment-${employeeKey}`);
-              localStorage.setItem(statusKey, 'in-progress');
-
-              // Сразу после подтверждения показываем выбор итога ИС
-              summaryModalEl.style.display = 'flex';
               return;
             }
-            summaryModalEl.style.display = 'flex';
+
+            // Основной сценарий: выбор "Да/Нет" через кастомную модалку.
+            if (summaryModalEl) {
+              summaryModalEl.style.display = 'flex';
+            }
           });
         }
 
@@ -3095,6 +3155,31 @@
 
         localStorage.setItem(statusKey, 'in-progress');
 
+        // Если был процесс изменений после "На выполнении", переводим его в "Прошлая версия".
+        // Процесс, инициированный в "На подписании", в историю "Процессов" не попадает.
+        const processHistory = JSON.parse(localStorage.getItem(historyKey));
+        if (!localStorage.getItem(version1GoalsKey)) {
+          const sourceVersion1Goals =
+            processHistory && Array.isArray(processHistory.previousGoals) && processHistory.previousGoals.length > 0
+              ? processHistory.previousGoals
+              : (goalsData?.goals || []);
+          if (sourceVersion1Goals.length > 0) {
+            const version1Payload = JSON.stringify({ goals: sourceVersion1Goals });
+            localStorage.setItem(version1GoalsKey, version1Payload);
+            if (!localStorage.getItem(signGoalsKey)) {
+              localStorage.setItem(signGoalsKey, version1Payload);
+            }
+          }
+        }
+        if (processHistory && processHistory.initiatedFrom === 'in-progress') {
+          processHistory.status = 'completed';
+          localStorage.setItem(historyKey, JSON.stringify(processHistory));
+          localStorage.setItem(historyArchiveKey, JSON.stringify(processHistory));
+        } else if (processHistory && processHistory.initiatedFrom === 'sign') {
+          localStorage.removeItem(historyKey);
+          localStorage.removeItem(historyArchiveKey);
+        }
+
         // Сохраняем текущие цели как подписанные (оригинал)
         if (goalsData) {
           localStorage.setItem(signedGoalsKey, JSON.stringify(goalsData));
@@ -3325,35 +3410,133 @@
         const signedRaw = localStorage.getItem(signedGoalsKey) || localStorage.getItem(signGoalsKey);
         const signedParsed = signedRaw ? JSON.parse(signedRaw) : null;
         const signedGoals = signedParsed && Array.isArray(signedParsed.goals) ? signedParsed.goals : [];
-
-        if (signedGoals.length > 0 && (status === 'in-progress' || status === 'passed' || status === 'failed')) {
-          processes.push({
-            id: 'active',
-            timestamp: new Date().toISOString(),
-            currentGoals: signedGoals,
-            managerComment: '',
-            status: 'active',
-            type: 'Выполнение целей'
-          });
-        }
+        const version1Raw = localStorage.getItem(version1GoalsKey) || localStorage.getItem(signGoalsKey);
+        const version1Parsed = version1Raw ? JSON.parse(version1Raw) : null;
+        let version1Goals = version1Parsed && Array.isArray(version1Parsed.goals) ? version1Parsed.goals : [];
 
         let historyData = getPostSignChangeProcess();
         if (!historyData && (status === 'passed' || status === 'failed')) {
           historyData = getAnySavedHistoryProcess();
         }
-        if (historyData) {
-          processes.push({
-            id: 'main',
-            timestamp: historyData.timestamp,
-            previousGoals: historyData.previousGoals || [],
-            currentGoals: historyData.currentGoals || [],
-            managerComment: historyData.managerComment || 'Инициирован процесс изменения целей',
-            status: historyData.status || 'review', // review, rejected, completed
-            type: 'Изменение целей'
-          });
+        if (
+          version1Goals.length === 0 &&
+          historyData &&
+          Array.isArray(historyData.previousGoals) &&
+          historyData.previousGoals.length > 0
+        ) {
+          version1Goals = historyData.previousGoals;
+          const version1Payload = JSON.stringify({ goals: version1Goals });
+          localStorage.setItem(version1GoalsKey, version1Payload);
+          if (!localStorage.getItem(signGoalsKey)) {
+            localStorage.setItem(signGoalsKey, version1Payload);
+          }
+        }
+        const isSignedProcessFinalized =
+          !!historyData &&
+          historyData.status === 'completed' &&
+          (status === 'in-progress' || status === 'passed' || status === 'failed');
+
+        // В финальных статусах при наличии истории:
+        // - если процесс версии 2 завершен успешно (completed), актуальной делаем версию 2;
+        // - если версия 2 закрыта/отклонена, актуальной остается версия 1.
+        if (historyData && (status === 'passed' || status === 'failed')) {
+          const previousGoals = Array.isArray(historyData.previousGoals) ? historyData.previousGoals : [];
+          const currentGoals = Array.isArray(historyData.currentGoals) ? historyData.currentGoals : [];
+          const hasDiffPayload = previousGoals.length > 0 || currentGoals.length > 0;
+          const isVersion2Completed = historyData.status === 'completed';
+
+          if (hasDiffPayload) {
+            if (isVersion2Completed) {
+              processes.push({
+                id: 'active',
+                timestamp: historyData.timestamp || new Date().toISOString(),
+                previousGoals,
+                currentGoals,
+                managerComment: historyData.managerComment || 'Инициирован процесс изменения целей',
+                status: 'active',
+                type: 'Версия формы 2',
+                detailsMode: 'comparison',
+                openMode: 'completed'
+              });
+
+              processes.push({
+                id: 'main',
+                timestamp: historyData.timestamp || new Date().toISOString(),
+                currentGoals: version1Goals.length > 0 ? version1Goals : previousGoals,
+                managerComment: '',
+                status: 'completed',
+                type: 'Версия формы 1',
+                detailsMode: 'snapshot',
+                openMode: 'snapshot'
+              });
+            } else {
+              const fallbackVersion1Goals = previousGoals.length > 0 ? previousGoals : signedGoals;
+              processes.push({
+                id: 'active',
+                timestamp: historyData.timestamp || new Date().toISOString(),
+                currentGoals: version1Goals.length > 0 ? version1Goals : fallbackVersion1Goals,
+                managerComment: '',
+                status: 'active',
+                type: 'Версия формы 1',
+                detailsMode: 'snapshot',
+                openMode: 'active'
+              });
+
+              processes.push({
+                id: 'main',
+                timestamp: historyData.timestamp || new Date().toISOString(),
+                previousGoals,
+                currentGoals,
+                managerComment: historyData.managerComment || 'Инициирован процесс изменения целей',
+                status: historyData.status || 'review',
+                type: 'Версия формы 2',
+                detailsMode: 'comparison',
+                openMode: historyData.status === 'sign' ? 'sign' : undefined
+              });
+            }
+          } else if (signedGoals.length > 0) {
+            // Если история есть, но без payload, оставляем только текущую подписанную версию
+            processes.push({
+              id: 'active',
+              timestamp: new Date().toISOString(),
+              currentGoals: version1Goals.length > 0 ? version1Goals : signedGoals,
+              managerComment: '',
+              status: 'active',
+              type: 'Версия формы 1',
+              detailsMode: 'snapshot',
+              openMode: 'active'
+            });
+          }
+        } else {
+          if (signedGoals.length > 0 && (status === 'in-progress' || status === 'passed' || status === 'failed')) {
+            processes.push({
+              id: 'active',
+              timestamp: new Date().toISOString(),
+              currentGoals: version1Goals.length > 0 ? version1Goals : signedGoals,
+              managerComment: '',
+              status: 'active',
+              type: 'Версия формы 1',
+              detailsMode: 'snapshot',
+              openMode: 'active'
+            });
+          }
+
+          if (historyData) {
+            processes.push({
+              id: 'main',
+              timestamp: historyData.timestamp,
+              previousGoals: historyData.previousGoals || [],
+              currentGoals: historyData.currentGoals || [],
+              managerComment: historyData.managerComment || 'Инициирован процесс изменения целей',
+              status: historyData.status || 'review', // review, rejected, sign, completed
+              type: 'Версия формы 2',
+              detailsMode: 'comparison',
+              openMode: historyData.status === 'sign' ? 'sign' : undefined
+            });
+          }
         }
         
-        // Сортируем по дате (активный процесс всегда первым)
+        // Базовая сортировка по дате (active обычно первым)
         return processes.sort((a, b) => {
           if (a.id === 'active') return -1;
           if (b.id === 'active') return 1;
@@ -3364,50 +3547,73 @@
       function renderProcesses(processes) {
         const container = document.getElementById('processesContainer');
         let html = '<div class="processes-container">';
+        const isFinalFormStatus = status === 'passed' || status === 'failed';
+        const version2IsActual = processes.some(process =>
+          process.type === 'Версия формы 2' &&
+          (process.status === 'completed' || (isFinalFormStatus && process.status === 'active'))
+        );
         
         processes.forEach((process, index) => {
           const statusClass = process.status === 'review' ? 'review' : 
                              process.status === 'rejected' ? 'rejected' : 
+                             process.status === 'sign' ? 'completed' :
                              process.status === 'completed' ? 'completed' :
-                             process.status === 'closed' ? 'completed' :
+                             process.status === 'closed' ? 'closed' :
                              process.status === 'active' ? 'active' : '';
           
           const statusText = process.status === 'review' ? 'На согласовании у HR' :
                             process.status === 'rejected' ? 'Отклонен HR' :
-                            process.status === 'completed' ? 'Прошлая версия' :
-                            process.status === 'closed' ? 'Прошлая версия' :
-                            process.status === 'active' ? 'Актуальный' :
+                            process.status === 'sign' ? 'На подписании' :
+                            process.status === 'completed' ? 'Успешно завершено' :
+                            process.status === 'closed' ? 'Закрыт' :
+                            process.status === 'active' ? 'Успешно завершено' :
                             'Неизвестно';
           
           const statusColor = process.status === 'review' ? '#FF8D28' :
                              process.status === 'rejected' ? '#FF383C' :
+                             process.status === 'sign' ? '#2563EB' :
                              process.status === 'completed' ? '#2563EB' :
                              process.status === 'closed' ? '#64748B' :
                              process.status === 'active' ? '#34C759' :
                              '#64748B';
           
           const reasonText = process.managerComment || 'Нет комментария';
+          let detailsMode = process.detailsMode || (process.status === 'active' ? 'snapshot' : 'comparison');
+          if (isFinalFormStatus && process.status === 'active' && process.type === 'Версия формы 2') {
+            detailsMode = 'comparison';
+          } else if (isFinalFormStatus && process.status === 'completed') {
+            detailsMode = 'snapshot';
+          }
           
+          const showActualTag =
+            (process.type === 'Версия формы 2' && version2IsActual) ||
+            (process.type === 'Версия формы 1' && !version2IsActual);
+          const versionTag = showActualTag
+            ? '<span style="margin-left:8px;padding:2px 8px;border-radius:10px;background:#D9F2E7;color:#2E9264;font-size:11px;font-weight:600;">Актуальная версия</span>'
+            : '';
+
           html += `
             <div class="process-item">
               <div class="process-header" onclick="toggleProcessDetails(${index})">
                 <div class="process-info">
                   <div class="process-title-row">
-                    <span class="process-name">${process.type || 'Изменение целей'}</span>
-                    <span class="process-status ${statusClass}" style="color: ${statusColor}">${statusText}</span>
+                    <span class="process-name">${process.type || 'Версия формы'}</span>
+                    <span class="process-status ${statusClass}" style="color: ${statusColor}">${statusText}</span>${versionTag}
                   </div>
                 </div>
                 <div class="process-reason">${reasonText.substring(0, 30)}${reasonText.length > 30 ? '...' : ''}</div>
                 <div class="process-actions">
                   <div class="process-link" onclick="event.stopPropagation(); downloadProcessHistory(${index})">Выгрузить историю</div>
-                  <div class="process-link" onclick="event.stopPropagation(); openProcess('${process.id}', '${process.status}')">Открыть процесс →</div>
+                  <div class="process-link" onclick="event.stopPropagation(); openProcessByIndex(${index})">Открыть процесс →</div>
                 </div>
               </div>
               <div class="process-details" id="process-details-${index}">
+                ${detailsMode === 'comparison' ? `
                 <div class="details-section">
                   <div class="details-label">Комментарий руководителя</div>
                   <div class="details-content">${reasonText}</div>
                 </div>
+                ` : ''}
                 
                 <div class="details-section">
                   <div class="details-label">Дата создания</div>
@@ -3415,10 +3621,10 @@
                 </div>
                 
                 <div class="details-section">
-                  <div class="details-label">${process.status === 'active' ? 'Актуальная версия целей' : 'Сравнение целей'}</div>
-                  ${process.status === 'active' ? `
+                  <div class="details-label">${detailsMode === 'comparison' ? 'Сравнение целей' : 'Версия целей до изменений'}</div>
+                  ${detailsMode === 'snapshot' ? `
                   <div class="comparison-view">
-                    <div class="new-version-process">
+                    <div class="new-version-process ${process.type === 'Версия формы 1' ? 'no-version-label' : ''}">
                       ${renderGoalsComparison(process.currentGoals, 'new')}
                     </div>
                   </div>
@@ -3427,7 +3633,7 @@
                     <div class="old-version-process">
                       ${renderGoalsComparison(process.previousGoals, 'old')}
                     </div>
-                    <div class="new-version-process">
+                    <div class="new-version-process ${process.type === 'Версия формы 1' ? 'no-version-label' : ''}">
                       ${renderGoalsComparison(process.currentGoals, 'new')}
                     </div>
                   </div>
@@ -3483,29 +3689,31 @@
         }
       }
 
-      function openProcess(processId, processStatus) {
+      function getProcessOpenMode(processData) {
+        const isFinalFormStatus = status === 'passed' || status === 'failed';
+        if (isFinalFormStatus && processData.status === 'active') return 'completed';
+        if (isFinalFormStatus && processData.status === 'completed') return 'snapshot';
+        if (processData.openMode) return processData.openMode;
+        if (processData.status === 'active') return 'active';
+        if (processData.status === 'review') return 'review';
+        if (processData.status === 'rejected') return 'rejected';
+        if (processData.status === 'sign') return 'sign';
+        if (processData.status === 'completed') return 'completed';
+        if (processData.status === 'closed') return 'closed';
+        return 'active';
+      }
+
+      function openProcessByIndex(index) {
         // Закрываем модалку процессов
         document.getElementById('processesModal').style.display = 'none';
         const currentFormStatus = status;
-
-        if (processId === 'active' || processStatus === 'active') {
-          // Просмотр процесса "Актуальный" в отдельном process-view экране
-          window.location.href = `review-process.html?employee=${encodeURIComponent(employeeName)}&process=${processId}&mode=active&role=${encodeURIComponent(role)}&formStatus=${encodeURIComponent(currentFormStatus)}`;
-        } else if (processStatus === 'review') {
-          // Статус "На согласовании" - показываем цели в режиме просмотра как у HR
-          // Перенаправляем на специальную страницу просмотра процесса
-          window.location.href = `review-process.html?employee=${encodeURIComponent(employeeName)}&process=${processId}&mode=review&role=${encodeURIComponent(role)}&formStatus=${encodeURIComponent(currentFormStatus)}`;
-        } else if (processStatus === 'rejected') {
-          // Статус "Отклонен HR" - показываем ту версию, которую хотел изменить руководитель
-          window.location.href = `review-process.html?employee=${encodeURIComponent(employeeName)}&process=${processId}&mode=rejected&role=${encodeURIComponent(role)}&formStatus=${encodeURIComponent(currentFormStatus)}`;
-        } else if (processStatus === 'completed') {
-          // Статус "Успешно завершено" - показываем итоговую версию
-          window.location.href = `review-process.html?employee=${encodeURIComponent(employeeName)}&process=${processId}&mode=completed&role=${encodeURIComponent(role)}&formStatus=${encodeURIComponent(currentFormStatus)}`;
-        } else if (processStatus === 'closed') {
-          // Статус "Закрыт" - процесс завершён без согласования/подписания
-          window.location.href = `review-process.html?employee=${encodeURIComponent(employeeName)}&process=${processId}&mode=closed&role=${encodeURIComponent(role)}&formStatus=${encodeURIComponent(currentFormStatus)}`;
-        }
+        const processData = (window.currentProcessesData || [])[index];
+        if (!processData) return;
+        const mode = getProcessOpenMode(processData);
+        window.location.href = `review-process.html?employee=${encodeURIComponent(employeeName)}&process=${encodeURIComponent(processData.id)}&mode=${encodeURIComponent(mode)}&role=${encodeURIComponent(role)}&formStatus=${encodeURIComponent(currentFormStatus)}`;
       }
+
+      
 
       function downloadProcessHistory(processIndex) {
         const processes = window.currentProcessesData || [];
@@ -3544,9 +3752,9 @@
           doc.setFont('helvetica', 'normal');
           doc.text(`Сотрудник: ${employeeName}`, 20, yPos);
           yPos += lineHeight;
-          doc.text(`Процесс: ${process.type || 'Изменение целей'}`, 20, yPos);
+          doc.text(`Процесс: ${process.type || 'Версия формы'}`, 20, yPos);
           yPos += lineHeight;
-          doc.text(`Статус: ${process.status === 'active' ? 'Актуальный' : process.status === 'completed' ? 'Прошлая версия' : process.status === 'review' ? 'На согласовании у HR' : process.status === 'rejected' ? 'Отклонен HR' : 'Неизвестно'}`, 20, yPos);
+          doc.text(`Статус: ${process.status === 'active' ? 'Успешно завершено' : process.status === 'sign' ? 'На подписании' : process.status === 'completed' ? 'Прошлая версия' : process.status === 'closed' ? 'Процесс закрыт' : process.status === 'review' ? 'На согласовании у HR' : process.status === 'rejected' ? 'Отклонен HR' : 'Неизвестно'}`, 20, yPos);
           yPos += lineHeight;
           doc.text(`Дата: ${new Date(process.timestamp).toLocaleString('ru-RU')}`, 20, yPos);
           yPos += lineHeight * 2;
@@ -3603,7 +3811,7 @@
 
       // Экспортируем функции для глобального доступа
       window.toggleProcessDetails = toggleProcessDetails;
-      window.openProcess = openProcess;
+      window.openProcessByIndex = openProcessByIndex;
       window.downloadProcessHistory = downloadProcessHistory;
 
       // Проверка изменения целей в статусе "На выполнении"
@@ -3641,6 +3849,37 @@
       const summaryYesBtn = document.getElementById('summaryYesBtn');
       const summaryNoBtn = document.getElementById('summaryNoBtn');
       const closeSummaryModal = document.getElementById('closeSummaryModal');
+      const unfinishedProcessModal = document.getElementById('unfinishedProcessModal');
+      const unfinishedProcessYesBtn = document.getElementById('unfinishedProcessYesBtn');
+      const unfinishedProcessNoBtn = document.getElementById('unfinishedProcessNoBtn');
+      const closeUnfinishedProcessModal = document.getElementById('closeUnfinishedProcessModal');
+
+      window.handleSummaryYes = function() {
+        if (!summaryModal) return;
+        // ИС пройден
+        localStorage.setItem(statusKey, 'passed');
+        const today = new Date().toISOString().split('T')[0];
+        localStorage.setItem(closeDateKey, today);
+        localStorage.removeItem(failurePendingKey);
+        localStorage.removeItem(failureDownloadedKey);
+        summaryModal.style.display = 'none';
+        localStorage.removeItem(managerReworkCommentKey);
+        alert('Статус сотрудника изменён на "ИС пройден"');
+        window.location.href = 'review-goals.html?employee=' + encodeURIComponent(employeeName) + '&status=passed&role=' + role;
+      };
+
+      window.handleSummaryNo = function() {
+        if (!summaryModal) return;
+        // Переходим в режим выгрузки/загрузки документов по отказу (без модалки)
+        summaryModal.style.display = 'none';
+        localStorage.setItem(failurePendingKey, 'true');
+        localStorage.removeItem(failureDownloadedKey);
+        localStorage.removeItem(failureDocumentKey);
+        isFailurePending = true;
+        isFailureDownloaded = false;
+        failureUploadedFile = null;
+        renderButtons();
+      };
 
       if (closeSummaryModal) {
         closeSummaryModal.addEventListener('click', () => {
@@ -3648,39 +3887,58 @@
         });
       }
 
-      if (summaryYesBtn) {
-        summaryYesBtn.addEventListener('click', () => {
-          // ИС пройден
-          localStorage.setItem(statusKey, 'passed');
-          const today = new Date().toISOString().split('T')[0];
-          localStorage.setItem(closeDateKey, today);
-          localStorage.removeItem(failurePendingKey);
-          localStorage.removeItem(failureDownloadedKey);
-          summaryModal.style.display = 'none';
-          // Историю процесса сохраняем для кнопки "Процессы" в конечном статусе
-          localStorage.removeItem(managerReworkCommentKey);
-          alert('Статус сотрудника изменён на "ИС пройден"');
-          window.location.href = 'review-goals.html?employee=' + encodeURIComponent(employeeName) + '&status=passed&role=' + role;
+      if (closeUnfinishedProcessModal) {
+        closeUnfinishedProcessModal.addEventListener('click', () => {
+          unfinishedProcessModal.style.display = 'none';
         });
       }
 
-      if (summaryNoBtn) {
-        summaryNoBtn.addEventListener('click', () => {
-          // Переходим в режим выгрузки/загрузки документов по отказу (без модалки)
-          summaryModal.style.display = 'none';
-          localStorage.setItem(failurePendingKey, 'true');
-          localStorage.removeItem(failureDownloadedKey);
-          localStorage.removeItem(failureDocumentKey);
-          isFailurePending = true;
-          isFailureDownloaded = false;
-          failureUploadedFile = null;
-          renderButtons();
+      if (unfinishedProcessNoBtn) {
+        unfinishedProcessNoBtn.addEventListener('click', () => {
+          unfinishedProcessModal.style.display = 'none';
         });
       }
+
+      if (unfinishedProcessYesBtn) {
+        unfinishedProcessYesBtn.addEventListener('click', () => {
+          closeUnfinishedChangeProcessBeforeSummary();
+          unfinishedProcessModal.style.display = 'none';
+          if (summaryModal) {
+            summaryModal.style.display = 'flex';
+          }
+        });
+      }
+
+      if (summaryYesBtn) {
+        summaryYesBtn.addEventListener('click', () => window.handleSummaryYes && window.handleSummaryYes());
+      }
+
+      if (summaryNoBtn) {
+        summaryNoBtn.addEventListener('click', () => window.handleSummaryNo && window.handleSummaryNo());
+      }
+
+      // Надёжный fallback: если локальные обработчики кнопок не сработали
+      // из-за конфликтов слоёв/перерисовки, ловим клик делегированно.
+      document.addEventListener('click', (e) => {
+        const target = e.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (target.id === 'summaryYesBtn') {
+          e.preventDefault();
+          e.stopPropagation();
+          handleSummaryYes();
+        } else if (target.id === 'summaryNoBtn') {
+          e.preventDefault();
+          e.stopPropagation();
+          handleSummaryNo();
+        }
+      }, true);
 
       window.addEventListener('click', (e) => {
         if (e.target === summaryModal) {
           summaryModal.style.display = 'none';
+        }
+        if (e.target === unfinishedProcessModal) {
+          unfinishedProcessModal.style.display = 'none';
         }
         if (e.target === document.getElementById('documentsModal')) {
           document.getElementById('documentsModal').style.display = 'none';

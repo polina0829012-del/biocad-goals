@@ -858,108 +858,31 @@
                     );
 
 
-                    // СОЗДАЕМ КАРТЫ ДЛЯ ПОИСКА
-                    const previousGoalsMap = new Map();
-
-                    previousGoals.forEach((goal, index) => {
-                        const key = goal.goal ? goal.goal.trim().replace(/\s+/g, ' ') : `empty-${index}`;
-                        if (!previousGoalsMap.has(key)) {
-                            previousGoalsMap.set(key, []);
-                        }
-                        previousGoalsMap.get(key).push({ goal, index });
-                    });
-
-
-                    // ОПРЕДЕЛЯЕМ ИЗМЕНЕНИЯ
+                    // ОПРЕДЕЛЯЕМ ИЗМЕНЕНИЯ ПО ПОЗИЦИИ ЦЕЛИ.
+                    // Это исключает ложные "удалена/создана", когда у одной и той же цели
+                    // одновременно меняют заголовок и критерии.
                     const newGoals = [];
                     const modifiedGoals = [];
                     const deletedGoals = [];
-                    const matchedPreviousIndices = new Set();
+                    const maxGoals = Math.max(previousGoals.length, validGoals.length);
+                    for (let idx = 0; idx < maxGoals; idx++) {
+                        const oldGoal = previousGoals[idx];
+                        const newGoal = validGoals[idx];
 
-                    // Проходим по текущим целям
-                    validGoals.forEach((currentGoal, currentIndex) => {
-                        const currentKey = currentGoal.goal ? currentGoal.goal.trim().replace(/\s+/g, ' ') : null;
-                        let foundMatch = false;
-
-                        // Ищем по ключу (текст цели)
-                        if (currentKey && previousGoalsMap.has(currentKey)) {
-
-                            const possibleMatches = previousGoalsMap.get(currentKey);
-                            for (let i = 0; i < possibleMatches.length; i++) {
-                                const match = possibleMatches[i];
-                                if (!matchedPreviousIndices.has(match.index)) {
-                                    matchedPreviousIndices.add(match.index);
-                                    const previousGoal = match.goal;
-
-                                    if (!areGoalsEqual(previousGoal, currentGoal)) {
-                                        modifiedGoals.push({
-                                            index: currentIndex,
-                                            oldGoal: previousGoal,
-                                            newGoal: currentGoal
-                                        });
-                                    } else {
-                                    }
-                                    foundMatch = true;
-                                    break;
-                                }
+                        if (oldGoal && newGoal) {
+                            if (!areGoalsEqual(oldGoal, newGoal)) {
+                                modifiedGoals.push({
+                                    index: idx,
+                                    oldGoal,
+                                    newGoal
+                                });
                             }
-                        } else {
+                        } else if (!oldGoal && newGoal) {
+                            newGoals.push({ index: idx, newGoal });
+                        } else if (oldGoal && !newGoal) {
+                            deletedGoals.push({ index: idx, oldGoal });
                         }
-
-                        // Если не нашли по ключу, ищем полным сравнением
-                        if (!foundMatch) {
-                            for (let [key, matches] of previousGoalsMap.entries()) {
-                                for (let i = 0; i < matches.length; i++) {
-                                    const match = matches[i];
-                                    if (!matchedPreviousIndices.has(match.index)) {
-                                        if (areGoalsEqual(match.goal, currentGoal)) {
-                                            matchedPreviousIndices.add(match.index);
-                                            foundMatch = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (foundMatch) break;
-                            }
-                        }
-
-                        // Если не нашли, но совпадают критерии и дата — считаем изменённой
-                        if (!foundMatch) {
-
-                            for (let [key, matches] of previousGoalsMap.entries()) {
-                                for (let i = 0; i < matches.length; i++) {
-                                    const match = matches[i];
-                                    if (!matchedPreviousIndices.has(match.index)) {
-                                        if (normalizeString(match.goal.criteria) === normalizeString(currentGoal.criteria) &&
-                                            (match.goal.date || '') === (currentGoal.date || '')) {
-
-                                            matchedPreviousIndices.add(match.index);
-                                            modifiedGoals.push({
-                                                index: currentIndex,
-                                                oldGoal: match.goal,
-                                                newGoal: currentGoal
-                                            });
-                                            foundMatch = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (foundMatch) break;
-                            }
-                        }
-
-                        // Если не нашли - это новая цель
-                        if (!foundMatch) {
-                            newGoals.push({ index: currentIndex, newGoal: currentGoal });
-                        }
-                    });
-
-                    // Все оставшиеся старые цели - удаленные
-                    previousGoals.forEach((oldGoal, index) => {
-                        if (!matchedPreviousIndices.has(index)) {
-                            deletedGoals.push({ index, oldGoal });
-                        }
-                    });
+                    }
 
 
                     // Показываем сводку изменений
@@ -1190,7 +1113,7 @@
                         // Обновляем статус процесса на completed, если он есть
                         const historyData = JSON.parse(localStorage.getItem(historyKey));
                         if (historyData) {
-                            historyData.status = 'completed';
+                            historyData.status = 'sign';
                             localStorage.setItem(historyKey, JSON.stringify(historyData));
                             localStorage.setItem(historyArchiveKey, JSON.stringify(historyData));
                         }
