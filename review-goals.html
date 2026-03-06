@@ -2525,7 +2525,7 @@
 
           // Показываем тултип если в режиме редактирования
           if (isEditMode) {
-            statusValue.innerHTML = 'Создание новой версии <span class="info-tooltip" id="statusTooltip"><span class="info-icon">i</span><span class="tooltip-text">Вы создаете новую версию целей. Она заменит текущие только после подписания. А пока действуют те, что вы подписали раньше.</span></span>';
+            statusValue.innerHTML = 'Черновик <span class="info-tooltip" id="statusTooltip"><span class="info-icon">i</span><span class="tooltip-text">Вы создаете новую версию целей. Она заменит текущие только после подписания. А пока действуют те, что вы подписали раньше.</span></span>';
           } else if (hasChangeProcess && historyData.status === 'review') {
             // Если есть активный процесс на согласовании, показываем статус "На выполнении" с тултипом
             statusValue.innerHTML = 'На выполнении <span class="info-tooltip" id="statusTooltip"><span class="info-icon">i</span><span class="tooltip-text">Новая версия целей заменит текущую только после подписания, а пока действительна та, что вы подписали ранее.</span></span>';
@@ -2630,6 +2630,11 @@
           statusMessage.style.display = 'flex';
           document.getElementById('messageTitle').textContent = 'Цели согласованы';
           document.getElementById('messageText').textContent = 'Скачайте форму с целями на испытательный срок, подпишите со своей стороны и у юридического руководителя (если не совпадает) живой подписью.\nИнициируйте встречу с сотрудником для ознакомления.\nПо результатам проведенной встречи с сотрудником загрузите подписанный с двух сторон документ.';
+          const signProcessData = getPostSignChangeProcess();
+          const canCancelSignProcess = !!(signProcessData && signProcessData.status === 'sign');
+          const cancelProcessBtnHtml = canCancelSignProcess
+            ? '<button class="btn btn-rework" id="cancelSignProcessBtn">Отменить процесс</button>'
+            : '';
 
           if (uploadedFile) {
             buttons = `
@@ -2638,6 +2643,7 @@
                 <button class="btn btn-edit" id="editBtn">Изменить цели</button>
               </div>
               <div class="right-buttons">
+                ${cancelProcessBtnHtml}
                 <button class="btn btn-download" id="downloadBtn">Выгрузить документ</button>
                 <button class="btn btn-upload active" id="uploadBtn">Приложить подписанный документ</button>
               </div>
@@ -2657,6 +2663,7 @@
                 <button class="btn btn-edit" id="editBtn">Изменить цели</button>
               </div>
               <div class="right-buttons">
+                ${cancelProcessBtnHtml}
                 <button class="btn btn-download" id="downloadBtn">Выгрузить документ</button>
                 <button class="${uploadButtonClass}" id="uploadBtn" ${uploadButtonDisabled}>
                   ${uploadButtonText}
@@ -2890,6 +2897,27 @@
           });
         }
 
+        const cancelSignProcessBtn = document.getElementById('cancelSignProcessBtn');
+        if (cancelSignProcessBtn) {
+          cancelSignProcessBtn.addEventListener('click', () => {
+            const processHistory = getPostSignChangeProcess();
+            if (!processHistory || processHistory.status !== 'sign') {
+              return;
+            }
+            const shouldCancel = confirm('Отменить процесс новой версии формы?');
+            if (!shouldCancel) {
+              return;
+            }
+            processHistory.status = 'closed';
+            localStorage.setItem(historyKey, JSON.stringify(processHistory));
+            localStorage.setItem(historyArchiveKey, JSON.stringify(processHistory));
+            localStorage.removeItem(managerReworkCommentKey);
+            localStorage.setItem(statusKey, 'in-progress');
+            alert('Процесс отменен. Форма возвращена в статус "На выполнении".');
+            window.location.href = 'review-goals.html?employee=' + encodeURIComponent(employeeName) + '&status=in-progress&role=' + role;
+          });
+        }
+
         // HR specific buttons
         const reworkBtn = document.getElementById('reworkBtn');
         if (reworkBtn) {
@@ -2934,6 +2962,23 @@
         const cancelEditModeBtn = document.getElementById('cancelEditModeBtn');
         if (cancelEditModeBtn) {
           cancelEditModeBtn.addEventListener('click', () => {
+            const cancelledDraftGoals = JSON.parse(JSON.stringify(goalsData?.goals || []));
+            const baseGoals =
+              (originalInProgressGoals && Array.isArray(originalInProgressGoals.goals) && originalInProgressGoals.goals.length > 0)
+                ? originalInProgressGoals.goals
+                : (signedGoalsData?.goals || []);
+
+            // Фиксируем отмененный процесс создания новой версии в истории "Процессов".
+            localStorage.setItem(historyKey, JSON.stringify({
+              timestamp: new Date().toISOString(),
+              previousGoals: baseGoals,
+              currentGoals: cancelledDraftGoals,
+              managerComment: 'Процесс создания новой версии отменен руководителем',
+              status: 'closed',
+              initiatedFrom: 'in-progress'
+            }));
+            localStorage.setItem(historyArchiveKey, localStorage.getItem(historyKey));
+
             // Выходим из режима редактирования
             isEditMode = false;
 
@@ -3578,9 +3623,9 @@
           const statusText = process.status === 'review' ? 'На согласовании у HR' :
                             process.status === 'rejected' ? 'Отклонен HR' :
                             process.status === 'sign' ? 'На подписании' :
-                            process.status === 'completed' ? 'Успешно завершено' :
-                            process.status === 'closed' ? 'Закрыт' :
-                            process.status === 'active' ? 'Успешно завершено' :
+                            process.status === 'completed' ? 'Завершено' :
+                            process.status === 'closed' ? 'Отменен' :
+                            process.status === 'active' ? 'Завершено' :
                             'Неизвестно';
           
           const statusColor = process.status === 'review' ? '#FF8D28' :
@@ -3768,7 +3813,7 @@
           yPos += lineHeight;
           doc.text(`Процесс: ${process.type || 'Версия формы'}`, 20, yPos);
           yPos += lineHeight;
-          doc.text(`Статус: ${process.status === 'active' ? 'Успешно завершено' : process.status === 'sign' ? 'На подписании' : process.status === 'completed' ? 'Прошлая версия' : process.status === 'closed' ? 'Процесс закрыт' : process.status === 'review' ? 'На согласовании у HR' : process.status === 'rejected' ? 'Отклонен HR' : 'Неизвестно'}`, 20, yPos);
+          doc.text(`Статус: ${process.status === 'active' ? 'Завершено' : process.status === 'sign' ? 'На подписании' : process.status === 'completed' ? 'Прошлая версия' : process.status === 'closed' ? 'Процесс отменен' : process.status === 'review' ? 'На согласовании у HR' : process.status === 'rejected' ? 'Отклонен HR' : 'Неизвестно'}`, 20, yPos);
           yPos += lineHeight;
           doc.text(`Дата: ${new Date(process.timestamp).toLocaleString('ru-RU')}`, 20, yPos);
           yPos += lineHeight * 2;

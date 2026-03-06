@@ -509,7 +509,7 @@
       let messageText = '';
 
       if (effectiveMode === 'active') {
-        statusText = 'Успешно завершенно';
+        statusText = 'Завершено';
         statusClass = 'badge-active';
         messageTitle = 'Это экран процесса, а не форма целей';
         messageText = 'Здесь доступен только просмотр текущей версии целей. Для действий с формой используйте кнопку "Перейти к форме с целями".';
@@ -543,16 +543,16 @@
         document.getElementById('splitView').classList.add('active-mode');
         document.getElementById('returnBtn').style.display = 'block';
       } else if (effectiveMode === 'completed') {
-        statusText = 'Успешно завершено';
+        statusText = 'Завершено';
         statusClass = 'badge-completed';
         messageTitle = 'Процесс успешно завершен';
         messageText = 'Изменения были согласованы и подписаны. Теперь это действующая версия целей.';
         document.getElementById('returnBtn').style.display = 'block';
       } else if (effectiveMode === 'closed') {
-        statusText = 'Закрыт';
+        statusText = 'Отменен';
         statusClass = 'badge-closed';
-        messageTitle = 'Процесс закрыт';
-        messageText = 'Процесс изменения целей закрыт без согласования и подписания изменений.';
+        messageTitle = 'Процесс отменен';
+        messageText = 'Процесс изменения целей отменен до подписания новой версии формы.';
         document.getElementById('returnBtn').style.display = 'block';
       }
 

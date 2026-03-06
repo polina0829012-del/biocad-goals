@@ -677,6 +677,7 @@
                     <button class="btn btn-back" id="backBtn">Назад</button>
                 </div>
                 <div class="right-buttons">
+                    <button class="btn btn-back" id="goToActualGoalsBtn" style="display: none;">Перейти к Актуальным целям</button>
                     <button class="btn btn-rework" id="reworkBtn">Отправить на доработку</button>
                     <button class="btn btn-rework" id="rejectChangesBtn" style="display: none;">Отклонить изменения</button>
                     <button class="btn btn-approve" id="approveBtn">Согласовать</button>
@@ -1162,6 +1163,15 @@
                         window.location.href = 'index.html?role=hr';
                     });
                 }
+
+                const goToActualGoalsBtn = document.getElementById('goToActualGoalsBtn');
+                if (goToActualGoalsBtn) {
+                    goToActualGoalsBtn.addEventListener('click', () => {
+                        window.location.href =
+                            'review-goals.html?employee=' + encodeURIComponent(employeeName) +
+                            '&status=in-progress&role=hr';
+                    });
+                }
             }
             function renderButtons() {
                 const buttonGroup = document.getElementById('buttonGroup');
@@ -1185,6 +1195,19 @@
                     const rejectChangesBtn = document.getElementById('rejectChangesBtn');
                     if (rejectChangesBtn) {
                         rejectChangesBtn.style.display = isChangeReview ? 'inline-flex' : 'none';
+                    }
+
+                    // Кнопка перехода к актуальным целям нужна только при согласовании версии 2
+                    // (изменения, инициированные после статуса "На выполнении").
+                    const isVersion2ReviewFromInProgress =
+                        currentStatus === 'review' &&
+                        historyData &&
+                        Array.isArray(historyData.previousGoals) &&
+                        historyData.previousGoals.length > 0 &&
+                        historyData.initiatedFrom === 'in-progress';
+                    const goToActualGoalsBtn = document.getElementById('goToActualGoalsBtn');
+                    if (goToActualGoalsBtn) {
+                        goToActualGoalsBtn.style.display = isVersion2ReviewFromInProgress ? 'inline-flex' : 'none';
                     }
                 }
 

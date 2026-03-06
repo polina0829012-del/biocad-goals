@@ -821,6 +821,10 @@
       color: #34C759;
     }
 
+    .process-status.closed {
+      color: #64748B;
+    }
+
     .process-reason {
       font-weight: 500;
       font-size: 16px;
@@ -1043,7 +1047,7 @@
               <label class="checkbox-item"><input type="checkbox" value="rework"> На доработке</label>
               <label class="checkbox-item"><input type="checkbox" value="passed"> Ис пройден</label>
               <label class="checkbox-item"><input type="checkbox" value="failed"> Ис не пройден</label>
-              <label class="checkbox-item"><input type="checkbox" value="closed"> Закрыта</label>
+              <label class="checkbox-item"><input type="checkbox" value="closed"> Отменена</label>
             </div>
           </div>
         </div>
@@ -1387,7 +1391,7 @@
         const map = {
           'draft': 'Черновик', 'review': 'На согласовании', 'approved': 'Согласовано',
           'sign': 'На подписании', 'in-progress': 'На выполнении', 'rework': 'На доработке',
-          'passed': 'Ис пройден', 'failed': 'Ис не пройден', 'closed': 'Закрыта'
+          'passed': 'Ис пройден', 'failed': 'Ис не пройден', 'closed': 'Отменена'
         };
         return map[status] || status;
       }
@@ -1540,12 +1544,15 @@
             statusClass = 'completed';
           } else if (process.status === 'completed') {
             // После подписания новой версии обе версии помечаем как успешно завершенные
-            statusText = 'Успешно завершено';
+            statusText = 'Завершено';
             statusClass = 'completed';
           } else if (process.status === 'active') {
             // Текущие подписанные цели
-            statusText = 'Успешно завершено';
+            statusText = 'Завершено';
             statusClass = 'active';
+          } else if (process.status === 'closed') {
+            statusText = 'Отменен';
+            statusClass = 'closed';
           } else {
             statusText = 'Неизвестно';
           }
@@ -1677,7 +1684,7 @@
           yPos += lineHeight;
           doc.text(`Процесс: ${process.type || 'Версия формы'}`, 20, yPos);
           yPos += lineHeight;
-          const statusText = process.status === 'active' ? 'Успешно завершено' :
+          const statusText = process.status === 'active' ? 'Завершено' :
                              process.status === 'sign' ? 'На подписании' :
                              process.status === 'completed' ? 'Прошлая версия' :
                              process.status === 'review' ? 'На согласовании у HR' :
@@ -1761,6 +1768,8 @@
           window.location.href = `review-process.html?employee=${encodeURIComponent(name)}&process=${encodeURIComponent(processId)}&mode=sign&role=${encodeURIComponent(currentRole)}&formStatus=${encodeURIComponent(actualFormStatus)}`;
         } else if (status === 'completed') {
           window.location.href = `review-process.html?employee=${encodeURIComponent(name)}&process=${encodeURIComponent(processId)}&mode=completed&role=${encodeURIComponent(currentRole)}&formStatus=${encodeURIComponent(actualFormStatus)}`;
+        } else if (status === 'closed') {
+          window.location.href = `review-process.html?employee=${encodeURIComponent(name)}&process=${encodeURIComponent(processId)}&mode=closed&role=${encodeURIComponent(currentRole)}&formStatus=${encodeURIComponent(actualFormStatus)}`;
         }
       };
 
