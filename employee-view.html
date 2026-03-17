@@ -131,6 +131,87 @@
       line-height: 1.5;
     }
 
+    .status-stepper {
+      width: 100%;
+      overflow: visible;
+      padding-bottom: 4px;
+      margin-top: -8px;
+    }
+
+    .status-stepper-track {
+      display: flex;
+      align-items: flex-start;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .status-step {
+      position: relative;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-align: center;
+      min-width: 0;
+      padding-right: 4px;
+    }
+
+    .status-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: calc(50% + 14px);
+      width: calc(100% - 28px);
+      height: 2px;
+      background: #E2E8F0;
+    }
+
+    .status-step.done:not(:last-child)::after {
+      background: #3389F4;
+    }
+
+    .status-step-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #CBD5E1;
+      background: #FFFFFF;
+      color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      line-height: 1;
+      position: relative;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+
+    .status-step.done .status-step-dot {
+      background: #3389F4;
+      border-color: #3389F4;
+      color: #FFFFFF;
+    }
+
+    .status-step.active .status-step-dot {
+      border-color: #3389F4;
+      box-shadow: 0 0 0 3px rgba(51, 137, 244, 0.2);
+    }
+
+    .status-step-label {
+      font-size: 12px;
+      line-height: 1.3;
+      color: #94A3B8;
+      max-width: 120px;
+    }
+
+    .status-step.done .status-step-label,
+    .status-step.active .status-step-label {
+      color: #334155;
+      font-weight: 600;
+    }
+
     .goals-section {
       margin-bottom: 40px;
     }
@@ -395,12 +476,8 @@
           <div class="value">Бизнес-аналитик К4</div>
         </div>
         <div class="info-item">
-          <div class="label">Длительность ИС</div>
-          <div class="date-range">
-            <span>09.12.2025</span>
-            <span>по</span>
-            <span>09.02.2026</span>
-          </div>
+          <div class="label">Юридический руководитель</div>
+          <div class="value">Петров Петр Петрович</div>
         </div>
         <div class="info-item" id="summaryByItem" style="display: none;">
           <div class="label">Подвести итоги до</div>
@@ -410,7 +487,17 @@
           <div class="label">Функциональный руководитель</div>
           <div class="value">Иванов Иван Иваныч</div>
         </div>
+        <div class="info-item">
+          <div class="label">Длительность ИС</div>
+          <div class="date-range">
+            <span>09.12.2025</span>
+            <span>по</span>
+            <span>09.02.2026</span>
+          </div>
+        </div>
       </div>
+
+      <div class="status-stepper" id="statusStepper"></div>
 
       <!-- Сообщение в зависимости от статуса -->
       <div class="status-message" id="statusMessage" style="display: none;">
@@ -456,6 +543,68 @@
       }
       
       document.getElementById('pageTitle').textContent = `Мои цели на испытательный срок`;
+
+      function renderStatusStepper() {
+        const stepperEl = document.getElementById('statusStepper');
+        if (!stepperEl) return;
+
+        const statusAliasMap = {
+          approved: 'sign',
+          rework: 'draft',
+          rejected: 'review'
+        };
+        const normalizedStatus = statusAliasMap[status] || status;
+        const finalLabel = normalizedStatus === 'passed'
+          ? 'ИС пройден'
+          : normalizedStatus === 'failed'
+            ? 'ИС не пройден'
+            : normalizedStatus === 'closed'
+              ? 'Отменена'
+              : 'Итог';
+
+        const steps = [
+          { id: 'draft', label: 'Черновик' },
+          { id: 'review', label: 'На согласовании' },
+          { id: 'sign', label: 'На подписании' },
+          { id: 'in-progress', label: 'На выполнении' },
+          { id: 'final', label: finalLabel }
+        ];
+
+        const finalStatuses = ['passed', 'failed', 'closed'];
+        const linearFlow = ['draft', 'review', 'sign', 'in-progress'];
+        const linearIndex = linearFlow.indexOf(normalizedStatus);
+
+        const getStepState = (stepId) => {
+          if (finalStatuses.includes(normalizedStatus)) {
+            if (stepId === 'final') return 'active';
+            if (linearFlow.includes(stepId)) return 'done';
+            return 'pending';
+          }
+          if (linearIndex >= 0) {
+            if (stepId === 'final') return 'pending';
+            if (!linearFlow.includes(stepId)) return 'pending';
+            const stepIndex = linearFlow.indexOf(stepId);
+            if (stepIndex < linearIndex) return 'done';
+            if (stepIndex === linearIndex) return 'active';
+            return 'pending';
+          }
+          return 'pending';
+        };
+
+        stepperEl.innerHTML = `
+          <div class="status-stepper-track">
+            ${steps.map((step) => {
+              const stepState = getStepState(step.id);
+              return `
+                <div class="status-step ${stepState}">
+                  <div class="status-step-dot">${stepState === 'done' ? '✓' : ''}</div>
+                  <div class="status-step-label">${step.label}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
       
       // Устанавливаем текст статуса
       let statusText = '';
@@ -476,8 +625,8 @@
         messageText = 'Руководитель подготавливает документы для подписания';
       } else if (status === 'in-progress') {
         statusText = 'На выполнении';
-        messageTitle = 'Цели в работе';
-        messageText = 'Документы подписаны, цели переведены в статус "На выполнении"';
+        messageTitle = 'Выполнение целей';
+        messageText = 'До конца испытательного срока, отметьте выполнение целей, выбрав статус для каждой цели и оставив комментарий';
       } else if (status === 'passed') {
         statusText = 'ИС пройден';
         messageTitle = 'Испытательный срок пройден';
@@ -493,6 +642,7 @@
       }
       
       document.getElementById('statusValue').textContent = statusText;
+      renderStatusStepper();
       
       if (messageTitle) {
         document.getElementById('statusMessage').style.display = 'flex';
@@ -650,9 +800,9 @@
                   <select class="evaluation-select" onchange="setEmployeeEvaluation(${index}, this.value)">
                     <option value="" ${!employeeEvaluation ? 'selected' : ''}>Выберите оценку</option>
                     <option value="completed" ${employeeEvaluation === 'completed' ? 'selected' : ''}>Выполнено</option>
-                    <option value="partially" ${employeeEvaluation === 'partially' ? 'selected' : ''}>Частично выполнено</option>
-                    <option value="delayed" ${employeeEvaluation === 'delayed' ? 'selected' : ''}>Просрочено</option>
-                    <option value="failed" ${employeeEvaluation === 'failed' ? 'selected' : ''}>Не выполнено</option>
+                    <option value="partially" ${employeeEvaluation === 'partially' ? 'selected' : ''}>Не выполнено полностью</option>
+                    <option value="delayed" ${employeeEvaluation === 'delayed' ? 'selected' : ''}>Не выполнено в обозначенные сроки</option>
+                    <option value="failed" ${employeeEvaluation === 'failed' ? 'selected' : ''}>Не выполнено в полном объеме</option>
                   </select>
                   <div class="comment-label">Комментарий</div>
                   <textarea class="comment-field" placeholder="Оставьте комментарий..." onchange="saveEmployeeComment(${index}, this.value)">${employeeComment}</textarea>

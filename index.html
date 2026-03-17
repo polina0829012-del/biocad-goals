@@ -656,6 +656,50 @@
       font-weight: 500;
     }
 
+    .close-date.overdue {
+      color: #EE4A3F;
+      font-weight: 600;
+    }
+
+    .action-state-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 190px;
+    }
+
+    .action-state-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      width: fit-content;
+    }
+
+    .action-state-badge.required {
+      background: #FEE2E2;
+      color: #B91C1C;
+    }
+
+    .action-state-badge.not-required {
+      background: #F1F5F9;
+      color: #64748B;
+    }
+
+    .action-state-meta {
+      font-size: 12px;
+      color: #64748B;
+      line-height: 1.3;
+    }
+
+    .action-state-meta.overdue {
+      color: #EE4A3F;
+      font-weight: 600;
+    }
+
     .search-count {
       font-size: 12px;
       color: #64748B;
@@ -975,6 +1019,45 @@
       background: #FFFFFF;
       width: 100%;
     }
+
+    .toast-container {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 2500;
+      max-width: min(630px, calc(100vw - 48px));
+    }
+
+    .toast-notification {
+      background: #0F172A;
+      color: #F8FAFC;
+      border-radius: 16px;
+      padding: 18px 21px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.28);
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      animation: toastIn 0.2s ease-out;
+    }
+
+    .toast-notification .to {
+      font-size: 18px;
+      color: #93C5FD;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .toast-notification .subject {
+      font-size: 19px;
+      line-height: 1.35;
+      color: #F8FAFC;
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -1093,15 +1176,11 @@
       </div>
 
       <div class="filter-section">
-        <div class="filter-header" id="formCloseHeader">
-          <span class="filter-title">Дата закрытия формы</span>
-          <svg class="chevron-down" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
-        </div>
-        <div class="filter-content" id="formCloseContent">
-          <div class="filter-group">
-            <input type="date" class="filter-input" id="formCloseFrom" placeholder="Начало" />
-            <input type="date" class="filter-input" id="formCloseTo" placeholder="Окончание" />
-          </div>
+        <div class="filter-group">
+          <label class="checkbox-item">
+            <input type="checkbox" id="deadlineMissedForms">
+            <span>Формы с нарушением дэдлайнов</span>
+          </label>
         </div>
       </div>
 
@@ -1129,7 +1208,7 @@
     <div class="modal-overlay-process" id="registryProcessesModal">
       <div class="modal-content-process">
         <div class="modal-header-process">
-          <h3>Процессы</h3>
+          <h3>История изменений формы</h3>
           <button class="close-modal-process" id="closeRegistryProcessesModal"></button>
         </div>
         <div class="processes-container" id="registryProcessesContainer">
@@ -1150,6 +1229,7 @@
               Статус
               <span class="sort-icon" id="statusSortIcon">↓</span>
             </th>
+            <th>Действие / дедлайн</th>
             <th></th>
           </tr>
         </thead>
@@ -1157,6 +1237,8 @@
       </table>
       <div class="no-results" id="noResults" style="display: none;">Нет сотрудников, соответствующих выбранным условиям. Попробуйте изменить фильтры.</div>
     </div>
+
+    <div class="toast-container" id="toastContainer"></div>
 
     <script>
       const employees = [
@@ -1167,13 +1249,58 @@
       ];
 
       let currentRole = 'manager';
-      let currentHRTab = 'review';
+      const notificationsStorageKey = 'goals-role-notifications';
       const urlRole = new URLSearchParams(window.location.search).get('role');
       if (urlRole && ['manager', 'hr', 'superior', 'employee'].includes(urlRole)) {
         currentRole = urlRole;
         document.querySelectorAll('.role-btn').forEach(b => {
           b.classList.toggle('active', b.dataset.role === urlRole);
         });
+      }
+
+      function getRoleLabel(role) {
+        const map = {
+          manager: 'Руководитель',
+          hr: 'HR',
+          employee: 'Сотрудник',
+          superior: 'Вышестоящий руководитель'
+        };
+        return map[role] || role;
+      }
+
+      function showRoleNotifications(role) {
+        const toastContainer = document.getElementById('toastContainer');
+        if (!toastContainer) return;
+
+        let notifications = [];
+        try {
+          notifications = JSON.parse(localStorage.getItem(notificationsStorageKey)) || [];
+        } catch (e) {
+          notifications = [];
+        }
+
+        const unreadForRole = notifications.filter(n => n.toRole === role && !n.read);
+        if (!unreadForRole.length) return;
+
+        unreadForRole.forEach((notification, index) => {
+          const toast = document.createElement('div');
+          toast.className = 'toast-notification';
+          toast.innerHTML = `
+            <div class="to">Кому: ${getRoleLabel(notification.toRole)}</div>
+            <div class="subject">Тема: ${notification.subject}</div>
+          `;
+
+          setTimeout(() => {
+            toastContainer.appendChild(toast);
+          }, index * 120);
+
+          setTimeout(() => {
+            toast.remove();
+          }, 5200 + index * 120);
+        });
+
+        notifications = notifications.map(n => (n.toRole === role ? { ...n, read: true } : n));
+        localStorage.setItem(notificationsStorageKey, JSON.stringify(notifications));
       }
 
       function renderTable() {
@@ -1193,12 +1320,6 @@
           return result;
         });
         
-        if (currentRole === 'hr') {
-          if (currentHRTab === 'review') {
-            updatedEmployees = updatedEmployees.filter(emp => emp.status === 'review');
-          }
-        }
-        
         // Фильтры не применяем для роли сотрудника, чтобы он всегда видел всех сотрудников
         if (currentRole !== 'employee') {
           updatedEmployees = applyFilterPanelFilters(updatedEmployees);
@@ -1215,10 +1336,14 @@
         tableBody.innerHTML = updatedEmployees.map(emp => {
           let closeDateDisplay = '–';
           let closeDateClass = 'close-date';
+          const isDeadlineMissed = !!(emp.closeDate && emp.endDate && emp.closeDate > emp.endDate);
           
           if ((emp.status === 'passed' || emp.status === 'failed') && emp.closeDate) {
             closeDateDisplay = formatDate(emp.closeDate);
             closeDateClass += ' filled';
+          }
+          if (isDeadlineMissed) {
+            closeDateClass += ' overdue';
           }
           
           const commentKey = `goals-comment-${emp.name.replace(/\s+/g, '-')}`;
@@ -1260,11 +1385,11 @@
               <span class="tooltip process-indicator">
                 <span class="process-indicator-dot"></span>
                 <span class="tooltip-text">
-                  Есть активный процесс по целям (на согласовании у HR или отклонён)
+                  Есть активная история изменений по целям (на согласовании у HR или отклонена)
                 </span>
               </span>
               <button class="process-link-btn" type="button" onclick="openProcessesFromRegistry('${emp.name}', '${emp.status}')">
-                Процессы
+                История изменений
               </button>
             `;
           }
@@ -1301,6 +1426,13 @@
               ? 'Требуется действие! HR согласовал новую версию формы, необходимо ее подписать'
               : '';
           const shouldShowActionAlert = showHrResubmitTooltip || showManagerSignTooltip;
+          const actionState = getActionStateForRole(emp, currentRole, employeeKey);
+          const todayIso = new Date().toISOString().split('T')[0];
+          const isActionDeadlineOverdue =
+            !!(actionState.required && actionState.deadline && todayIso > actionState.deadline);
+          const actionDeadlineText = actionState.required && actionState.deadline
+            ? `до ${formatDate(actionState.deadline)}`
+            : '—';
           const actionCellHtml = shouldShowActionAlert
             ? `<span class="tooltip action-tooltip"><span class="action-with-alert">${actionButtonHtml}<span class="action-alert-bell" aria-hidden="true"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z"/><path d="M13.73 21C13.5542 21.3031 13.3019 21.5547 12.9982 21.7295C12.6946 21.9044 12.3504 21.9965 12 21.9965C11.6496 21.9965 11.3054 21.9044 11.0018 21.7295C10.6982 21.5547 10.4458 21.3031 10.27 21"/></svg></span></span><span class="tooltip-text">${actionTooltipText}</span></span>`
             : actionButtonHtml;
@@ -1312,6 +1444,16 @@
               <td>${formatDate(emp.endDate)}</td>
               <td><span class="${closeDateClass}">${closeDateDisplay}</span></td>
               <td>${statusDisplay}</td>
+              <td>
+                <div class="action-state-cell">
+                  <span class="action-state-badge ${actionState.required ? 'required' : 'not-required'}">
+                    ${actionState.required ? 'Требуется' : 'Не требуется'}
+                  </span>
+                  <div class="action-state-meta ${isActionDeadlineOverdue ? 'overdue' : ''}">
+                    ${actionState.required ? actionState.label : '—'}${actionState.required ? `<br>${actionDeadlineText}` : ''}
+                  </div>
+                </div>
+              </td>
               <td>${actionCellHtml}</td>
             </tr>
           `;
@@ -1368,16 +1510,15 @@
         const positionFilters = Array.from(document.querySelectorAll('#positionFilters input:checked')).map(el => el.value);
         const endDateFrom = document.getElementById('endDateFrom').value;
         const endDateTo = document.getElementById('endDateTo').value;
-        const formCloseFrom = document.getElementById('formCloseFrom').value;
-        const formCloseTo = document.getElementById('formCloseTo').value;
         const showDirect = document.getElementById('directReports').checked;
+        const showDeadlineMissedForms = document.getElementById('deadlineMissedForms').checked;
 
         return employees.filter(emp => {
           if (statusFilters.length && !statusFilters.includes(emp.status)) return false;
           if (positionFilters.length && !positionFilters.includes(emp.positionCode)) return false;
           if (endDateFrom && emp.endDate < endDateFrom) return false;
           if (endDateTo && emp.endDate > endDateTo) return false;
-          if ((formCloseFrom || formCloseTo) && (!emp.closeDate || (formCloseFrom && emp.closeDate < formCloseFrom) || (formCloseTo && emp.closeDate > formCloseTo))) return false;
+          if (showDeadlineMissedForms && (!emp.closeDate || !emp.endDate || emp.closeDate <= emp.endDate)) return false;
           if (showDirect && emp.positionCode !== 'k4') return false;
           return true;
         });
@@ -1394,6 +1535,47 @@
           'passed': 'Ис пройден', 'failed': 'Ис не пройден', 'closed': 'Отменена'
         };
         return map[status] || status;
+      }
+
+      function getActionStateForRole(emp, role, employeeKey) {
+        const isFailurePending = localStorage.getItem(`goals-failure-pending-${employeeKey}`) === 'true';
+        const deadline = emp.endDate || null;
+
+        if (role === 'manager') {
+          if (emp.status === 'draft' || emp.status === 'rework' || emp.status === 'rejected') {
+            return { required: true, deadline, label: 'Сформировать и отправить цели' };
+          }
+          if (emp.status === 'sign') {
+            return { required: true, deadline, label: 'Подписать и загрузить документ' };
+          }
+          if (emp.status === 'in-progress' && isFailurePending) {
+            return { required: true, deadline, label: 'Завершить процесс по отказу' };
+          }
+          if (emp.status === 'in-progress') {
+            return { required: true, deadline, label: 'Подвести итоги ИС' };
+          }
+          return { required: false, deadline: null, label: 'Действие не требуется' };
+        }
+
+        if (role === 'hr') {
+          if (emp.status === 'review') {
+            return { required: true, deadline, label: 'Согласовать или вернуть на доработку' };
+          }
+          return { required: false, deadline: null, label: 'Действие не требуется' };
+        }
+
+        if (role === 'employee') {
+          if (emp.status === 'in-progress') {
+            return { required: true, deadline, label: 'Обновлять прогресс по целям' };
+          }
+          return { required: false, deadline: null, label: 'Действие не требуется' };
+        }
+
+        if (role === 'superior') {
+          return { required: false, deadline: null, label: 'Действие не требуется' };
+        }
+
+        return { required: false, deadline: null, label: 'Действие не требуется' };
       }
 
       window.handleAction = function(employeeName, status) {
@@ -1581,7 +1763,7 @@
                 <div class="process-reason">${shortReason}</div>
                 <div class="process-actions">
                   <div class="process-link" onclick="event.stopPropagation(); downloadRegistryProcessHistory(${index})">Выгрузить историю</div>
-                  <div class="process-link" onclick="event.stopPropagation(); openRegistryProcess('${process.id}', '${process.status}')">Открыть процесс →</div>
+                  <div class="process-link" onclick="event.stopPropagation(); openRegistryProcess('${process.id}', '${process.status}')">Открыть историю →</div>
                 </div>
               </div>
               <div class="process-details" id="registry-process-details-${index}">
@@ -1649,7 +1831,7 @@
         const processes = window.registryProcessesData || [];
         const process = processes[index];
         if (!process || !registryProcessesEmployee) {
-          alert('Процесс не найден');
+          alert('История не найдена');
           return;
         }
 
@@ -1682,7 +1864,7 @@
           doc.setFont('helvetica', 'normal');
           doc.text(`Сотрудник: ${employeeName}`, 20, yPos);
           yPos += lineHeight;
-          doc.text(`Процесс: ${process.type || 'Версия формы'}`, 20, yPos);
+          doc.text(`История: ${process.type || 'Версия формы'}`, 20, yPos);
           yPos += lineHeight;
           const statusText = process.status === 'active' ? 'Завершено' :
                              process.status === 'sign' ? 'На подписании' :
@@ -1795,6 +1977,7 @@
           localStorage.removeItem(`goals-version1-${base}`);
           localStorage.removeItem(`goals-evaluation-${base}`);
           localStorage.removeItem(`goals-manager-rework-${base}`);
+          localStorage.removeItem(`goals-summary-final-comment-${base}`);
           localStorage.removeItem(`goals-previous-status-${base}`);
           localStorage.removeItem(`goals-failure-pending-${base}`);
           localStorage.removeItem(`goals-failure-downloaded-${base}`);
@@ -1833,19 +2016,21 @@
           document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           currentRole = btn.dataset.role;
-          if (currentRole === 'hr') currentHRTab = 'review';
           // При переключении на роль сотрудника очищаем фильтры
           if (currentRole === 'employee') {
             document.querySelectorAll('#statusFilters input, #positionFilters input').forEach(el => el.checked = false);
-            ['endDateFrom', 'endDateTo', 'formCloseFrom', 'formCloseTo'].forEach(id => {
+            ['endDateFrom', 'endDateTo'].forEach(id => {
               const el = document.getElementById(id);
               if (el) el.value = '';
             });
             const direct = document.getElementById('directReports');
             if (direct) direct.checked = false;
+            const deadlineMissed = document.getElementById('deadlineMissedForms');
+            if (deadlineMissed) deadlineMissed.checked = false;
           }
           updateUIForRole(currentRole);
           renderTable();
+          showRoleNotifications(currentRole);
         });
       });
 
@@ -1863,16 +2048,10 @@
             if (resetBtn) resetBtn.style.display = 'flex';
             break;
           case 'hr':
-            title.textContent = 'Цели на согласовании';
-            tabs.innerHTML = `<div class="tab ${currentHRTab === 'review' ? 'active' : ''}" data-tab="review">Цели на согласовании</div><div class="tab ${currentHRTab === 'all' ? 'active' : ''}" data-tab="all">Все цели</div>`;
+            title.textContent = 'Цели моей команды';
+            tabs.innerHTML = '<div class="tab active" data-tab="registry">Реестр сотрудников</div>';
             filterBar.style.display = 'flex';
             if (resetBtn) resetBtn.style.display = 'none';
-            setTimeout(() => document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => {
-              document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-              tab.classList.add('active');
-              currentHRTab = tab.dataset.tab;
-              renderTable();
-            })), 100);
             break;
           case 'superior':
             title.textContent = 'Цели подразделения';
@@ -1898,8 +2077,9 @@
       document.getElementById('applyFilters')?.addEventListener('click', () => { renderTable(); document.getElementById('filterPanel').style.display = 'none'; });
       document.getElementById('clearFilters')?.addEventListener('click', () => {
         document.querySelectorAll('#statusFilters input, #positionFilters input').forEach(el => el.checked = false);
-        ['endDateFrom', 'endDateTo', 'formCloseFrom', 'formCloseTo'].forEach(id => document.getElementById(id).value = '');
+        ['endDateFrom', 'endDateTo'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('directReports').checked = false;
+        document.getElementById('deadlineMissedForms').checked = false;
         renderTable();
         document.getElementById('filterPanel').style.display = 'none';
       });
@@ -1924,7 +2104,11 @@
         rows.forEach(row => tbody.appendChild(row));
       }
 
-      document.addEventListener('DOMContentLoaded', () => { updateUIForRole('manager'); renderTable(); });
+      document.addEventListener('DOMContentLoaded', () => {
+        updateUIForRole(currentRole);
+        renderTable();
+        showRoleNotifications(currentRole);
+      });
       window.addEventListener('storage', (e) => { if (e.key?.startsWith('goals-status-')) renderTable(); });
       
     </script>

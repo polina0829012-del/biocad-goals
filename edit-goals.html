@@ -104,6 +104,87 @@
       color: #0F172A;
     }
 
+    .status-stepper {
+      width: 100%;
+      overflow: visible;
+      padding-bottom: 4px;
+      margin-top: -8px;
+    }
+
+    .status-stepper-track {
+      display: flex;
+      align-items: flex-start;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .status-step {
+      position: relative;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-align: center;
+      min-width: 0;
+      padding-right: 4px;
+    }
+
+    .status-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: calc(50% + 14px);
+      width: calc(100% - 28px);
+      height: 2px;
+      background: #E2E8F0;
+    }
+
+    .status-step.done:not(:last-child)::after {
+      background: #3389F4;
+    }
+
+    .status-step-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #CBD5E1;
+      background: #FFFFFF;
+      color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      line-height: 1;
+      position: relative;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+
+    .status-step.done .status-step-dot {
+      background: #3389F4;
+      border-color: #3389F4;
+      color: #FFFFFF;
+    }
+
+    .status-step.active .status-step-dot {
+      border-color: #3389F4;
+      box-shadow: 0 0 0 3px rgba(51, 137, 244, 0.2);
+    }
+
+    .status-step-label {
+      font-size: 12px;
+      line-height: 1.3;
+      color: #94A3B8;
+      max-width: 120px;
+    }
+
+    .status-step.done .status-step-label,
+    .status-step.active .status-step-label {
+      color: #334155;
+      font-weight: 600;
+    }
+
     .rework-message {
       display: none;
       background: #E7F2FF;
@@ -212,6 +293,54 @@
       margin-bottom: 8px;
     }
 
+    .field-title-with-tooltip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .field-help-tooltip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #E7F2FF;
+      color: #3389F4;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: help;
+      user-select: none;
+    }
+
+    .field-help-tooltip .tooltip-text {
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 8px);
+      transform: none;
+      width: 320px;
+      max-width: calc(100vw - 340px);
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #1E293B;
+      color: #FFFFFF;
+      font-size: 12px;
+      line-height: 1.4;
+      text-align: left;
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .field-help-tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+
     .form-row .field-group .text-field {
       width: 100%;
       min-height: 40px;
@@ -229,6 +358,10 @@
     .form-row .field-group .text-field.error {
       border-color: #EE4A3F;
       box-shadow: 0px 0px 0px 2px rgba(238, 74, 63, 0.2);
+    }
+
+    .form-row .field-group .text-field:focus::placeholder {
+      color: transparent;
     }
 
     .form-row .date-group .date-field {
@@ -447,20 +580,20 @@
           <div class="value">Бизнес-аналитик К4</div>
         </div>
         <div class="info-item">
-          <div class="label">Длительность ИС</div>
-          <div class="date-range">
-            <span>09.12.2025</span>
-            <span>по</span>
-            <span>09.02.2026</span>
-          </div>
+          <div class="label">Юридический руководитель</div>
+          <div class="value">Петров Петр Петрович</div>
         </div>
         <div class="info-item">
           <div class="label">Функциональный руководитель</div>
           <div class="value">Иванов Иван Иваныч</div>
         </div>
         <div class="info-item">
-          <div class="label">Руководитель по юридической ОШС</div>
-          <div class="value">Петров Петр Петрович</div>
+          <div class="label">Длительность ИС</div>
+          <div class="date-range">
+            <span>09.12.2025</span>
+            <span>по</span>
+            <span>09.02.2026</span>
+          </div>
         </div>
         <div class="info-item" id="agreeDateItem">
           <div class="label">Согласовать до</div>
@@ -475,6 +608,8 @@
           <div class="value">20.10.2025</div>
         </div>
       </div>
+
+      <div class="status-stepper" id="statusStepper"></div>
 
       <div class="rework-message" id="reworkMessage">
         <div class="title">Комментарий HR по доработке:</div>
@@ -562,6 +697,7 @@
       const historyKey = `goals-history-${employeeKey}`;
       const originalGoalsKey = `goals-original-${employeeKey}`;
       const previousStatusKey = `goals-previous-status-${employeeKey}`;
+      const notificationsStorageKey = 'goals-role-notifications';
 
       // Загружаем данные
       let goalsData = JSON.parse(localStorage.getItem(draftKey));
@@ -576,6 +712,24 @@
       }
 
       const previousStatus = localStorage.getItem(statusKey);
+      const MAX_GOALS_COUNT = 5;
+
+      function enqueueRoleNotification(toRole, subject) {
+        let notifications = [];
+        try {
+          notifications = JSON.parse(localStorage.getItem(notificationsStorageKey)) || [];
+        } catch (e) {
+          notifications = [];
+        }
+        notifications.push({
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          toRole,
+          subject,
+          createdAt: new Date().toISOString(),
+          read: false
+        });
+        localStorage.setItem(notificationsStorageKey, JSON.stringify(notifications));
+      }
 
       // ---------- ИСПРАВЛЕННЫЙ БЛОК ЗАГРУЗКИ ОРИГИНАЛОВ ----------
       // ---------- ИСПРАВЛЕННЫЙ БЛОК ЗАГРУЗКИ ОРИГИНАЛОВ ----------
@@ -623,6 +777,69 @@
                   savedStatus === 'in-progress' ? 'На выполнении' : savedStatus;
       }
 
+      function renderStatusStepper() {
+        const stepperEl = document.getElementById('statusStepper');
+        if (!stepperEl) return;
+
+        const currentStatus = localStorage.getItem(statusKey) || 'draft';
+        const statusAliasMap = {
+          approved: 'sign',
+          rework: 'draft',
+          rejected: 'review'
+        };
+        const normalizedStatus = statusAliasMap[currentStatus] || currentStatus;
+        const finalLabel = normalizedStatus === 'passed'
+          ? 'ИС пройден'
+          : normalizedStatus === 'failed'
+            ? 'ИС не пройден'
+            : normalizedStatus === 'closed'
+              ? 'Отменена'
+              : 'Итог';
+
+        const steps = [
+          { id: 'draft', label: 'Черновик' },
+          { id: 'review', label: 'На согласовании' },
+          { id: 'sign', label: 'На подписании' },
+          { id: 'in-progress', label: 'На выполнении' },
+          { id: 'final', label: finalLabel }
+        ];
+
+        const finalStatuses = ['passed', 'failed', 'closed'];
+        const linearFlow = ['draft', 'review', 'sign', 'in-progress'];
+        const linearIndex = linearFlow.indexOf(normalizedStatus);
+
+        const getStepState = (stepId) => {
+          if (finalStatuses.includes(normalizedStatus)) {
+            if (stepId === 'final') return 'active';
+            if (linearFlow.includes(stepId)) return 'done';
+            return 'pending';
+          }
+          if (linearIndex >= 0) {
+            if (stepId === 'final') return 'pending';
+            if (!linearFlow.includes(stepId)) return 'pending';
+            const stepIndex = linearFlow.indexOf(stepId);
+            if (stepIndex < linearIndex) return 'done';
+            if (stepIndex === linearIndex) return 'active';
+            return 'pending';
+          }
+          return 'pending';
+        };
+
+        stepperEl.innerHTML = `
+          <div class="status-stepper-track">
+            ${steps.map((step) => {
+              const stepState = getStepState(step.id);
+              return `
+                <div class="status-step ${stepState}">
+                  <div class="status-step-dot">${stepState === 'done' ? '✓' : ''}</div>
+                  <div class="status-step-label">${step.label}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
       // Функция проверки даты (не в прошлом)
       function isValidDate(dateString) {
         if (!dateString) return false;
@@ -654,7 +871,18 @@
           const criteriaValue = criteriaField ? criteriaField.value.trim() : '';
           const dateValue = dateField ? dateField.value : '';
 
-          // Проверяем, есть ли хоть что-то заполненное
+          // Полностью пустая цель не должна отправляться:
+          // либо заполните её, либо удалите карточку.
+          if (!goalValue && !criteriaValue && !dateValue) {
+            isValid = false;
+            if (goalField) goalField.classList.add('error');
+            if (criteriaField) criteriaField.classList.add('error');
+            if (dateField) dateField.classList.add('error');
+            errors.push(`• Цель ${index + 1}: заполните цель полностью или удалите её`);
+            return;
+          }
+
+          // Проверяем заполненную/частично заполненную цель
           if (goalValue || criteriaValue || dateValue) {
             hasAnyContent = true;
 
@@ -853,9 +1081,13 @@
 
               <div class="form-row">
                 <div class="field-group">
-                  <div class="title">Цель</div>
+                  <div class="title field-title-with-tooltip">Цель
+                    <span class="field-help-tooltip">i
+                      <span class="tooltip-text">Заполните название цели, оно должно быть кратким и отображать конечный результат, к которому сотрудник должен прийти</span>
+                    </span>
+                  </div>
                   <textarea class="text-field goal-field" data-field="goal" data-index="${index}" 
-                    placeholder="Введите цель (минимум 5 символов)">${goal.goal || ''}</textarea>
+                    placeholder="Например: Провести валидацию тест-системы">${goal.goal || ''}</textarea>
                 </div>
                 <div class="date-group">
                   <div class="title">Срок выполнения</div>
@@ -866,9 +1098,13 @@
 
               <div class="form-row">
                 <div class="field-group">
-                  <div class="title">Критерии достижения</div>
+                  <div class="title field-title-with-tooltip">Критерии достижения
+                    <span class="field-help-tooltip">i
+                      <span class="tooltip-text">Опишите шаги, которые сотруднику необходимо выполнить, для достижения цели</span>
+                    </span>
+                  </div>
                   <textarea class="text-field goal-field" data-field="criteria" data-index="${index}" 
-                    placeholder="Введите критерии (минимум 5 символов)">${goal.criteria || ''}</textarea>
+                    placeholder="Например: Самостоятельно проведена валидация тест-системы, для контроля привлечен старший научный сотрудник....">${goal.criteria || ''}</textarea>
                 </div>
               </div>
             </div>
@@ -902,6 +1138,10 @@
       };
 
       document.getElementById('addGoalBtn').addEventListener('click', () => {
+        if (goalsData.goals.length >= MAX_GOALS_COUNT) {
+          alert('Можно добавить не более 5 целей. Удалите одну из имеющихся целей для добавления новой.');
+          return;
+        }
         goalsData.goals.push({ goal: '', criteria: '', date: '' });
         localStorage.setItem(draftKey, JSON.stringify(goalsData));
         renderGoals();
@@ -949,6 +1189,7 @@
 
         localStorage.setItem(draftKey, JSON.stringify(goalsData));
         localStorage.setItem(statusKey, 'review');
+        enqueueRoleNotification('hr', `Согласуйте ИС по ${employeeName}`);
         localStorage.removeItem(commentKey);
         document.getElementById('submitModal').style.display = 'flex';
       });
@@ -994,6 +1235,7 @@
         window.location.href = 'index.html';
       });
 
+      renderStatusStepper();
       renderGoals();
     </script>
   </main>

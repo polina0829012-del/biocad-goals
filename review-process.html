@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Просмотр процесса</title>
+  <title>История изменений формы</title>
   <style>
     * {
       margin: 0;
@@ -412,15 +412,11 @@
 
   <main class="main-content">
     <div class="page-content">
-      <h1 class="page-title" id="pageTitle">Просмотр процесса изменения целей</h1>
+      <h1 class="page-title" id="pageTitle">История изменений формы</h1>
 
       <div class="employee-info">
         <div class="info-item">
-          <div class="label">Сотрудник</div>
-          <div class="value" id="employeeName">Котова Вероника</div>
-        </div>
-        <div class="info-item">
-          <div class="label">Статус процесса</div>
+          <div class="label">Статус</div>
           <div class="value" id="processStatus"></div>
         </div>
         <div class="info-item">
@@ -486,19 +482,18 @@
         isFinalFormStatus && processId === 'main' && mode === 'snapshot' ? 'snapshot' :
         mode;
 
-      document.getElementById('employeeName').textContent = employeeName;
 
       const historyKey = `goals-history-${employeeKey}`;
       const historyArchiveKey = `goals-history-archive-${employeeKey}`;
       const signedGoalsKey = `goals-signed-${employeeKey}`;
       const signGoalsKey = `goals-sign-${employeeKey}`;
 
-      // Загружаем данные процесса
+      // Загружаем данные истории
       let historyData = JSON.parse(localStorage.getItem(historyKey)) || JSON.parse(localStorage.getItem(historyArchiveKey));
       const signedData = JSON.parse(localStorage.getItem(signedGoalsKey) || localStorage.getItem(signGoalsKey) || '{"goals":[]}');
 
       if (!historyData && effectiveMode !== 'active') {
-        alert('Данные процесса не найдены');
+        alert('Данные истории не найдены');
         window.location.href = 'index.html';
       }
 
@@ -511,7 +506,7 @@
       if (effectiveMode === 'active') {
         statusText = 'Завершено';
         statusClass = 'badge-active';
-        messageTitle = 'Это экран процесса, а не форма целей';
+        messageTitle = 'Это экран истории, а не форма целей';
         messageText = 'Здесь доступен только просмотр текущей версии целей. Для действий с формой используйте кнопку "Перейти к форме с целями".';
         document.getElementById('comparisonTitle').textContent = 'Текущая версия целей';
         document.getElementById('splitView').classList.add('active-mode');
@@ -519,20 +514,20 @@
       } else if (effectiveMode === 'review') {
         statusText = 'На согласовании у HR';
         statusClass = 'badge-review';
-        messageTitle = 'Процесс на согласовании';
+        messageTitle = 'Версия формы на согласовании';
         messageText = 'Изменения целей находятся на рассмотрении у HR. Вы можете просмотреть предлагаемые изменения.';
         document.getElementById('returnBtn').style.display = 'block';
       } else if (effectiveMode === 'rejected') {
         statusText = 'Отклонен HR';
         statusClass = 'badge-rejected';
-        messageTitle = 'Процесс отклонен';
+        messageTitle = 'Версия формы отклонена';
         messageText = 'HR отклонил предложенные изменения. Вы можете вернуться к подписанным целям.';
         document.getElementById('returnBtn').style.display = 'block';
       } else if (effectiveMode === 'sign') {
         statusText = 'На подписании';
         statusClass = 'badge-active';
-        messageTitle = 'Процесс на подписании';
-        messageText = 'Изменения согласованы HR и ожидают подписания документа. После подписания процесс станет прошлой версией.';
+        messageTitle = 'Версия формы на подписании';
+        messageText = 'Изменения согласованы HR и ожидают подписания документа. После подписания версия формы станет прошлой.';
         document.getElementById('returnBtn').style.display = 'block';
       } else if (effectiveMode === 'snapshot') {
         statusText = 'Прошлая версия';
@@ -545,14 +540,14 @@
       } else if (effectiveMode === 'completed') {
         statusText = 'Завершено';
         statusClass = 'badge-completed';
-        messageTitle = 'Процесс успешно завершен';
+        messageTitle = 'Версия формы успешно завершена';
         messageText = 'Изменения были согласованы и подписаны. Теперь это действующая версия целей.';
         document.getElementById('returnBtn').style.display = 'block';
       } else if (effectiveMode === 'closed') {
         statusText = 'Отменен';
         statusClass = 'badge-closed';
-        messageTitle = 'Процесс отменен';
-        messageText = 'Процесс изменения целей отменен до подписания новой версии формы.';
+        messageTitle = 'Версия формы отменена';
+        messageText = 'Изменения целей отменены до подписания новой версии формы.';
         document.getElementById('returnBtn').style.display = 'block';
       }
 
@@ -571,7 +566,7 @@
       // Устанавливаем комментарий
       const commentSection = document.getElementById('commentSection');
       if (effectiveMode === 'active') {
-        // В "Актуальном процессе" комментарий руководителя не отображаем
+        // В "Актуальной истории" комментарий руководителя не отображаем
         commentSection.style.display = 'none';
       } else {
         commentSection.style.display = 'block';
