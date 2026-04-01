@@ -34,6 +34,31 @@ main.main-content > header.header {
   border-bottom: 1px solid var(--color-secondary-200);
 }
 
+/*
+  В ui-components у класса .tooltip другой смысл (всплывашка под иконками в шапке портала).
+  Глобальный импорт ломает тултипы реестра: колокольчик «на доработку» уезжает.
+*/
+.employee-table .tooltip {
+  position: relative !important;
+  display: inline-block !important;
+  width: auto !important;
+  height: auto !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  color: inherit !important;
+  z-index: 2;
+}
+
+.employee-table .tooltip.action-tooltip {
+  z-index: 3;
+}
+
 .header h1,
 .page-title {
   font-family: 'Biocad Display', 'Inter', sans-serif;

@@ -1358,7 +1358,7 @@
 
           let statusDisplay = `<span class="status-badge status-${emp.status}">${statusText}`;
           
-          if (currentRole === 'manager' && emp.status === 'draft' && hasComment) {
+          if (currentRole === 'manager' && (emp.status === 'draft' || emp.status === 'rework') && hasComment) {
             statusDisplay += `
               <span class="tooltip bell-icon">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1416,12 +1416,19 @@
             !!processHistoryData &&
             processHistoryData.initiatedFrom === 'in-progress' &&
             (processHistoryData.status === 'completed' || processHistoryData.status === 'sign');
+          const showManagerReworkTooltip =
+            currentRole === 'manager' &&
+            (emp.status === 'draft' || emp.status === 'rework') &&
+            hasComment;
           const actionTooltipText = showHrResubmitTooltip
             ? 'Требуется действие! Руководитель изменил цели, необходимо повторное согласование'
             : showManagerSignTooltip
               ? 'Требуется действие! HR согласовал новую версию формы, необходимо ее подписать'
-              : '';
-          const shouldShowActionAlert = showHrResubmitTooltip || showManagerSignTooltip;
+              : showManagerReworkTooltip
+                ? 'Требуется действие! HR вернул цели на доработку, откройте форму и внесите правки'
+                : '';
+          const shouldShowActionAlert =
+            showHrResubmitTooltip || showManagerSignTooltip || showManagerReworkTooltip;
           const actionState = getActionStateForRole(emp, currentRole, employeeKey);
           const todayIso = new Date().toISOString().split('T')[0];
           const isActionDeadlineOverdue =
