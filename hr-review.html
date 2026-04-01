@@ -5,12 +5,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HR: Согласование целей</title>
+    <link rel="stylesheet" href="./ui-components-master/src/global/styles/index.css" />
+    <link rel="stylesheet" href="./prototype-styles.css" />
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
         }
 
         body {
@@ -59,7 +60,7 @@
         }
 
         .page-title {
-            font-family: 'Biocad Display', sans-serif;
+            font-family: 'Inter', sans-serif;
             font-weight: 700;
             font-size: 40px;
             line-height: 42px;
@@ -306,7 +307,8 @@
         .goal-header-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+            gap: 12px;
             margin-bottom: 16px;
             padding-bottom: 8px;
             border-bottom: 1px solid #E2E8F0;
@@ -318,9 +320,9 @@
             font-size: 20px;
             color: #1E293B;
             flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            min-width: 0;
+            line-height: 1.35;
+            word-break: break-word;
         }
 
         .goal-header-row .goal-date {
@@ -698,6 +700,7 @@
             cursor: pointer;
         }
     </style>
+    <link rel="stylesheet" href="./prototype-ds-bridge.css" />
 </head>
 
 <body>
@@ -707,7 +710,7 @@
 
     <main class="main-content">
         <div class="page-content">
-            <h1 class="page-title" id="pageTitle">HR: Согласование целей</h1>
+            <h1 class="page-title headingBiocad" id="pageTitle">HR: Согласование целей</h1>
 
             <div class="employee-info">
                 <div class="info-item">
@@ -1154,12 +1157,6 @@
         ` : ''}
     </div>
     <div class="new-version">
-        ${goalChanged ? `
-            <div class="field-comparison">
-                <div class="field-label">Цель</div>
-                <div class="field-value added">${newGoal.goal || '—'}</div>
-            </div>
-        ` : ''}
         <div class="field-comparison">
             <div class="field-label">Критерии достижения</div>
             <div class="field-value ${criteriaChanged ? 'added' : 'unchanged'}">${newGoal.criteria || '—'}</div>
@@ -1337,18 +1334,54 @@
                     });
                 }
             }
+            function parseHistoryData() {
+                try {
+                    const raw = localStorage.getItem(historyKey);
+                    if (!raw) return null;
+                    return JSON.parse(raw);
+                } catch (e) {
+                    return null;
+                }
+            }
+
             function renderButtons() {
                 const buttonGroup = document.getElementById('buttonGroup');
                 const currentStatus = localStorage.getItem(statusKey) || 'review';
-                const historyData = JSON.parse(localStorage.getItem(historyKey));
+                const historyData = parseHistoryData();
 
-                // HR в режиме просмотра (view=readonly) — только "Назад", без кнопок согласования
+                // Кнопка перехода к актуальным целям — версия 2: «На согласовании» или «На подписании»,
+                // в истории есть предыдущая версия (изменения после подписания / с «На выполнении»).
+                const showGoToActualGoals =
+                    (currentStatus === 'review' || currentStatus === 'sign') &&
+                    historyData &&
+                    Array.isArray(historyData.previousGoals) &&
+                    historyData.previousGoals.length > 0 &&
+                    (historyData.initiatedFrom === 'sign' || historyData.initiatedFrom === 'in-progress');
+
+                const goToActualGoalsBtn = document.getElementById('goToActualGoalsBtn');
+                if (goToActualGoalsBtn) {
+                    goToActualGoalsBtn.style.display = showGoToActualGoals ? 'inline-flex' : 'none';
+                }
+
+                const rightBtns = buttonGroup.querySelector('.right-buttons');
+                const reworkBtn = document.getElementById('reworkBtn');
+                const approveBtn = document.getElementById('approveBtn');
+                const rejectChangesBtn = document.getElementById('rejectChangesBtn');
+
+                // view=readonly (например, открытие из реестра при статусе «На подписании»):
+                // не показываем согласование/доработку, но оставляем переход к актуальным целям.
                 if (isReadOnly) {
-                    const rightBtns = buttonGroup.querySelector('.right-buttons');
-                    if (rightBtns) rightBtns.style.display = 'none';
+                    if (reworkBtn) reworkBtn.style.display = 'none';
+                    if (approveBtn) approveBtn.style.display = 'none';
+                    if (rejectChangesBtn) rejectChangesBtn.style.display = 'none';
+                    if (rightBtns) {
+                        rightBtns.style.display = showGoToActualGoals ? 'flex' : 'none';
+                    }
                 } else {
-                    // Кнопка "Отклонить изменения" — только для изменений из статусов
-                    // "На подписании" или "На выполнении"
+                    if (rightBtns) rightBtns.style.display = 'flex';
+                    if (reworkBtn) reworkBtn.style.display = '';
+                    if (approveBtn) approveBtn.style.display = '';
+
                     const isChangeReview =
                         currentStatus === 'review' &&
                         historyData &&
@@ -1356,22 +1389,8 @@
                         historyData.previousGoals.length > 0 &&
                         (historyData.initiatedFrom === 'sign' || historyData.initiatedFrom === 'in-progress');
 
-                    const rejectChangesBtn = document.getElementById('rejectChangesBtn');
                     if (rejectChangesBtn) {
                         rejectChangesBtn.style.display = isChangeReview ? 'inline-flex' : 'none';
-                    }
-
-                    // Кнопка перехода к актуальным целям нужна только при согласовании версии 2
-                    // (изменения, инициированные после статуса "На выполнении").
-                    const isVersion2ReviewFromInProgress =
-                        currentStatus === 'review' &&
-                        historyData &&
-                        Array.isArray(historyData.previousGoals) &&
-                        historyData.previousGoals.length > 0 &&
-                        historyData.initiatedFrom === 'in-progress';
-                    const goToActualGoalsBtn = document.getElementById('goToActualGoalsBtn');
-                    if (goToActualGoalsBtn) {
-                        goToActualGoalsBtn.style.display = isVersion2ReviewFromInProgress ? 'inline-flex' : 'none';
                     }
                 }
 

@@ -1,0 +1,8 @@
+.link {
+    color: var(--color-primary-600);
+}
+
+.link:hover,
+.link:active {
+    color: var(--color-primary-700);
+}

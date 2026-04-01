@@ -5,6 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Просмотр целей</title>
+  <link rel="stylesheet" href="./ui-components-master/src/global/styles/index.css" />
+  <link rel="stylesheet" href="./prototype-styles.css" />
   <!-- Подключаем jsPDF для генерации PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -12,7 +14,6 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
     }
 
     body {
@@ -61,7 +62,7 @@
     }
 
     .page-title {
-      font-family: 'Biocad Display', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-weight: 700;
       font-size: 40px;
       line-height: 42px;
@@ -497,6 +498,10 @@
       margin-bottom: 16px;
     }
 
+    .goal-card.edit-mode .edit-field {
+      margin-bottom: 20px;
+    }
+
     .edit-field:focus::placeholder {
       color: transparent;
     }
@@ -561,10 +566,31 @@
       color: #0F172A;
     }
 
+    /*
+      В глобальной типографике ui-components класс .title — это крупный заголовок (64px).
+      Подписи полей в форме редактирования цели используют тот же класс — переопределяем локально.
+    */
+    .goal-card.edit-mode .field-group .title,
+    .goal-card.edit-mode .date-group .title {
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 10px;
+    }
+
+    .goal-card.edit-mode .form-row + .form-row {
+      margin-top: 28px;
+    }
+
     /* Evaluation section */
     .evaluation-section {
       margin-top: 16px;
       margin-bottom: 16px;
+    }
+
+    .goal-card.edit-mode .evaluation-section {
+      margin-bottom: 24px;
     }
 
     .evaluation-row {
@@ -615,6 +641,15 @@
     .badge-default {
       background: #F1F5F9;
       color: #64748B;
+    }
+
+    .badge-evaluate-cta {
+      background: #0066CC;
+      color: #FFFFFF;
+    }
+
+    .badge-evaluate-cta:hover {
+      background: #09549D;
     }
 
     /* Manager evaluation dropdown */
@@ -834,6 +869,16 @@
       background: #0066CC;
       color: white;
       border: none;
+    }
+
+    .btn-submit {
+      background: #059669;
+      color: #FFFFFF;
+      border: none;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: #047857;
     }
 
     .btn:hover:not(:disabled) {
@@ -1257,6 +1302,16 @@
       cursor: pointer;
     }
 
+    #summaryModal .modal-actions .btn-cancel {
+      background: #F59E0B;
+      color: #FFFFFF;
+      border: none;
+    }
+
+    #summaryModal .modal-actions .btn-cancel:hover {
+      background: #D97706;
+    }
+
     /* Upload area */
     .upload-area {
       border: 2px dashed #CBD5E1;
@@ -1479,7 +1534,8 @@
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      height: 28px;
+      min-height: 40px;
+      gap: 16px;
     }
 
     .modal-header-process h3 {
@@ -1490,6 +1546,16 @@
       line-height: 28px;
       color: #0F172A;
       margin: 0;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .modal-header-process-right {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
     }
 
     .close-modal-process {
@@ -1520,6 +1586,29 @@
 
     .close-modal-process::after {
       transform: rotate(-45deg);
+    }
+
+    .processes-modal-toolbar {
+      display: none;
+      align-items: center;
+    }
+
+    .btn-download-history {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      background: #0066CC;
+      color: #FFFFFF;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+
+    .btn-download-history:hover {
+      background: #09549D;
+      color: #FFFFFF;
     }
 
     .processes-container {
@@ -1817,6 +1906,7 @@
       word-break: break-word;
     }
   </style>
+  <link rel="stylesheet" href="./prototype-ds-bridge.css" />
 </head>
 
 <body>
@@ -1826,7 +1916,7 @@
 
   <main class="main-content">
     <div class="page-content">
-      <h1 class="page-title" id="pageTitle">Просмотр целей</h1>
+      <h1 class="page-title headingBiocad" id="pageTitle">Просмотр целей</h1>
 
       <div class="employee-info">
         <div class="info-item">
@@ -1895,6 +1985,11 @@
 
       <!-- Add goal button (visible only in edit mode) -->
       <button class="add-goal-btn" id="addGoalBtn" style="display: none;">+ Добавить цель</button>
+
+      <!-- Подсказка руководителю при «ИС не пройден»: выгрузка и загрузка документов -->
+      <div class="status-message" id="managerFailureDocsHint" style="display: none;">
+        <div class="text">Скачайте документы и подпишите форму с целями со своей стороны и со стороны сотрудника. В случае, если сотрудник отказывается от подписания, приложите также подписанный с вашей стороны акт об отказе от подписи.</div>
+      </div>
 
       <!-- Button group -->
       <div class="button-group" id="buttonGroup"></div>
@@ -1979,9 +2074,14 @@
       <div class="modal-content-process">
         <div class="modal-header-process">
           <h3>История изменений формы</h3>
-          <button class="close-modal-process" id="closeProcessesModal"></button>
+          <div class="modal-header-process-right">
+            <div class="processes-modal-toolbar" id="processesModalToolbar" style="display: none;">
+              <button type="button" class="btn-download-history" id="downloadFullProcessHistoryBtn">Выгрузить историю</button>
+            </div>
+            <button class="close-modal-process" id="closeProcessesModal"></button>
+          </div>
         </div>
-        
+
         <div class="processes-container" id="processesContainer">
           <!-- Здесь будет отображаться история изменений -->
           <div class="loading-processes">Загрузка истории изменений...</div>
@@ -2041,7 +2141,7 @@
         <div class="sign-upload-attachment">
           <div class="sign-upload-attachment-title" id="signUploadAttachmentTitle">Прикрепите подписанный документ сотрудника</div>
           <div class="sign-upload-attachment-row">
-            <button class="btn-attach-sign-file" id="attachSignFileBtn">Прикрепить файл</button>
+            <button type="button" class="btn-attach-sign-file" id="attachSignFileBtn">Прикрепить файл</button>
             <span class="sign-upload-support-text">до 20 МБ</span>
           </div>
           <div class="sign-upload-file-info" id="signUploadFileInfo">
@@ -2052,6 +2152,18 @@
             Перетащите файл сюда или нажмите для выбора на компьютере
           </div>
           <input type="file" id="signFileInput" style="display: none;" accept=".pdf,.doc,.docx">
+        </div>
+        <div class="sign-upload-attachment" id="signUploadFailureSecondBlock" style="display: none;">
+          <div class="sign-upload-attachment-title" id="signUploadAttachmentTitle2">Второй файл (по желанию)</div>
+          <div class="sign-upload-attachment-row">
+            <button type="button" class="btn-attach-sign-file" id="attachSignFileBtn2">Прикрепить файл</button>
+            <span class="sign-upload-support-text">до 20 МБ</span>
+          </div>
+          <div class="sign-upload-file-info" id="signUploadFileInfo2">
+            <span class="sign-upload-file-name" id="signUploadFileName2"></span>
+            <span class="sign-upload-file-remove" id="removeSignUploadFile2">✕ Удалить</span>
+          </div>
+          <input type="file" id="signFileInput2" style="display: none;" accept=".pdf,.doc,.docx">
         </div>
         <div class="sign-upload-actions">
           <button class="btn-cancel" id="cancelSignUpload">Отмена</button>
@@ -2138,9 +2250,11 @@
       const failurePendingKey = `goals-failure-pending-${employeeKey}`;
       const failureDownloadedKey = `goals-failure-downloaded-${employeeKey}`;
       const failureDocumentKey = `goals-failure-document-${employeeKey}`;
+      const failureDocumentKey2 = `goals-failure-document-2-${employeeKey}`;
       let isFailurePending = localStorage.getItem(failurePendingKey) === 'true';
       let isFailureDownloaded = localStorage.getItem(failureDownloadedKey) === 'true';
       let failureUploadedFile = localStorage.getItem(failureDocumentKey);
+      let failureUploadedFile2 = localStorage.getItem(failureDocumentKey2);
       let signUploadIsFailureFlow = false;
       // New state for edit mode in in-progress
       let isEditMode = false; // Режим редактирования в статусе "На выполнении"
@@ -2262,17 +2376,27 @@
         const subtitleEl = document.getElementById('signUploadAttachmentTitle');
         const fileInfoEl = document.getElementById('signUploadFileInfo');
         const fileNameEl = document.getElementById('signUploadFileName');
+        const secondBlock = document.getElementById('signUploadFailureSecondBlock');
+        const fileInfoEl2 = document.getElementById('signUploadFileInfo2');
+        const fileNameEl2 = document.getElementById('signUploadFileName2');
         signUploadIsFailureFlow = isFailureFlow;
 
         const currentUploadedFile = signUploadIsFailureFlow
           ? (failureUploadedFile || localStorage.getItem(failureDocumentKey))
           : (uploadedFile || localStorage.getItem(documentKey));
+        const currentUploadedFile2 =
+          failureUploadedFile2 || localStorage.getItem(failureDocumentKey2);
 
         if (titleEl) {
           titleEl.textContent = 'Загрузить подписанный документ';
         }
         if (subtitleEl) {
-          subtitleEl.textContent = 'Прикрепите подписанный документ сотрудника';
+          subtitleEl.textContent = isFailureFlow
+            ? 'Для завершения процесса достаточно прикрепить один файл; второй — по желанию.'
+            : 'Прикрепите подписанный документ сотрудника';
+        }
+        if (secondBlock) {
+          secondBlock.style.display = isFailureFlow ? 'flex' : 'none';
         }
         if (fileInfoEl && fileNameEl) {
           if (currentUploadedFile) {
@@ -2282,6 +2406,18 @@
             fileNameEl.textContent = '';
             fileInfoEl.style.display = 'none';
           }
+        }
+        if (isFailureFlow && fileInfoEl2 && fileNameEl2) {
+          if (currentUploadedFile2) {
+            fileNameEl2.textContent = currentUploadedFile2;
+            fileInfoEl2.style.display = 'flex';
+          } else {
+            fileNameEl2.textContent = '';
+            fileInfoEl2.style.display = 'none';
+          }
+        } else if (fileInfoEl2 && fileNameEl2) {
+          fileNameEl2.textContent = '';
+          fileInfoEl2.style.display = 'none';
         }
         if (modal) {
           modal.style.display = 'flex';
@@ -2570,7 +2706,7 @@
                         </div>
                       ` : `
                         <select class="evaluation-select" onchange="setEmployeeEvaluation(${index}, this.value)">
-                          <option value="" ${!employeeEvaluation ? 'selected' : ''}>Выберите оценку</option>
+                          <option value="" ${!employeeEvaluation ? 'selected' : ''}>Выберите статус</option>
                           <option value="completed" ${employeeEvaluation === 'completed' ? 'selected' : ''}>Выполнено</option>
                           <option value="partially" ${employeeEvaluation === 'partially' ? 'selected' : ''}>Не выполнено полностью</option>
                           <option value="delayed" ${employeeEvaluation === 'delayed' ? 'selected' : ''}>Не выполнено в обозначенные сроки</option>
@@ -2616,7 +2752,7 @@
                   `<span class="evaluation-badge ${evaluationOptions.find(opt => opt.value === managerEvaluation)?.color}" onclick="toggleDropdown(${index})" style="cursor: pointer;">
                               ${evaluationOptions.find(opt => opt.value === managerEvaluation)?.label}
                             </span>` :
-                  `<span class="evaluation-badge badge-default" onclick="toggleDropdown(${index})" style="cursor: pointer;">
+                  `<span class="evaluation-badge badge-default ${status === 'in-progress' ? 'badge-evaluate-cta' : ''}" onclick="toggleDropdown(${index})" style="cursor: pointer;">
                               Оценить
                             </span>`
                 }
@@ -2641,7 +2777,7 @@
           if (isEditMode) {
             // В режиме редактирования показываем поля для ввода
             html += `
-              <div class="form-row" style="margin-top: ${status === 'in-progress' ? '20px' : '0'};">
+              <div class="form-row" style="margin-top: ${status === 'in-progress' ? '28px' : '0'};">
                 <div class="field-group" style="flex: 2;">
                   <div class="title field-title-with-tooltip">Цель
                     <span class="field-help-tooltip">i
@@ -2745,6 +2881,8 @@
       function renderButtons() {
         const buttonGroup = document.getElementById('buttonGroup');
         const statusMessage = document.getElementById('statusMessage');
+        const managerFailureDocsHint = document.getElementById('managerFailureDocsHint');
+        if (managerFailureDocsHint) managerFailureDocsHint.style.display = 'none';
         const uploadSection = document.getElementById('uploadSection');
         const statusValue = document.getElementById('statusValue');
         const statusTooltip = document.getElementById('statusTooltip');
@@ -2925,10 +3063,12 @@
             `;
           } else if (role === 'manager') {
             if (isFailurePending && !isEditMode) {
+              if (managerFailureDocsHint) managerFailureDocsHint.style.display = 'flex';
               const uploadButtonClass = isFailureDownloaded ? 'btn btn-upload active' : 'btn btn-upload';
               const uploadButtonText = isFailureDownloaded ? 'Приложить подписанные документы' : 'Сначала выгрузите документы';
               const uploadButtonDisabled = !isFailureDownloaded ? 'disabled' : '';
-              const finishProcessDisabled = failureUploadedFile ? '' : 'disabled';
+              const hasFailureAttachment = !!(failureUploadedFile || failureUploadedFile2);
+              const finishProcessDisabled = hasFailureAttachment ? '' : 'disabled';
 
               buttons = `
                 <div class="left-buttons">
@@ -2999,7 +3139,7 @@
         } else if (status === 'review' && role === 'manager') {
           statusMessage.style.display = 'flex';
           document.getElementById('messageTitle').textContent = 'Цели на согласовании';
-          document.getElementById('messageText').textContent = 'Цели на согласовании у HR. После того как ваши цели согласуют, вам будет необходимо выгрузить форму с целями и загрузить его с подписями юридического руководителя и сотрудника';
+          document.getElementById('messageText').textContent = 'Цели на согласовании у HR.\nПосле того как HR согласует цели, форма примет статус "На подписании". Вам будет необходимо скачать форму с целями на испытательный срок, подписать со своей стороны и у юридического руководителя (если не совпадает) в КЭДО или вручную, если сотрудник на БДО.';
 
           buttons = `
             <div class="left-buttons">
@@ -3274,7 +3414,7 @@
         if (goalsData) {
           localStorage.setItem(signedGoalsKey, JSON.stringify(goalsData));
         }
-        enqueueRoleNotification('employee', `Начато выполнение целей ИС по ${employeeName}`);
+        enqueueRoleNotification('employee', 'Ваши цели переведены в статус «На выполнении»');
 
         alert('Статус формы изменен на "На выполнении"');
         setTimeout(() => {
@@ -3333,6 +3473,7 @@
             const docs = [];
             const signed = localStorage.getItem(documentKey);
             const failureDoc = localStorage.getItem(failureDocumentKey);
+            const failureDoc2 = localStorage.getItem(failureDocumentKey2);
             const postSignProcess = getPostSignChangeProcess();
 
             if (status === 'in-progress') {
@@ -3348,6 +3489,9 @@
               }
               if (failureDoc) {
                 docs.push({ label: 'Акт об отказе', name: failureDoc, fileName: failureDoc });
+              }
+              if (failureDoc2) {
+                docs.push({ label: 'Акт об отказе (доп.)', name: failureDoc2, fileName: failureDoc2 });
               }
             }
             if (!docs.length) {
@@ -3611,7 +3755,9 @@
       const removeFile = document.getElementById('removeFile');
       const signUploadDropArea = document.getElementById('signUploadDropArea');
       const signFileInput = document.getElementById('signFileInput');
+      const signFileInput2 = document.getElementById('signFileInput2');
       const attachSignFileBtn = document.getElementById('attachSignFileBtn');
+      const attachSignFileBtn2 = document.getElementById('attachSignFileBtn2');
 
       function setupUploadHandlers(areaElement, inputElement) {
         if (!areaElement || !inputElement) return;
@@ -3635,7 +3781,7 @@
 
           const file = e.dataTransfer.files[0];
           if (file) {
-            handleFileUpload(file);
+            handleFileUpload(file, 1);
           }
         });
       }
@@ -3650,11 +3796,26 @@
         });
       }
 
+      if (attachSignFileBtn2 && signFileInput2) {
+        attachSignFileBtn2.addEventListener('click', () => {
+          signFileInput2.click();
+        });
+      }
+
       if (signFileInput) {
         signFileInput.addEventListener('change', (e) => {
           const file = e.target.files[0];
           if (file) {
-            handleFileUpload(file);
+            handleFileUpload(file, 1);
+          }
+        });
+      }
+
+      if (signFileInput2) {
+        signFileInput2.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            handleFileUpload(file, 2);
           }
         });
       }
@@ -3663,29 +3824,58 @@
         fileInput.addEventListener('change', (e) => {
           const file = e.target.files[0];
           if (file) {
-            handleFileUpload(file);
+            handleFileUpload(file, 1);
           }
         });
       }
 
-      // Handle file upload
-      function handleFileUpload(file) {
-        closeSignUploadModal();
+      // Handle file upload (failureSlot: 1 или 2 — только для сценария «ИС не пройден»)
+      function handleFileUpload(file, failureSlot = 1) {
+        const isFailureUploadPath =
+          isFailurePending && role === 'manager' && status === 'in-progress';
 
-        // Загрузка документов по отказу (после "ИС не пройден" -> до финального статуса)
-        if (isFailurePending && role === 'manager' && status === 'in-progress') {
-          localStorage.setItem(failureDocumentKey, file.name);
-          failureUploadedFile = file.name;
+        if (!isFailureUploadPath) {
+          closeSignUploadModal();
+        }
 
-          fileName.textContent = file.name;
-          fileInfo.style.display = 'flex';
+        // Загрузка документов по отказу (после «ИС не пройден» → до финального статуса)
+        if (isFailureUploadPath) {
+          if (failureSlot === 1) {
+            localStorage.setItem(failureDocumentKey, file.name);
+            failureUploadedFile = file.name;
+            const suName = document.getElementById('signUploadFileName');
+            const suInfo = document.getElementById('signUploadFileInfo');
+            if (suName) suName.textContent = file.name;
+            if (suInfo) suInfo.style.display = 'flex';
+          } else {
+            localStorage.setItem(failureDocumentKey2, file.name);
+            failureUploadedFile2 = file.name;
+            const suName2 = document.getElementById('signUploadFileName2');
+            const suInfo2 = document.getElementById('signUploadFileInfo2');
+            if (suName2) suName2.textContent = file.name;
+            if (suInfo2) suInfo2.style.display = 'flex';
+          }
 
-          alert('Документ успешно загружен. Для того, чтобы завершить  работу с целими данного сотрудника, нажмите на кнопку "Завершить процесс"');
+          if (fileName && fileInfo) {
+            fileName.textContent = failureUploadedFile || failureUploadedFile2 || file.name;
+            fileInfo.style.display = 'flex';
+          }
+
+          if (failureSlot === 2 && signUploadIsFailureFlow) {
+            alert('Второй документ прикреплён.');
+          } else {
+            alert(
+              'Документ успешно загружен. Для того, чтобы завершить работу с целями данного сотрудника, нажмите на кнопку «Завершить процесс»'
+            );
+          }
           renderButtons();
+          if (!signUploadIsFailureFlow) {
+            closeSignUploadModal();
+          }
           return;
         }
 
-        // Обычная загрузка подписанного документа (статус "На подписании")
+        // Обычная загрузка подписанного документа (статус «На подписании»)
         localStorage.setItem(documentKey, file.name);
         uploadedFile = file.name;
 
@@ -3725,6 +3915,9 @@
         if (signFileInput) {
           signFileInput.value = '';
         }
+        if (signFileInput2) {
+          signFileInput2.value = '';
+        }
       }
 
       const closeSignUploadModalBtn = document.getElementById('closeSignUploadModal');
@@ -3746,17 +3939,26 @@
           if (signUploadIsFailureFlow) {
             localStorage.removeItem(failureDocumentKey);
             failureUploadedFile = null;
+            if (fileName && fileInfo) {
+              if (failureUploadedFile2) {
+                fileName.textContent = failureUploadedFile2;
+                fileInfo.style.display = 'flex';
+              } else {
+                fileName.textContent = '';
+                fileInfo.style.display = 'none';
+              }
+            }
           } else {
             localStorage.removeItem(documentKey);
             uploadedFile = null;
+            if (fileInfo) {
+              fileInfo.style.display = 'none';
+            }
+            if (fileName) {
+              fileName.textContent = '';
+            }
           }
 
-          if (fileInfo) {
-            fileInfo.style.display = 'none';
-          }
-          if (fileName) {
-            fileName.textContent = '';
-          }
           if (signFileInput) {
             signFileInput.value = '';
           }
@@ -3767,6 +3969,35 @@
             signUploadFileInfo.style.display = 'none';
           }
 
+          renderButtons();
+        });
+      }
+
+      const removeSignUploadFile2 = document.getElementById('removeSignUploadFile2');
+      if (removeSignUploadFile2) {
+        removeSignUploadFile2.addEventListener('click', () => {
+          localStorage.removeItem(failureDocumentKey2);
+          failureUploadedFile2 = null;
+          const signUploadFileInfo2 = document.getElementById('signUploadFileInfo2');
+          const signUploadFileName2 = document.getElementById('signUploadFileName2');
+          if (signFileInput2) {
+            signFileInput2.value = '';
+          }
+          if (signUploadFileName2) {
+            signUploadFileName2.textContent = '';
+          }
+          if (signUploadFileInfo2) {
+            signUploadFileInfo2.style.display = 'none';
+          }
+          if (fileName && fileInfo) {
+            if (failureUploadedFile) {
+              fileName.textContent = failureUploadedFile;
+              fileInfo.style.display = 'flex';
+            } else {
+              fileName.textContent = '';
+              fileInfo.style.display = 'none';
+            }
+          }
           renderButtons();
         });
       }
@@ -3853,7 +4084,7 @@
         // и запоминаем предыдущее состояние для возможного отката
         localStorage.setItem(previousStatusKey, status);
         localStorage.setItem(statusKey, 'review');
-        enqueueRoleNotification('hr', `Согласуйте изменения ИС по ${employeeName}`);
+        enqueueRoleNotification('hr', `Согласуйте изменения целей на ИС для ${employeeName}`);
 
         // Выходим из режима редактирования
         isEditMode = false;
@@ -3935,16 +4166,19 @@
       // Processes Modal Functions
       function openProcessesModal() {
         const processesContainer = document.getElementById('processesContainer');
-        
+        const toolbar = document.getElementById('processesModalToolbar');
+
         // Загружаем все процессы из localStorage
         const processes = loadProcesses();
-        
+
         if (processes.length === 0) {
+          if (toolbar) toolbar.style.display = 'none';
           processesContainer.innerHTML = '<div class="empty-processes">Нет активных процессов</div>';
         } else {
+          if (toolbar) toolbar.style.display = 'flex';
           renderProcesses(processes);
         }
-        
+
         document.getElementById('processesModal').style.display = 'flex';
       }
 
@@ -4089,7 +4323,7 @@
 
       function renderProcesses(processes) {
         const container = document.getElementById('processesContainer');
-        let html = '<div class="processes-container">';
+        let html = '';
         const isFinalFormStatus = status === 'passed' || status === 'failed';
         const version2IsActual = processes.some(process =>
           process.type === 'Версия формы 2' &&
@@ -4146,7 +4380,6 @@
                 </div>
                 <div class="process-reason">${reasonText.substring(0, 30)}${reasonText.length > 30 ? '...' : ''}</div>
                 <div class="process-actions">
-                  <div class="process-link" onclick="event.stopPropagation(); downloadProcessHistory(${index})">Выгрузить историю</div>
                   <div class="process-link" onclick="event.stopPropagation(); openProcessByIndex(${index})">Открыть историю →</div>
                 </div>
               </div>
@@ -4186,8 +4419,7 @@
             </div>
           `;
         });
-        
-        html += '</div>';
+
         container.innerHTML = html;
         window.currentProcessesData = processes;
       }
@@ -4258,10 +4490,19 @@
 
       
 
-      function downloadProcessHistory(processIndex) {
+      function getProcessPdfStatusLabel(process) {
+        if (process.status === 'active') return 'Завершено';
+        if (process.status === 'sign') return 'На подписании';
+        if (process.status === 'completed') return 'Прошлая версия';
+        if (process.status === 'closed') return 'Процесс отменен';
+        if (process.status === 'review') return 'На согласовании у HR';
+        if (process.status === 'rejected') return 'Отклонен HR';
+        return 'Неизвестно';
+      }
+
+      function downloadProcessHistory() {
         const processes = window.currentProcessesData || [];
-        const process = processes[processIndex];
-        if (!process) {
+        if (!processes.length) {
           alert('История не найдена');
           return;
         }
@@ -4294,44 +4535,66 @@
           doc.setFontSize(11);
           doc.setFont('helvetica', 'normal');
           doc.text(`Сотрудник: ${employeeName}`, 20, yPos);
-          yPos += lineHeight;
-          doc.text(`История: ${process.type || 'Версия формы'}`, 20, yPos);
-          yPos += lineHeight;
-          doc.text(`Статус: ${process.status === 'active' ? 'Завершено' : process.status === 'sign' ? 'На подписании' : process.status === 'completed' ? 'Прошлая версия' : process.status === 'closed' ? 'Процесс отменен' : process.status === 'review' ? 'На согласовании у HR' : process.status === 'rejected' ? 'Отклонен HR' : 'Неизвестно'}`, 20, yPos);
-          yPos += lineHeight;
-          doc.text(`Дата: ${new Date(process.timestamp).toLocaleString('ru-RU')}`, 20, yPos);
           yPos += lineHeight * 2;
 
-          doc.setFont('helvetica', 'bold');
-          doc.text('Комментарий руководителя:', 20, yPos);
-          yPos += lineHeight;
-          doc.setFont('helvetica', 'normal');
-          drawMultiline(process.managerComment || 'Комментарий отсутствует');
-
-          const previous = Array.isArray(process.previousGoals) ? process.previousGoals : [];
-          const current = Array.isArray(process.currentGoals) ? process.currentGoals : [];
-          const maxGoals = Math.max(previous.length, current.length);
-
-          for (let i = 0; i < maxGoals; i++) {
-            const oldGoal = previous[i] || {};
-            const newGoal = current[i] || {};
-            if (yPos > 250) {
+          processes.forEach((process, processIndex) => {
+            if (yPos > 230) {
               doc.addPage();
               yPos = 20;
             }
-            doc.setFont('helvetica', 'bold');
-            doc.text(`Цель ${i + 1}`, 20, yPos);
-            yPos += lineHeight;
 
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text(
+              `Версия ${processIndex + 1} из ${processes.length}: ${process.type || 'Версия формы'}`,
+              20,
+              yPos
+            );
+            yPos += lineHeight * 1.5;
+
+            doc.setFontSize(11);
             doc.setFont('helvetica', 'normal');
-            drawMultiline(`Предыдущая версия: ${oldGoal.goal || '—'}`);
-            drawMultiline(`Новая версия: ${newGoal.goal || '—'}`);
-            drawMultiline(`Предыдущие критерии: ${oldGoal.criteria || '—'}`);
-            drawMultiline(`Новые критерии: ${newGoal.criteria || '—'}`);
-            drawMultiline(`Предыдущий срок: ${oldGoal.date ? formatDate(oldGoal.date) : '—'}`);
-            drawMultiline(`Новый срок: ${newGoal.date ? formatDate(newGoal.date) : '—'}`);
-            yPos += 2;
-          }
+            doc.text(`Статус: ${getProcessPdfStatusLabel(process)}`, 20, yPos);
+            yPos += lineHeight;
+            const dateStr = process.timestamp
+              ? new Date(process.timestamp).toLocaleString('ru-RU')
+              : '—';
+            doc.text(`Дата: ${dateStr}`, 20, yPos);
+            yPos += lineHeight * 2;
+
+            doc.setFont('helvetica', 'bold');
+            doc.text('Комментарий руководителя:', 20, yPos);
+            yPos += lineHeight;
+            doc.setFont('helvetica', 'normal');
+            drawMultiline(process.managerComment || 'Комментарий отсутствует');
+
+            const previous = Array.isArray(process.previousGoals) ? process.previousGoals : [];
+            const current = Array.isArray(process.currentGoals) ? process.currentGoals : [];
+            const maxGoals = Math.max(previous.length, current.length);
+
+            for (let i = 0; i < maxGoals; i++) {
+              const oldGoal = previous[i] || {};
+              const newGoal = current[i] || {};
+              if (yPos > 250) {
+                doc.addPage();
+                yPos = 20;
+              }
+              doc.setFont('helvetica', 'bold');
+              doc.text(`Цель ${i + 1}`, 20, yPos);
+              yPos += lineHeight;
+
+              doc.setFont('helvetica', 'normal');
+              drawMultiline(`Предыдущая версия: ${oldGoal.goal || '—'}`);
+              drawMultiline(`Новая версия: ${newGoal.goal || '—'}`);
+              drawMultiline(`Предыдущие критерии: ${oldGoal.criteria || '—'}`);
+              drawMultiline(`Новые критерии: ${newGoal.criteria || '—'}`);
+              drawMultiline(`Предыдущий срок: ${oldGoal.date ? formatDate(oldGoal.date) : '—'}`);
+              drawMultiline(`Новый срок: ${newGoal.date ? formatDate(newGoal.date) : '—'}`);
+              yPos += 4;
+            }
+
+            yPos += lineHeight;
+          });
 
           doc.save(filename);
         } catch (e) {
@@ -4344,6 +4607,11 @@
       document.getElementById('closeProcessesModal').addEventListener('click', () => {
         document.getElementById('processesModal').style.display = 'none';
       });
+
+      const downloadFullProcessHistoryBtn = document.getElementById('downloadFullProcessHistoryBtn');
+      if (downloadFullProcessHistoryBtn) {
+        downloadFullProcessHistoryBtn.addEventListener('click', () => downloadProcessHistory());
+      }
 
       window.addEventListener('click', (e) => {
         const modal = document.getElementById('processesModal');
@@ -4428,6 +4696,7 @@
         localStorage.setItem(closeDateKey, today);
         localStorage.removeItem(failurePendingKey);
         localStorage.removeItem(failureDownloadedKey);
+        localStorage.removeItem(failureDocumentKey2);
         enqueueRoleNotification('employee', `Испытательный срок пройден по ${employeeName}`);
         summaryModal.style.display = 'none';
         localStorage.removeItem(managerReworkCommentKey);
@@ -4448,9 +4717,11 @@
         localStorage.setItem(failurePendingKey, 'true');
         localStorage.removeItem(failureDownloadedKey);
         localStorage.removeItem(failureDocumentKey);
+        localStorage.removeItem(failureDocumentKey2);
         isFailurePending = true;
         isFailureDownloaded = false;
         failureUploadedFile = null;
+        failureUploadedFile2 = null;
         renderButtons();
       };
 

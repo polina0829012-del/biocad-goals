@@ -1,0 +1,39 @@
+.container {
+    overflow: hidden;
+}
+
+.sectionTitle {
+    margin-bottom: 20px;
+}
+
+.item {
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--spacing-4);
+    border-radius: var(--radius-6);
+    margin-bottom: 8px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.item:hover {
+    background: var(--color-secondary-50);
+}
+
+.itemDescription {
+    display: -webkit-box;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    color: var(--color-secondary-500);
+}
+
+.itemDate {
+    color: var(--color-primary-600);
+}
+
+.showAllButton {
+    height: auto;
+    padding: 0;
+}

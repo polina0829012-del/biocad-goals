@@ -1,0 +1,21 @@
+.container {
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--spacing-20);
+    border-radius: var(--radius-24);
+    padding: 30px;
+    background: var(--color-secondary-100);
+}
+
+.scroll {
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--spacing-20);
+    overflow-y: auto;
+    padding-right: 22px;
+}
+
+.scroll::-webkit-scrollbar {
+    background: var(--color-secondary-100);
+}

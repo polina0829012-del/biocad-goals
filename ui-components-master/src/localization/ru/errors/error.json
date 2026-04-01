@@ -1,0 +1,26 @@
+{
+    "unauthorizedTitle": "Пользователь не авторизован",
+    "unauthorizedDescription": "Для просмотра данной страницы авторизуйтесь в системе.",
+
+    "forbiddenTitle": "У Вас нет прав для просмотра данной страницы",
+    "forbiddenDescription": "Обратитесь к администратору сети для получения разрешения.",
+
+    "notFoundTitle": "Упс! Что-то пошло не так",
+    "notFoundDescription": "Мы не нашли такую страницу :(",
+
+    "internalServerErrorTitle": "Внутренняя ошибка сервера",
+    "internalServerErrorDescription": "Попробуйте повторить запрос позже.",
+
+    "badGatewayTitle": "Сбой шлюза передачи данных",
+    "badGatewayDescription": "Проверьте подключение к интернету и повторите попытку позже.",
+
+    "serviceUnavailableTitle": "Сервис недоступен",
+    "serviceUnavailableDescription": "Возможно, сервер перегружен, повторите попытку позже.",
+
+    "instructionMissingDescription": "Статья находится в процессе разработки",
+    "instructionMissingButton": "Вернуться к базе знаний",
+    
+    "returnButtonText": "Вернуться на главную",
+
+    "networkError": "Network Error"
+}

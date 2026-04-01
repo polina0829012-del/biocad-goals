@@ -1,0 +1,18 @@
+{
+    "noResultSearch": "Ничего не найдено",
+    "searchResultError": "При поиске произошла ошибка, попробуйте изменить запрос",
+    "shortThanThreeSymbols": "Введите не менее 3-х символов для поиска",
+    "notificationDisabled": "Уведомление отключено",
+    "notificationEnabled": "Уведомление подключено",
+    "dontNotify": "Больше не уведомлять",
+    "notifyAboutBirthday": "Уведомлять о дне рождения",
+    "copyEmail": "Скопировать почту",
+    "successCopyEmail": "Почта скопирована",
+    "copyTelegram": "Скопировать Телеграм",
+    "successCopyTelegram": "Телеграм скопирован",
+    "noSearchResults": "Ничего не найдено, измените запрос",
+    "noContentPlugTitle": "Записей нет",
+    "glossary": "Глоссарий",
+    "fullGlossary": "Весь глоссарий",
+    "enterThreeSymbols": "Введите 3 символа"
+}

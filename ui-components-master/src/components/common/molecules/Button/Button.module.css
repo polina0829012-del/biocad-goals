@@ -1,0 +1,207 @@
+.button {
+    width: min-content;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    column-gap: var(--spacing-12);
+    border-radius: var(--radius-8);
+    padding: 0 16px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* primary */
+
+.primary {
+    color: var(--color-base-white);
+    background: var(--color-primary-600);
+    cursor: pointer;
+}
+
+.primary:hover {
+    background: var(--color-primary-700);
+}
+
+.primary:active {
+    background: var(--color-primary-800);
+}
+
+.primary:disabled {
+    border-radius: var(--spacing-8);
+    background: var(--color-secondary-400);
+    cursor: auto;
+}
+
+/* primary-text */
+
+.primaryText {
+    color: var(--color-primary-500);
+    background: var(--color-base-white);
+}
+
+.primaryText:hover {
+    color: var(--color-primary-600);
+}
+
+.primaryText:active {
+    color: var(--color-primary-800);
+}
+
+.primaryText:disabled {
+    color: var(--color-secondary-300);
+    cursor: auto;
+}
+
+/* primary-white */
+
+.primaryWhite {
+    border: 1px solid var(--color-primary-500);
+    color: var(--color-primary-500);
+    background: var(--color-base-white);
+}
+
+.primaryWhite:hover {
+    border-color: var(--color-primary-600);
+    color: var(--color-primary-600);
+}
+
+.primaryWhite:active {
+    border-color: var(--color-primary-800);
+    color: var(--color-primary-800);
+}
+
+.primaryWhite:disabled {
+    border-color: var(--color-secondary-300);
+    color: var(--color-secondary-300);
+    cursor: auto;
+}
+
+/** primary-light */
+
+.primaryLight {
+    border: none;
+    color: var(--color-primary-500);
+    background: var(--color-primary-100);
+}
+
+.primaryLight:hover {
+    border-color: none;
+    color: var(--color-primary-600);
+}
+
+.primaryLight:active {
+    border-color: none;
+    color: var(--color-primary-800);
+}
+
+.primaryLight:disabled {
+    background: var(--color-secondary-100);
+    color: var(--color-secondary-300);
+    cursor: auto;
+}
+
+/* secondary */
+
+.secondary {
+    border: 1px solid var(--color-secondary-300);
+    border-radius: var(--radius-6);
+    color: var(--color-secondary-600);
+    background-color: var(--color-base-white);
+}
+
+.secondary:hover {
+    border-color: var(--color-secondary-400);
+}
+
+.secondary:active,
+.secondaryActive {
+    border-color: var(--color-secondary-600);
+}
+
+/* secondary-text */
+
+.secondaryText {
+    color: var(--color-secondary-400);
+}
+
+.secondaryText:hover {
+    color: var(--color-secondary-500);
+}
+
+.secondaryText:active {
+    color: var(--color-secondary-600);
+}
+
+/* secondary-rounded */
+
+.secondaryRounded {
+    border: 1px solid var(--color-secondary-300);
+    border-radius: var(--radius-24);
+    color: var(--color-secondary-600);
+}
+
+.secondaryRounded:hover {
+    border-color: var(--color-secondary-400);
+}
+
+.secondaryRounded:active {
+    border-color: var(--color-secondary-500);
+    color: var(--color-secondary-800);
+}
+
+/* secondary-fill */
+
+.secondaryFill {
+    border-radius: var(--radius-8);
+    color: var(--color-secondary-600);
+    background-color: var(--color-secondary-100);
+}
+
+.secondaryFill:active,
+.secondaryFill:hover {
+    background-color: var(--color-secondary-200);
+}
+
+/* transparent-fill */
+
+.transparentFill {
+    border: 1px solid var(--color-white-transparent25);
+    border-radius: var(--radius-8);
+    color: var(--color-base-white);
+    background-color: var(--color-white-transparent25);
+}
+
+.transparentFill:active,
+.transparentFill:hover {
+    background-color: var(--color-white-transparent40);
+}
+
+/* transparent-outline */
+
+.transparentOutline {
+    border: 1px solid var(--color-white-transparent25);
+    border-radius: var(--radius-8);
+    color: var(--color-base-white);
+}
+
+.transparentOutline:active,
+.transparentOutline:hover {
+    background-color: var(--color-white-transparent20);
+}
+
+/* link-text */
+
+.linkText {
+    color: var(--color-secondary-400);
+}
+
+.linkText:hover {
+    color: var(--color-secondary-500);
+}
+
+.linkText:active,
+.linkTextActive {
+    color: var(--color-primary-500);
+}

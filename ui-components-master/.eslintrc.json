@@ -1,0 +1,56 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:react/recommended",
+        "standard-with-typescript",
+        "plugin:react/jsx-runtime",
+        "plugin:import/recommended",
+        "plugin:react-hooks/recommended",
+        "plugin:eslint-comments/recommended",
+        "prettier"
+    ],
+    "overrides": [],
+    "parserOptions": {
+        "project": ["./tsconfig.json"],
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    "plugins": ["react", "eslint-plugin-import"],
+    "rules": {
+        "@typescript-eslint/no-unused-vars": "off",
+        "no-unused-vars": "warn",
+        "eslint-comments/require-description": "error",
+        "eslint-comments/no-unlimited-disable": "off",
+        "@typescript-eslint/strict-boolean-expressions": "off",
+        "import/no-cycle": "warn",
+        "prefer-const": "warn",
+        "semi": ["warn", "always"],
+        "quotes": ["error", "single"],
+        "no-multi-spaces": "error",
+        "import/order": [
+            "warn",
+            {
+                "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"],
+                "newlines-between": "always-and-inside-groups"
+            }
+        ],
+        "@typescript-eslint/no-misused-promises": [
+            "error",
+            {
+                "checksVoidReturn": false
+            }
+        ],
+        "@typescript-eslint/prefer-nullish-coalescing": "warn"
+    },
+    "settings": {
+        "import/resolver": {
+            "node": {
+                "extensions": [".js", ".jsx", ".ts", ".tsx"]
+            }
+        }
+    }
+}

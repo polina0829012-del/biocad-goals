@@ -1,0 +1,11 @@
+:root {
+    --shadowLarge: 0 8px 40px 0;
+    --shadowSmall: 0 2px 35px 0;
+    --shadowCard: 0 4px 35px 0 #94a3b826;
+    --shadowDropdown: 0 2px 8px 0 #6767671a;
+    --shadowField: 0 0 0 2px #3389f466;
+    --shadowTooltip: 0 4px 8px 2px #67676726;
+    --quick-search-box-shadow-size: 0 0 0 2px;
+    --overlay-background: #47556966;
+    --double-overlay-background: #47556999;
+}

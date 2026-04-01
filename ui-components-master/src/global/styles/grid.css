@@ -1,0 +1,33 @@
+:root {
+    --horizontal-fill: 2 / 3;
+
+    --spacing-2: 2px;
+    --spacing-4: 4px;
+    --spacing-6: 6px;
+    --spacing-8: 8px;
+    --spacing-10: 10px;
+    --spacing-11: 11px;
+    --spacing-12: 12px;
+    --spacing-14: 14px;
+    --spacing-15: 15px;
+    --spacing-16: 16px;
+    --spacing-17: 17px;
+    --spacing-20: 20px;
+    --spacing-22: 22px;
+    --spacing-24: 24px;
+    --spacing-26: 26px;
+    --spacing-30: 30px;
+    --spacing-32: 32px;
+    --spacing-34: 34px;
+    --spacing-36: 36px;
+    --spacing-40: 40px;
+    --spacing-44: 44px;
+    --spacing-45: 45px;
+    --spacing-54: 54px;
+    --spacing-55: 55px;
+    --spacing-60: 60px;
+    --spacing-63: 63px;
+    --spacing-64: 64px;
+    --spacing-65: 65px;
+    --spacing-80: 80px;
+}

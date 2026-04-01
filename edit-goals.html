@@ -5,12 +5,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Цели на испытательный срок</title>
+    <link rel="stylesheet" href="./ui-components-master/src/global/styles/index.css" />
+    <link rel="stylesheet" href="./prototype-styles.css" />
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
     }
 
     body {
@@ -59,7 +60,7 @@
     }
 
     .page-title {
-      font-family: 'Biocad Display', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-weight: 700;
       font-size: 40px;
       line-height: 42px;
@@ -559,6 +560,7 @@
       display: block;
     }
   </style>
+  <link rel="stylesheet" href="./prototype-ds-bridge.css" />
 </head>
 
 <body>
@@ -568,7 +570,7 @@
 
   <main class="main-content">
     <div class="page-content">
-      <h1 class="page-title" id="pageTitle">Цели на испытательный срок</h1>
+      <h1 class="page-title headingBiocad" id="pageTitle">Цели на испытательный срок</h1>
 
       <div class="employee-info">
         <div class="info-item">
@@ -1189,7 +1191,7 @@
 
         localStorage.setItem(draftKey, JSON.stringify(goalsData));
         localStorage.setItem(statusKey, 'review');
-        enqueueRoleNotification('hr', `Согласуйте ИС по ${employeeName}`);
+        enqueueRoleNotification('hr', `Согласуйте цели на ИС для ${employeeName}`);
         localStorage.removeItem(commentKey);
         document.getElementById('submitModal').style.display = 'flex';
       });

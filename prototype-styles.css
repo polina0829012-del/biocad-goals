@@ -1,0 +1,3 @@
+/* Слот под локальные дополнения до страничных <style>.
+   Цепочка: ui-components global (index.css) → страничные стили → prototype-ds-bridge.css
+   (импортирует prototype-ds-components-import.css — все *.module.css из ui-components-master). */

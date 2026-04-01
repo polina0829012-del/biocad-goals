@@ -1,0 +1,26 @@
+.red path {
+    stroke: var(--color-red-600);
+}
+
+.red:hover path {
+    stroke: var(--color-red-700);
+}
+
+.red:active path {
+    stroke: var(--color-red-800);
+}
+
+.red {
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-4);
+    background: var(--color-red-50);
+}
+
+.red:hover {
+    background: var(--color-red-100);
+}
+
+.red:active {
+    background: var(--color-red-200);
+}

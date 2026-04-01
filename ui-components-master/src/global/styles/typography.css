@@ -1,0 +1,306 @@
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 500;
+}
+
+/* Значения по умолчанию (покрывает адаптив от 0px до 1200px и разрешения, свойства для которых, не изменились) */
+h1.heading {
+    font-size: 32px;
+    line-height: 38px;
+}
+
+h2.heading {
+    font-size: 28px;
+    line-height: 34px;
+}
+
+h3.heading {
+    font-size: 24px;
+    line-height: 28px;
+}
+
+h4.heading {
+    font-size: 20px;
+    line-height: 24px;
+}
+
+h5.heading {
+    font-size: 16px;
+    line-height: 20px;
+}
+
+h6.heading {
+    font-size: 12px;
+    line-height: 14px;
+}
+
+h1.headingBiocad {
+    font-size: 32px;
+    line-height: 30px;
+}
+
+h2.headingBiocad {
+    font-size: 28px;
+    line-height: 26px;
+}
+
+h3.headingBiocad {
+    font-size: 24px;
+    line-height: 26px;
+}
+
+h4.headingBiocad {
+    font-size: 20px;
+    line-height: 20px;
+}
+
+h5.headingBiocad {
+    font-size: 16px;
+    line-height: 16px;
+}
+
+h6.headingBiocad {
+    font-size: 12px;
+    line-height: 12px;
+}
+
+.title {
+    font-size: 64px;
+    line-height: 60px;
+}
+
+.accentSubtitle {
+    font-family: 'Biocad Display', sans-serif;
+    font-size: 24px;
+    line-height: 28px;
+}
+
+.text {
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.textSmall {
+    font-size: 10px;
+    line-height: 14px;
+}
+
+.textMedium {
+    font-size: 20px;
+    line-height: 24px;
+}
+
+.caption {
+    font-size: 10px;
+    line-height: 12px;
+}
+
+/* Толщина начертания */
+.regularFontWeight {
+    font-weight: 400;
+}
+
+.mediumFontWeight {
+    font-weight: 500;
+}
+
+.semiboldFontWeight {
+    font-weight: 600;
+}
+
+.boldFontWeight {
+    font-weight: 700;
+}
+
+/* Семейство шрифта */
+.fontInter {
+    font-family: 'Inter', sans-serif;
+}
+
+.fontBiocadDisplay {
+    font-family: 'Biocad Display', sans-serif;
+}
+
+.fontColus {
+    font-family: 'Colus', sans-serif;
+}
+
+/* Адаптив текстовых стилей для экранов в диапазоне разрешения от 1200px до 1800px  */
+@media only screen and (min-width: 1200px) and (max-width: 1800px) {
+    body {
+        font-size: 14px;
+        line-height: 1.42;
+    }
+
+    h1.heading {
+        font-size: 36px;
+        line-height: 44px;
+    }
+
+    h2.heading {
+        font-size: 30px;
+        line-height: 36px;
+    }
+
+    h3.heading {
+        font-size: 26px;
+        line-height: 32px;
+    }
+
+    h6.heading {
+        font-size: 14px;
+        line-height: 18px;
+    }
+
+    h1.headingBiocad {
+        font-size: 36px;
+        line-height: 34px;
+    }
+    
+    h2.headingBiocad {
+        font-size: 30px;
+        line-height: 30px;
+    }
+
+    h3.headingBiocad {
+        font-size: 26px;
+        line-height: 28px;
+    }
+
+    h6.headingBiocad {
+        font-size: 14px;
+        line-height: 100px;
+    }
+
+    .title {
+        font-size: 70px;
+        line-height: 64px;
+    }
+
+    .accentSubtitle {
+        font-size: 26px;
+        line-height: 32px;
+    }
+
+    .text {
+        font-size: 14px;
+        line-height: 20px;
+    }
+
+    .textSmall {
+        font-size: 12px;
+        line-height: 16px;
+    }
+
+    .caption {
+        font-size: 12px;
+        line-height: 16px;
+    }
+}
+
+/* Адаптив текстовых стилей для экранов больше чем 1800px и выше */
+@media only screen and (min-width: 1800px) {
+    body {
+        font-size: 16px;
+        line-height: 1.375;
+    }
+
+    h1.heading {
+        font-size: 46px;
+        line-height: 54px;
+    }
+
+    h2.heading {
+        font-size: 36px;
+        line-height: 44px;
+    }
+
+    h3.heading {
+        font-size: 28px;
+        line-height: 34px;
+    }
+
+    h4.heading {
+        font-size: 24px;
+        line-height: 28px;
+    }
+
+    h5.heading {
+        font-size: 20px;
+        line-height: 24px;
+    }
+
+    h6.heading {
+        font-size: 16px;
+        line-height: 20px;
+    }
+
+    h1.headingBiocad {
+        font-size: 40px;
+        line-height: 42px;
+    }
+
+    h2.headingBiocad {
+        font-size: 36px;
+        line-height: 34px;
+    }
+
+    h3.headingBiocad {
+        font-size: 28px;
+        line-height: 28px;
+    }
+
+    h4.headingBiocad {
+        font-size: 24px;
+        line-height: 24px;
+    }
+    
+    h5.headingBiocad {
+        font-size: 20px;
+        line-height: 20px;
+    }
+    
+    h6.headingBiocad {
+        font-size: 16px;
+        line-height: 16px;
+    }
+
+    .title {
+        font-size: 80px;
+        line-height: 70px;
+    }
+
+    .accentSubtitle {
+        font-size: 28px;
+        line-height: 34px;
+    }
+
+    .text {
+        font-size: 16px;
+        line-height: 22px;
+    }
+
+    .textSmall {
+        font-size: 14px;
+        line-height: 20px;
+    }
+
+    .caption {
+        font-size: 12px;
+        line-height: 16px;
+    }
+}

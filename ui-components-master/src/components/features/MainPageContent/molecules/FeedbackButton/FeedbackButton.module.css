@@ -1,0 +1,78 @@
+.bVoiceNotificationButton {
+    width: 100%;
+    position: relative;
+}
+
+.feedbackButton {
+    position: relative;
+    transition: transform 0.1s ease-in-out;
+}
+
+.feedbackIcon,
+.feedbackIcon:hover,
+.feedbackIcon:active {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: var(--radius-8);
+    padding: 4px;
+    background: linear-gradient(132deg, #5cc1f7 12.89%, #7479f8 97.53%);
+}
+
+.feedbackIcon svg,
+.feedbackIcon:hover svg,
+.feedbackIcon:active svg {
+    background: linear-gradient(132deg, #5cc1f7 12.89%, #7479f8 97.53%);
+}
+
+.feedbackIcon svg path,
+.feedbackIcon:hover svg path,
+.feedbackIcon:active svg path {
+    fill: var(--color-base-white);
+}
+
+@keyframes notification-animation {
+    0% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(8deg);
+    }
+    50% {
+        transform: rotate(-8deg);
+    }
+    75% {
+        transform: rotate(8deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.feedbackAnimationIconButton {
+    animation: notification-animation 3s ease-in-out infinite;
+    animation-delay: 30ms;
+}
+
+.tooltip {
+    width: fit-content;
+    position: absolute;
+    right: 0%;
+    left: 0%;
+    top: 42px;
+    border-radius: var(--radius-8);
+    padding: 8px 16px;
+    color: var(--color-secondary-600);
+    background: var(--color-base-white);
+    box-shadow: var(--shadowTooltip);
+    white-space: nowrap;
+    z-index: 1;
+}
+
+.dropdownMenu {
+    right: 0%;
+    left: 0%;
+    top: 42px;
+}

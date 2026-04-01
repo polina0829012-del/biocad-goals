@@ -1,0 +1,38 @@
+@font-face {
+    font-family: 'Inter';
+    src: local('â˜º'), url('../../assets/fonts/Inter-SemiBold.ttf') format('truetype'),
+        url('../../assets/fonts/Inter-SemiBold.svg') format('svg');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: local('â˜º'), url('../../assets/fonts/Inter-Medium.ttf') format('truetype'),
+        url('../../assets/fonts/Inter-Medium.svg') format('svg');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: local('â˜º'), url('../../assets/fonts/Inter-Regular.ttf') format('truetype'),
+        url('../../assets/fonts/Inter-Regular.svg') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Biocad Display';
+    src: local('â˜º'), url('../../assets/fonts/Biocad_Display-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Biocad Display';
+    src: local('â˜º'), url('../../assets/fonts/Biocad_Display-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+

@@ -1,0 +1,27 @@
+.containerHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-22);
+}
+
+.menuItemTitle {
+    color: var(--color-base-white);
+}
+
+.containerHeaderIcon {
+    width: 36px;
+    height: 36px;
+}
+
+.menuStrokeIcon {
+    width: 40px;
+    height: 40px;
+}
+
+.menuStrokeIcon g path {
+    stroke-width: 0;
+}
+
+.menuStrokeLessIcon g path {
+    stroke-width: 1px;
+}

@@ -1,0 +1,49 @@
+/* Все CSS-модули ui-components-master (глобальная подача для статичных прототипов).
+   Дубликаты имён классов: побеждает последний импорт; прототип не использует «голый» class="container". */
+
+/* common / atoms */
+@import url('./ui-components-master/src/components/common/atoms/ErrorContent/ErrorContent.module.css');
+@import url('./ui-components-master/src/components/common/atoms/CloseIconButton/CloseIconButton.module.css');
+@import url('./ui-components-master/src/components/common/atoms/Divider/Divider.module.css');
+@import url('./ui-components-master/src/components/common/atoms/Spinner/Spinner.module.css');
+@import url('./ui-components-master/src/components/common/atoms/TextLink/TextLink.module.css');
+@import url('./ui-components-master/src/components/common/atoms/SquareIconButton/SquareIconButton.module.css');
+
+/* common / molecules */
+@import url('./ui-components-master/src/components/common/molecules/Modal/Modal.module.css');
+@import url('./ui-components-master/src/components/common/molecules/ProfileAvatar/ProfileAvatar.module.css');
+@import url('./ui-components-master/src/components/common/molecules/Button/Button.module.css');
+@import url('./ui-components-master/src/components/common/molecules/SquareCard/SquareCard.module.css');
+@import url('./ui-components-master/src/components/common/molecules/TextArea/TextArea.module.css');
+@import url('./ui-components-master/src/components/common/molecules/ShortUserInfo/ShortUserInfo.module.css');
+@import url('./ui-components-master/src/components/common/molecules/DropdownMenu/DropdownMenu.module.css');
+@import url('./ui-components-master/src/components/common/molecules/Footer/Footer.module.css');
+
+/* common / organisms & templates */
+@import url('./ui-components-master/src/components/common/organisms/Header/Header.module.css');
+@import url('./ui-components-master/src/components/common/organisms/QuickSearch/QuickSearch.module.css');
+@import url('./ui-components-master/src/components/common/templates/TemplatePage/TemplatePage.module.css');
+
+/* features */
+@import url('./ui-components-master/src/components/features/DirectorReception/organisms/DemandToDirectorForm/DemandToDirectorForm.module.css');
+@import url('./ui-components-master/src/components/features/MainPageContent/organisms/HeaderQuickInfoButtons/HeaderQuickInfoButtons.module.css');
+@import url('./ui-components-master/src/components/features/MainPageContent/molecules/PortalSupportButton/PortalSupportButton.module.css');
+@import url('./ui-components-master/src/components/features/MainPageContent/molecules/TeambuildingsWalletButton/TeambuildingsWalletButton.module.css');
+@import url('./ui-components-master/src/components/features/MainPageContent/molecules/TeambuildingsWalletPopupMenu/TeambuildingsWalletPopupMenu.module.css');
+@import url('./ui-components-master/src/components/features/MainPageContent/molecules/UsersScrollList/UsersScrollList.module.css');
+@import url('./ui-components-master/src/components/features/MainPageContent/molecules/FeedbackButton/FeedbackButton.module.css');
+
+@import url('./ui-components-master/src/components/features/Menu/organisms/Menu/Menu.module.css');
+@import url('./ui-components-master/src/components/features/Menu/organisms/MenuItem/MenuItem.module.css');
+@import url('./ui-components-master/src/components/features/Menu/organisms/SidebarMenuItem/SidebarMenuItem.module.css');
+@import url('./ui-components-master/src/components/features/Menu/molecules/MenuItemChapter/MenuItemChapter.module.css');
+@import url('./ui-components-master/src/components/features/Menu/molecules/ChapterPart/ChapterPart.module.css');
+@import url('./ui-components-master/src/components/features/Menu/molecules/ChapterItem/ChapterItem.module.css');
+@import url('./ui-components-master/src/components/features/Menu/molecules/MenuItemLink/MenuItemLink.module.css');
+@import url('./ui-components-master/src/components/features/Menu/molecules/NavSidebarTitle/NavSidebarTitle.module.css');
+
+@import url('./ui-components-master/src/components/features/AdvancedSearch/organisms/AdvancedSearchResults/AdvancedSearchResults.module.css');
+@import url('./ui-components-master/src/components/features/AdvancedSearch/molecules/AdvancedSearchLlmAnswer/AdvancedSearchLlmAnswer.module.css');
+@import url('./ui-components-master/src/components/features/AdvancedSearch/molecules/AdvancedSearchResultsLinks/AdvancedSearchResultsLinks.module.css');
+
+@import url('./ui-components-master/src/components/features/StaticPages/Welcome/atoms/WelcomePageHeaderIcon/WelcomePageHeaderIcon.module.css');

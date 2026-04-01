@@ -1,0 +1,23 @@
+.container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.divider {
+    width: inherit;
+    height: 1px;
+    border: 0;
+    margin: 0;
+    background-color: var(--color-secondary-200);
+}
+
+.dividerIntoSection {
+    display: none;
+}
+
+@media only screen and (max-width: 1200px) {
+    .dividerIntoSection {
+        display: block;
+    }
+}

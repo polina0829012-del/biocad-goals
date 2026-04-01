@@ -1,0 +1,32 @@
+.menuMainItem {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.4s ease;
+}
+
+.menuItemOpenChapter,
+.menuMainItem:hover {
+    background: var(--color-dark-700);
+}
+
+.menuItemOpenChapter::after {
+    width: 4px;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: var(--color-primary-500);
+    content: '';
+}
+
+.subMenu {
+    overflow: hidden;
+    transition: height ease 0.4s;
+}
+
+.menuMainItemLink,
+.menuMainItemLink:hover,
+.menuMainItemLink:active {
+    color: var(--color-primary-400);
+}

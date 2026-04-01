@@ -1,0 +1,73 @@
+.colorCircle {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: var(--radius-20);
+}
+
+.profileAvatarImageExtraSmall {
+    height: 40px;
+    width: 40px;
+}
+
+.profileAvatarImageSmall {
+    height: 40px;
+    width: 40px;
+}
+
+.profileAvatarImageMedium {
+    height: 86px;
+    width: 86px;
+}
+
+.profileAvatarImageLarge {
+    height: 120px;
+    width: 120px;
+}
+
+.colorCircle {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: var(--radius-20);
+}
+
+.profileAvatarCircle {
+    border-radius: var(--radius-circle);
+}
+
+.profileAvatarSquare {
+    border-radius: var(--radius-10);
+}
+
+@media only screen and (min-width: 1200px) and (max-width: 1799px) {
+    .profileAvatarImageMedium {
+        width: 100px;
+        height: 100px;
+    }
+
+    .profileAvatarImageMedium.profileAvatarSquare {
+        width: 140px;
+        height: 140px;
+    }
+}
+
+@media only screen and (min-width: 1800px) {
+    .profileAvatarImageSmall {
+        width: 50px;
+        height: 50px;
+    }
+
+    .profileAvatarImageMedium {
+        width: 120px;
+        height: 120px;
+    }
+
+    .profileAvatarImageLarge.profileAvatarSquare {
+        width: 164px;
+        height: 164px;
+    }
+}

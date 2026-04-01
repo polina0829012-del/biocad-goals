@@ -1,0 +1,50 @@
+.chapterPartItem {
+    width: 218px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-40);
+}
+
+.partLinksSection {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-8);
+}
+
+.partTitleHeader {
+    color: var(--color-dark-600);
+}
+
+.partLinkWhite {
+    color: var(--color-base-white);
+}
+
+.partLinkWhite:hover {
+    color: var(--color-primary-400);
+}
+
+.partLinkBlue {
+    color: var(--color-primary-500);
+}
+
+.partLinkBlue:hover {
+    color: var(--color-primary-400);
+}
+
+.partLinkAllArticles {
+    color: var(--color-primary-500);
+}
+
+.partLinkAllArticles:hover {
+    color: var(--color-primary-400);
+}
+
+.partLinkBlueDisabled {
+    color: var(--color-primary-600);
+    opacity: 0.5;
+}
+
+.partLinkWhiteDisabled {
+    color: var(--color-dark-400);
+    opacity: 0.5;
+}

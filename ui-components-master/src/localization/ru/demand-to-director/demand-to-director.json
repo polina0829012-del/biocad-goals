@@ -1,0 +1,12 @@
+{
+    "allRequests": "Все запросы",
+    "appeal": "Обращения",
+    "directorReception": "Приемная генерального директора",
+    "directorName": "Сивокоз Дмитрий Владимирович",
+    "textAreaDescription": "Ваш отзыв, запрос или предложение",
+    "writeRequestPlaceholder": "Введите текст...",
+    "sendButton": "Отправить",
+    "backButton": "Назад",
+    "successStatusTitle": "Ваше обращение успешно отправлено",
+    "errorStatusTitle": "При отправке возникла ошибка, попробуйте позднее"
+}

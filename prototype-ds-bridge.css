@@ -1,0 +1,713 @@
+/* Все CSS-модули ui-components-master + мост прототипа */
+@import url('./prototype-ds-components-import.css');
+
+/* ---------- База страницы ---------- */
+body {
+  background: var(--color-base-white);
+  color: var(--color-secondary-900);
+  font-size: 14px;
+  line-height: 1.42;
+}
+
+/* ---------- Шапка, навигация, сайдбар ---------- */
+.sidebar {
+  background: var(--color-dark-800);
+}
+
+.sidebar .logo {
+  font-family: 'Biocad Display', 'Inter', sans-serif;
+  font-weight: 700;
+  color: var(--color-base-white);
+}
+
+/* Реестр: совмещаем Header из ДС с высотой прототипа */
+main.main-content > header.header {
+  min-height: 68px;
+  align-items: center;
+  padding-left: 40px;
+  padding-right: 40px;
+  box-sizing: border-box;
+}
+
+.header {
+  background: var(--color-base-white);
+  border-bottom: 1px solid var(--color-secondary-200);
+}
+
+.header h1,
+.page-title {
+  font-family: 'Biocad Display', 'Inter', sans-serif;
+  font-weight: 700;
+  color: var(--color-typography-title);
+  letter-spacing: -0.02em;
+}
+
+.role-switcher {
+  background: var(--color-secondary-100);
+  border-radius: var(--radius-8);
+  padding: var(--spacing-4);
+}
+
+.role-btn {
+  border-radius: var(--radius-6);
+  color: var(--color-secondary-500);
+  font-weight: 500;
+}
+
+.role-btn.active {
+  background: var(--color-base-white);
+  color: var(--color-primary-500);
+  box-shadow: var(--shadowDropdown);
+}
+
+.tab {
+  color: var(--color-secondary-600);
+}
+
+.tab.active {
+  border-bottom-color: var(--color-primary-500);
+  color: var(--color-primary-500);
+  font-weight: 600;
+}
+
+.avatar .photo {
+  border-radius: var(--radius-circle);
+  background: var(--color-secondary-200);
+}
+
+.avatar .name {
+  color: var(--color-secondary-600);
+  font-weight: 600;
+}
+
+.avatar .email {
+  color: var(--color-secondary-500);
+}
+
+/* ---------- Кнопки прототипа (единая геометрия ДС) ---------- */
+.btn,
+.back-button,
+.save-button,
+.btn-ok,
+button.btn-cancel,
+button.btn-submit-rework,
+button.btn-cancel-rework,
+button.btn-cancel-edit,
+button.btn-confirm-edit,
+button.btn-confirm,
+button.btn-attach-sign-file {
+  height: 40px;
+  min-height: 40px;
+  padding: 0 var(--spacing-16);
+  border-radius: var(--radius-8);
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-8);
+  box-sizing: border-box;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.back-button {
+  min-width: 100px;
+}
+
+.btn:disabled,
+.back-button:disabled,
+.save-button:disabled,
+button.btn-cancel:disabled,
+button.btn-submit-rework:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+  background: var(--color-secondary-400) !important;
+  color: var(--color-base-white) !important;
+  border-color: transparent !important;
+}
+
+.btn:hover:not(:disabled),
+.back-button:hover:not(:disabled),
+.save-button:hover:not(:disabled) {
+  transform: none;
+}
+
+/* Outline primary */
+.btn-back,
+.btn-save-draft,
+.back-button {
+  background: var(--color-base-white);
+  border: 1px solid var(--color-primary-500);
+  color: var(--color-primary-500);
+}
+
+.btn-back:hover:not(:disabled),
+.btn-save-draft:hover:not(:disabled),
+.back-button:hover:not(:disabled) {
+  border-color: var(--color-primary-600);
+  color: var(--color-primary-600);
+  box-shadow: var(--shadowDropdown);
+}
+
+/* Отмена в модалках — secondary; исключение: «Выйти» на редактировании целей */
+.btn-cancel {
+  background: var(--color-base-white);
+  border: 1px solid var(--color-secondary-300);
+  color: var(--color-secondary-600);
+}
+
+.btn-cancel:hover:not(:disabled) {
+  border-color: var(--color-secondary-400);
+  color: var(--color-secondary-700);
+  box-shadow: var(--shadowDropdown);
+}
+
+#exitBtn.btn-cancel {
+  border-color: var(--color-primary-500);
+  color: var(--color-primary-500);
+}
+
+#exitBtn.btn-cancel:hover:not(:disabled) {
+  border-color: var(--color-primary-600);
+  color: var(--color-primary-600);
+}
+
+/* Solid primary */
+.btn-approve,
+.btn-save,
+.btn-ok,
+.save-button,
+.btn-submit:not(.btn-submit-rework) {
+  background: var(--color-primary-600);
+  color: var(--color-base-white);
+  border: none;
+}
+
+.btn-approve:hover:not(:disabled),
+.btn-save:hover:not(:disabled),
+.btn-ok:hover:not(:disabled),
+.save-button:hover:not(:disabled),
+.btn-submit:not(.btn-submit-rework):hover:not(:disabled) {
+  background: var(--color-primary-700);
+  box-shadow: var(--shadowDropdown);
+}
+
+.btn-approve:active:not(:disabled),
+.btn-save:active:not(:disabled),
+.btn-ok:active:not(:disabled),
+.save-button:active:not(:disabled),
+.btn-submit:not(.btn-submit-rework):active:not(:disabled) {
+  background: var(--color-primary-800);
+}
+
+/* .btn-confirm в разных модалках: подтверждение действия или опасный сброс */
+#summaryYesBtn.btn-confirm,
+#unfinishedProcessYesBtn.btn-confirm,
+#confirmEdit.btn-confirm {
+  background: var(--color-primary-600);
+  color: var(--color-base-white);
+  border: none;
+}
+
+#summaryYesBtn.btn-confirm:hover:not(:disabled),
+#unfinishedProcessYesBtn.btn-confirm:hover:not(:disabled),
+#confirmEdit.btn-confirm:hover:not(:disabled) {
+  background: var(--color-primary-700);
+  box-shadow: var(--shadowDropdown);
+}
+
+#confirmReset.btn-confirm {
+  background: var(--color-error-600);
+  color: var(--color-base-white);
+  border: none;
+}
+
+#confirmReset.btn-confirm:hover:not(:disabled) {
+  background: var(--color-error-700);
+  box-shadow: var(--shadowDropdown);
+}
+
+/* Зелёный — подвести итоги */
+.btn-summary {
+  background: var(--color-success-700);
+  color: var(--color-base-white);
+  border: none;
+}
+
+.btn-summary:hover:not(:disabled) {
+  background: var(--color-success-800);
+  box-shadow: var(--shadowDropdown);
+}
+
+/* Один класс .btn-submit-rework в HR и в review-goals — разные кнопки */
+#submitRework.btn-submit-rework {
+  background: var(--color-error-600);
+  color: var(--color-base-white);
+  border: none;
+}
+
+#submitRework.btn-submit-rework:hover:not(:disabled) {
+  background: var(--color-error-700);
+  box-shadow: var(--shadowDropdown);
+}
+
+#submitReworkComment.btn-submit-rework {
+  background: var(--color-primary-600);
+  color: var(--color-base-white);
+  border: none;
+}
+
+#submitReworkComment.btn-submit-rework:hover:not(:disabled) {
+  background: var(--color-primary-700);
+  box-shadow: var(--shadowDropdown);
+}
+
+/* Ошибка / доработка в тулбаре */
+.btn-rework {
+  background: var(--color-base-white);
+  border: 1px solid var(--color-error-600);
+  color: var(--color-error-600);
+}
+
+.btn-rework:hover:not(:disabled) {
+  background: var(--color-error-100);
+  box-shadow: var(--shadowDropdown);
+}
+
+/* Вторичные цветные кнопки */
+.btn-edit {
+  background: var(--color-base-white);
+  border: 1px solid var(--color-orange-500);
+  color: var(--color-orange-600);
+}
+
+.btn-download {
+  background: var(--color-base-white);
+  border: 1px solid var(--color-success-700);
+  color: var(--color-success-700);
+}
+
+.btn-process {
+  background: var(--color-base-white);
+  border: 1px solid var(--color-purple-600);
+  color: var(--color-purple-600);
+}
+
+.btn-documents {
+  background: var(--color-base-white);
+  border: 1px solid var(--color-pink-600);
+  color: var(--color-pink-600);
+}
+
+.btn-upload {
+  background: var(--color-base-white);
+  border: 1px solid var(--color-primary-500);
+  color: var(--color-primary-500);
+}
+
+.btn-upload.active {
+  background: var(--color-primary-600);
+  color: var(--color-base-white);
+  border: 1px solid var(--color-primary-600);
+}
+
+.btn-upload.active:hover:not(:disabled) {
+  background: var(--color-primary-700);
+}
+
+/* Реестр и фильтры */
+.filter-button {
+  border-radius: var(--radius-10);
+  border: 1px solid var(--color-secondary-300);
+  color: var(--color-secondary-600);
+  background: var(--color-base-white);
+}
+
+.filter-button:hover {
+  border-color: var(--color-primary-400);
+  color: var(--color-primary-600);
+}
+
+.reset-button {
+  border-radius: var(--radius-10);
+  border: 1px solid var(--color-error-600);
+  color: var(--color-error-600);
+  background: var(--color-base-white);
+}
+
+.reset-button:hover {
+  background: var(--color-red-50);
+}
+
+.btn-clear {
+  background: var(--color-secondary-100);
+  color: var(--color-secondary-600);
+  border: 1px solid var(--color-secondary-200);
+}
+
+.btn-apply {
+  background: var(--color-primary-600);
+  color: var(--color-base-white);
+  border: none;
+}
+
+.btn-return {
+  background: var(--color-primary-100);
+  color: var(--color-primary-700);
+  border: 1px solid var(--color-primary-300);
+}
+
+.btn-return:hover:not(:disabled) {
+  background: var(--color-primary-200);
+}
+
+.add-goal-btn {
+  border-radius: var(--radius-8);
+  border: 1px dashed var(--color-secondary-300);
+  color: var(--color-secondary-600);
+  background: var(--color-secondary-50);
+}
+
+.add-goal-btn:hover {
+  background: var(--color-secondary-100);
+  border-color: var(--color-primary-400);
+  color: var(--color-primary-600);
+}
+
+.btn-confirm-edit {
+  background: var(--color-primary-600);
+  color: var(--color-base-white);
+  border: none;
+}
+
+.btn-confirm-edit:hover:not(:disabled) {
+  background: var(--color-primary-700);
+  box-shadow: var(--shadowDropdown);
+}
+
+.btn-cancel-edit,
+.btn-cancel-rework {
+  background: var(--color-base-white);
+  border: 1px solid var(--color-secondary-300);
+  color: var(--color-secondary-400);
+}
+
+.btn-cancel-edit:hover:not(:disabled),
+.btn-cancel-rework:hover:not(:disabled) {
+  border-color: var(--color-secondary-400);
+  color: var(--color-secondary-600);
+}
+
+.btn-attach-sign-file {
+  background: var(--color-base-white);
+  border: 1px solid var(--color-primary-500);
+  color: var(--color-primary-600);
+  border-radius: var(--radius-8);
+}
+
+.btn-attach-sign-file:hover:not(:disabled) {
+  border-color: var(--color-primary-600);
+  background: var(--color-primary-50);
+}
+
+.btn-download-history {
+  border-color: var(--color-secondary-300);
+  color: var(--color-secondary-600);
+}
+
+.btn-download-history:hover {
+  border-color: var(--color-primary-400);
+  color: var(--color-primary-600);
+}
+
+/* Модальные окна (оверлей как в Modal.module) */
+.modal-overlay,
+.modal-overlay-edit,
+.modal-overlay-process,
+.modal-overlay-rework {
+  background: var(--overlay-background) !important;
+}
+
+.modal-content,
+.modal-content-edit,
+.sign-upload-modal-content,
+#reworkModal .modal-content,
+#summaryModal .modal-content {
+  border-radius: var(--radius-10);
+  box-shadow: var(--shadowSmall) var(--color-shadow);
+  background: var(--color-base-white);
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--spacing-20);
+}
+
+.modal-header h3,
+.modal-header-edit h3 {
+  color: var(--color-typography-title);
+  font-weight: 600;
+}
+
+.close-modal,
+.close-modal-sign-upload {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: var(--radius-8);
+  color: var(--color-secondary-500);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-modal:hover,
+.close-modal-sign-upload:hover {
+  background: var(--color-secondary-100);
+  color: var(--color-secondary-700);
+}
+
+/* Карточки целей и панели */
+.goal-card,
+.goal-form,
+.goal-item-process {
+  border: 1px solid var(--color-border-card);
+  box-shadow: var(--shadowCard);
+}
+
+.filter-panel {
+  border-radius: var(--radius-10);
+  border: 1px solid var(--color-secondary-300);
+  box-shadow: var(--shadowSmall) var(--color-shadow);
+}
+
+/* Инфо-блоки */
+.status-message,
+.rework-message {
+  background: var(--color-primary-100);
+  border-radius: var(--radius-12);
+}
+
+.status-message .title,
+.rework-message .title {
+  color: var(--color-primary-600);
+}
+
+.status-message .text,
+.rework-message .text {
+  color: var(--color-primary-700);
+}
+
+/* Подвал */
+.footer {
+  background: var(--color-secondary-50);
+  border-top: 1px solid var(--color-secondary-200);
+}
+
+.footer-text {
+  color: var(--color-secondary-400);
+}
+
+/* ---------- Поля форм (как TextArea / поля портала) ---------- */
+textarea,
+input[type='text'],
+input[type='search'],
+input[type='email'],
+input[type='number'],
+input[type='date'],
+select:not([multiple]) {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.42;
+  color: var(--color-secondary-900);
+  border: 1px solid var(--color-secondary-200);
+  border-radius: var(--radius-8);
+  background: var(--color-secondary-50);
+  box-sizing: border-box;
+}
+
+textarea,
+input[type='text'],
+input[type='search'],
+input[type='email'],
+input[type='number'] {
+  padding: 8px 12px;
+  min-height: 40px;
+}
+
+input[type='date'],
+select:not([multiple]) {
+  padding: 8px 12px;
+  min-height: 40px;
+}
+
+textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+textarea:hover,
+input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):hover,
+select:hover {
+  background: var(--color-secondary-100);
+}
+
+textarea:focus-visible,
+input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: var(--color-primary-500);
+  background: var(--color-base-white);
+  box-shadow: var(--shadowField);
+}
+
+/* Классы прототипа */
+.text-field,
+.edit-field,
+.goal-field {
+  background: var(--color-base-white) !important;
+  border-color: var(--color-secondary-200) !important;
+  border-radius: var(--radius-8) !important;
+}
+
+.comment-field,
+.modal-textarea,
+.modal-textarea-rework,
+#reworkCommentInput,
+textarea.modal-textarea {
+  background: var(--color-base-white) !important;
+  border: 1px solid var(--color-secondary-200) !important;
+  border-radius: var(--radius-8) !important;
+}
+
+.criteria-text,
+.goal-field-value-process {
+  background: var(--color-base-white) !important;
+  border: 1px solid var(--color-secondary-200) !important;
+  border-radius: var(--radius-8) !important;
+}
+
+.evaluation-select,
+select.evaluation-select {
+  cursor: pointer;
+  background-color: var(--color-base-white) !important;
+  border: 1px solid var(--color-secondary-300) !important;
+}
+
+.collapse-btn {
+  border-radius: var(--radius-8);
+  color: var(--color-secondary-400);
+}
+
+.collapse-btn:hover {
+  color: var(--color-primary-500);
+  background: var(--color-primary-50);
+}
+
+/* Подписи к полям */
+.info-item .label,
+.evaluation-label,
+.comment-label,
+.criteria-label,
+.field-group .title,
+.date-group .title,
+.field-title-with-tooltip,
+.goal-field-label-process,
+.filter-title {
+  color: var(--color-secondary-500);
+  font-weight: 500;
+}
+
+.header h1 {
+  color: var(--color-typography-title);
+}
+
+/* Таблица реестра */
+.table-container {
+  border-radius: var(--radius-12);
+  border: 1px solid var(--color-secondary-200);
+  box-shadow: var(--shadowCard);
+  overflow: hidden;
+  background: var(--color-base-white);
+}
+
+.employee-table th {
+  background: var(--color-secondary-100);
+  color: var(--color-secondary-700);
+  font-weight: 600;
+}
+
+.employee-table td {
+  color: var(--color-secondary-800);
+  border-bottom: 1px solid var(--color-secondary-100);
+}
+
+.employee-table tbody tr:hover td {
+  background: var(--color-primary-50);
+}
+
+/* Блок пользователя в шапке (ShortUserInfo из ДС) */
+.avatar.shortUserInfo .photo.colorCircle {
+  background: var(--color-primary-200);
+  flex-shrink: 0;
+}
+
+.avatar.shortUserInfo .name.userName {
+  color: var(--color-secondary-600);
+  font-weight: 600;
+}
+
+.avatar.shortUserInfo .email.userEmail {
+  color: var(--color-secondary-400);
+  font-size: 14px;
+}
+
+/* Обёртка полей как в TextArea.module (добавляйте class="textArea" на контейнер при разметке) */
+.textArea {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.textArea .textAreaField {
+  width: 100%;
+  border: 1px solid var(--color-secondary-200);
+  border-radius: var(--radius-8);
+  padding: 8px 12px;
+  background: var(--color-secondary-50);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  min-height: 72px;
+}
+
+.textArea .textAreaField:hover {
+  background: var(--color-secondary-100);
+}
+
+.textArea .textAreaField:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  background: var(--color-base-white);
+  box-shadow: var(--shadowField);
+}
+
+/* Чекбоксы фильтра реестра: reset ДС скрывает input — возвращаем видимость */
+.filter-panel .checkbox-item input[type='checkbox'] {
+  position: static;
+  clip: auto;
+  clip-path: none;
+  overflow: visible;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin: 0;
+  white-space: normal;
+  border: 1px solid var(--color-secondary-300);
+  border-radius: var(--radius-4);
+  cursor: pointer;
+  appearance: auto;
+  -webkit-appearance: auto;
+  accent-color: var(--color-primary-500);
+}

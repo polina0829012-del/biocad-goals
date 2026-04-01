@@ -1,0 +1,115 @@
+{
+    "name": "@workdeskbio/ui-components",
+    "version": "$CI_COMMIT_TAG",
+    "peerDependencies": {
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-router-dom": "^6.4.5"
+    },
+    "devDependencies": {
+        "@babel/preset-env": "^7.22.15",
+        "@babel/preset-react": "^7.22.15",
+        "@babel/preset-typescript": "^7.22.15",
+        "@hookform/resolvers": "^3.1.0",
+        "@rollup/plugin-alias": "^5.0.0",
+        "@rollup/plugin-babel": "^6.0.3",
+        "@rollup/plugin-commonjs": "^25.0.4",
+        "@rollup/plugin-json": "^6.0.0",
+        "@rollup/plugin-node-resolve": "^15.1.0",
+        "@rollup/plugin-typescript": "^11.1.2",
+        "@storybook/addon-essentials": "^7.0.26",
+        "@storybook/addon-interactions": "^7.0.26",
+        "@storybook/addon-links": "^7.0.26",
+        "@storybook/addon-storysource": "^7.5.1",
+        "@storybook/blocks": "^7.0.26",
+        "@storybook/preset-typescript": "^3.0.0",
+        "@storybook/react": "^7.0.26",
+        "@storybook/react-webpack5": "^7.0.26",
+        "@storybook/testing-library": "^0.0.14-next.2",
+        "@svgr/rollup": "^8.1.0",
+        "@testing-library/jest-dom": "^5.14.1",
+        "@testing-library/react": "^13.0.0",
+        "@testing-library/user-event": "^13.2.1",
+        "@types/jest": "^27.0.1",
+        "@types/jwt-decode": "^3.1.0",
+        "@types/node": "^16.7.13",
+        "@types/react": "^18.0.0",
+        "@types/react-dom": "^18.0.0",
+        "@types/rollup-plugin-peer-deps-external": "^2.2.3",
+        "@typescript-eslint/eslint-plugin": "^5.0.0",
+        "babel-cli": "^6.26.0",
+        "eslint": "^8.30.0",
+        "eslint-config-prettier": "^8.5.0",
+        "eslint-config-standard-with-typescript": "^23.0.0",
+        "eslint-plugin-eslint-comments": "^3.2.0",
+        "eslint-plugin-import": "^2.26.0",
+        "eslint-plugin-n": "^15.0.0",
+        "eslint-plugin-promise": "^6.0.0",
+        "eslint-plugin-react": "^7.31.11",
+        "eslint-plugin-react-hooks": "^4.6.0",
+        "i": "^0.3.7",
+        "localforage": "^1.10.0",
+        "match-sorter": "^6.3.1",
+        "nanoid": "^4.0.2",
+        "npm": "^9.8.1",
+        "postcss-import": "^15.1.0",
+        "prettier": "^2.8.1",
+        "prop-types": "^15.8.1",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-hook-form": "^7.43.9",
+        "react-scripts": "^2.1.3",
+        "rollup": "^3.28.0",
+        "rollup-plugin-dts": "^5.3.1",
+        "rollup-plugin-import-css": "^3.3.1",
+        "rollup-plugin-peer-deps-external": "^2.2.4",
+        "rollup-plugin-postcss": "^4.0.2",
+        "rollup-plugin-svg": "^2.0.0",
+        "sort-by": "^0.0.2",
+        "storybook": "^7.0.26",
+        "web-vitals": "^2.1.0",
+        "yup": "^1.1.1"
+    },
+    "scripts": {
+        "eject": "react-scripts eject",
+        "storybook": "storybook dev -p 6006",
+        "build-storybook": "storybook build",
+        "build": "rm -rf dist && rollup -c --bundleConfigAsCjs"
+    },
+    "main": "dist/src/index.js",
+    "module": "dist/index.es.js",
+    "types": "dist/types/index.d.ts",
+    "files": [
+        "dist",
+        "src/global/styles",
+        "src/assets/fonts"
+    ],
+    "eslintConfig": {
+        "extends": [
+            "react-app",
+            "react-app/jest"
+        ]
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "dependencies": {
+        "@rollup/plugin-image": "^3.0.3",
+        "class-transformer": "^0.5.1",
+        "classnames": "^2.3.2",
+        "mobx-react": "^9.1.1",
+        "reflect-metadata": "^0.1.14",
+        "rollup-plugin-url": "^3.0.1",
+        "ts-serializable": "^3.3.0",
+        "react-markdown": "^9.0.1"
+    }
+}

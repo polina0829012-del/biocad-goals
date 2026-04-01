@@ -1,0 +1,102 @@
+.menuItem {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.4s ease;
+}
+
+.menuItem:hover {
+    background: #404040;
+}
+
+.link {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 20px;
+}
+
+.linkMinimized {
+    justify-content: center;
+}
+
+/* TODO: добавить перееиспользование из переменной дизайна - h3 extra bold */
+
+/* Используем уточняющий селектор родителя для переопределения font-weight */
+.linkActive .linkLabel {
+    font-weight: 800;
+    color: var(--color-primary-400);
+}
+
+.linkActive .menuIcon path {
+    stroke: var(--color-primary-400);
+}
+
+.linkActive::after {
+    width: 4px;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: var(--color-primary-500);
+    content: '';
+}
+
+.linkLabel {
+    margin-left: 14px;
+    white-space: nowrap;
+}
+
+.menuItem:hover .linkLabel {
+    color: var(--color-primary-400);
+}
+
+.menuIcon {
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: inherit;
+    transition: all 0.4s ease;
+}
+
+.menuItem:hover .menuIcon path {
+    stroke: var(--color-primary-400);
+}
+
+.menuIcon svg {
+    width: 20px;
+    height: 20px;
+}
+
+@media (-webkit-min-device-pixel-ratio: 1.25), (min-resolution: 120dpi) {
+    .link {
+        padding: 14px;
+    }
+
+    /* Нужно менять размер шрифта, стили не перекрываются. */
+    .linkLabel {
+        font-size: 12px !important;
+    }
+
+    .menuIcon svg {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+@media (-webkit-min-device-pixel-ratio: 1.1) {
+    /* Нужно менять размер шрифта, стили не перекрываются. */
+    .linkLabel {
+        font-size: 14px !important;
+    }
+
+    .link {
+        padding: 14px;
+    }
+
+    .menuIcon svg {
+        width: 18px;
+        height: 18px;
+    }
+}

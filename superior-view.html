@@ -4,12 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Просмотр целей</title>
+  <link rel="stylesheet" href="./ui-components-master/src/global/styles/index.css" />
+  <link rel="stylesheet" href="./prototype-styles.css" />
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
     }
 
     body {
@@ -58,7 +59,7 @@
     }
 
     .page-title {
-      font-family: 'Biocad Display', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-weight: 700;
       font-size: 40px;
       line-height: 42px;
@@ -236,7 +237,8 @@
     .goal-header-row {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
+      gap: 12px;
       margin-bottom: 0;
       cursor: pointer;
     }
@@ -246,6 +248,8 @@
       font-size: 18px;
       color: #0F172A;
       flex: 1;
+      min-width: 0;
+      line-height: 1.35;
     }
 
     .goal-header-row .goal-date {
@@ -378,6 +382,7 @@
       font-size: 14px;
     }
   </style>
+  <link rel="stylesheet" href="./prototype-ds-bridge.css" />
 </head>
 <body>
   <aside class="sidebar">
@@ -386,7 +391,7 @@
 
   <main class="main-content">
     <div class="page-content">
-      <h1 class="page-title" id="pageTitle">Просмотр целей</h1>
+      <h1 class="page-title headingBiocad" id="pageTitle">Просмотр целей</h1>
 
       <div class="employee-info">
         <div class="info-item">
@@ -584,7 +589,7 @@
         let html = '';
         validGoals.forEach((goal, index) => {
           const isCollapsed = collapsedStates[index] || false;
-          const goalTitle = goal.goal ? (goal.goal.length > 50 ? goal.goal.substring(0, 50) + '...' : goal.goal) : 'Без названия';
+          const goalTitle = goal.goal ? goal.goal : 'Без названия';
           const goalEval = evaluationsData[index] || {};
           const empEval = goalEval.employeeEvaluation || '';
           const mgrEval = goalEval.managerEvaluation || '';
@@ -603,14 +608,6 @@
           
           if (!isCollapsed) {
             html += `
-              <div class="form-row">
-                <div class="field-group">
-                  <div class="text-field">${goal.goal || '—'}</div>
-                </div>
-                <div class="date-group">
-                  <div class="date-field">${goal.date ? formatDate(goal.date) : '—'}</div>
-                </div>
-              </div>
               <div class="form-row">
                 <div class="field-group">
                   <div class="text-field">${goal.criteria || '—'}</div>

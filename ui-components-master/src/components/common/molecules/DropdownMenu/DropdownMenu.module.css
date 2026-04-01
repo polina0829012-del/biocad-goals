@@ -1,0 +1,78 @@
+.menuContainer {
+    position: relative;
+}
+
+.iconButton {
+    width: 28px;
+    height: 28px;
+    padding: 4px;
+    background: var(--color-secondary-100);
+}
+
+.iconButton:hover {
+    background: var(--color-secondary-200);
+}
+
+.iconButton:active {
+    background: var(--color-secondary-300);
+}
+
+.iconButton:hover svg path {
+    fill: var(--color-secondary-500);
+}
+
+.iconButton:active svg path {
+    fill: var(--color-secondary-600);
+}
+
+.dropdownMenu {
+    width: 220px;
+    position: absolute;
+    top: 115%;
+    right: 10%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    border-radius: var(--radius-8);
+    background: var(--color-base-white);
+    box-shadow: var(--shadowSmall) rgba(148, 163, 184, 0.15);
+    z-index: 2;
+    overflow: hidden;
+}
+
+.dropdownMenuItem {
+    display: flex;
+    align-items: flex-start;
+    align-self: stretch;
+    column-gap: var(--spacing-8);
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.dropdownMenuItem:hover {
+    background: var(--color-secondary-50);
+}
+
+.dropdownMenuItem:active {
+    background: var(--color-secondary-100);
+}
+
+.menuItemName {
+    color: var(--color-secondary-500);
+}
+
+.menuItemName:hover {
+    color: var(--color-secondary-600);
+}
+
+.menuItemName:active {
+    color: var(--color-secondary-700);
+}
+
+.pointIcon {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    z-index: 1;
+}

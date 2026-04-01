@@ -1,0 +1,141 @@
+.container {
+    width: inherit;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9;
+    user-select: none;
+}
+
+.containerIndexLow {
+    z-index: 8;
+}
+
+.menu {
+    height: 100%;
+    position: relative;
+    padding-top: 50px;
+    color: var(--color-dark-300);
+    background-color: var(--color-dark-800);
+}
+
+.overlayMenu {
+    width: inherit;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: var(--overlay-background);
+    pointer-events: all;
+}
+
+.doubleOverlay {
+    background-color: var(--double-overlay-background);
+}
+
+.navBarBlock {
+    height: 80vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.navBarBlock::-webkit-scrollbar {
+    width: 6px;
+    background: var(--color-dark-800);
+}
+
+.navBarBlock::-webkit-scrollbar-thumb {
+    background: var(--color-dark-500);
+}
+
+.navBarBlock::-webkit-scrollbar-thumb:hover {
+    background: var(--color-dark-600);
+}
+
+.expandArrow {
+    width: 36px;
+    height: 36px;
+    position: absolute;
+    top: 92px;
+    right: -18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: var(--radius-10);
+    vertical-align: middle;
+    background: var(--color-dark-700);
+    transition: all 0.4s ease;
+    cursor: pointer;
+}
+
+.expandArrowOverlay {
+    pointer-events: none;
+}
+
+.expandArrowOverlay::after {
+    width: 50%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    border-radius: 0 var(--radius-10) var(--radius-10) 0;
+    background-color: var(--overlay-background);
+    content: '';
+    pointer-events: none;
+    z-index: 15;
+}
+
+.expandArrow:hover {
+    background: var(--color-dark-800);
+}
+
+.expandArrowDoubleOverlay::after {
+    background-color: var(--double-overlay-background);
+}
+
+.menuLogo {
+    margin-bottom: 60px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.arrowRotate {
+    transform: rotate(180deg);
+}
+
+.theme {
+    padding: 20px 20px 14px 20px;
+    color: var(--color-dark-500);
+    word-break: break-word;
+}
+
+@media (-webkit-min-device-pixel-ratio: 1.25), (min-resolution: 120dpi) {
+    .menu {
+        padding-top: 30px;
+    }
+
+    .menuLogo {
+        margin-bottom: 50px;
+    }
+
+    .doubleArrow {
+        top: 70px;
+    }
+
+    .navBarBlock {
+        height: 80vh;
+    }
+}
+
+@media only screen and (min-width: 1440px) and (-webkit-min-device-pixel-ratio: 1.25) {
+    .navBarBlock {
+        height: 75vh;
+    }
+}
+
+@media only screen and (max-device-width: 1366px) and (-webkit-min-device-pixel-ratio: 1.5) {
+    .navBarBlock {
+        height: 67vh;
+    }
+}

@@ -1,0 +1,111 @@
+.button {
+    width: min-content;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    column-gap: var(--spacing-12);
+    padding: 0 16px;
+    border-radius: var(--radius-8);
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* primary */
+
+.primary {
+    color: var(--color-base-white);
+    background: var(--color-primary-600);
+    cursor: pointer;
+}
+
+.primary:hover {
+    background: var(--color-primary-700);
+}
+
+.primary:active {
+    background: var(--color-primary-800);
+}
+
+/* primary-text */
+
+.primaryText {
+    color: var(--color-primary-500);
+    background: var(--color-base-white);
+}
+
+.primaryText:hover {
+    color: var(--color-primary-600);
+}
+
+.primaryText:active {
+    color: var(--color-primary-800);
+}
+
+/* primary-white */
+
+.primaryWhite {
+    border: 1px solid var(--color-primary-500);
+    color: var(--color-primary-500);
+    background: var(--color-base-white);
+}
+
+.primaryWhite:hover {
+    border-color: var(--color-primary-600);
+    color: var(--color-primary-600);
+}
+
+.primaryWhite:active {
+    border-color: var(--color-primary-800);
+    color: var(--color-primary-800);
+}
+
+/* secondary */
+
+.secondary {
+    border: 1px solid var(--color-secondary-300);
+    border-radius: var(--radius-6);
+    color: var(--color-secondary-600);
+    background-color: var(--color-base-white);
+}
+
+.secondary:hover {
+    border-color: var(--color-secondary-400);
+}
+
+.secondary:active,
+.secondaryActive {
+    border-color: var(--color-secondary-600);
+}
+
+/* secondary-text */
+
+.secondaryText {
+    color: var(--color-secondary-400);
+}
+
+.secondaryText:hover {
+    color: var(--color-secondary-500);
+}
+
+.secondaryText:active {
+    color: var(--color-secondary-600);
+}
+
+/* secondary-rounded */
+
+.secondaryRounded {
+    border: 1px solid var(--color-secondary-300);
+    border-radius: var(--radius-24);
+    color: var(--color-secondary-600);
+}
+
+.secondaryRounded:hover {
+    border-color: var(--color-secondary-400);
+}
+
+.secondaryRounded:active {
+    border-color: var(--color-secondary-500);
+    color: var(--color-secondary-800);
+}

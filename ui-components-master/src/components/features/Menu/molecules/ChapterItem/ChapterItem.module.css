@@ -1,0 +1,52 @@
+.menuItemCategory {
+    width: 280px;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-20);
+    border-radius: var(--radius-16);
+    padding: 14px 24px 14px 16px;
+    cursor: pointer;
+}
+
+.menuItemCategoryActive {
+    background: var(--color-dark-800);
+}
+
+.menuItemCategoryIcon {
+    width: 46px;
+    height: 46px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-10);
+    border-radius: var(--radius-circle);
+    padding: 6px 5px;
+    background: var(--color-dark-800);
+}
+
+.menuItemCategoryIconActive {
+    background: var(--color-primary-500);
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+}
+
+.activeIcon path,
+.activeIcon circle {
+    stroke: var(--color-primary-900);
+}
+
+.activeIcon[id='shield'] path {
+    fill: var(--color-primary-900);
+}
+
+.menuItemTitle {
+    max-width: 175px;
+    color: var(--color-base-white);
+}
+
+.link .menuItemCategoryActive .menuItemTitle {
+    color: var(--color-primary-400);
+}

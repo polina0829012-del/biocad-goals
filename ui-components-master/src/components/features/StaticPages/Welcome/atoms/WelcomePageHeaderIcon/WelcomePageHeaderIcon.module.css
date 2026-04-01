@@ -1,0 +1,52 @@
+.welcomePageHeaderIcon {
+    width: fit-content;
+    position: relative;
+}
+
+.welcomePageIconButton {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: var(--radius-8);
+    padding: 4px;
+    background: linear-gradient(132deg, #5cc1f7 12.89%, #7479f8 97.53%);
+}
+
+@keyframes icon-animation {
+    0% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(-20deg);
+    }
+    50% {
+        transform: rotate(0deg);
+    }
+    75% {
+        transform: rotate(20deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.welcomePageIcon {
+    animation: icon-animation 1.5s ease-out;
+    animation-delay: 30ms;
+    animation-iteration-count: 3;
+}
+
+.tooltip {
+    width: fit-content;
+    position: absolute;
+    right: 0%;
+    left: 0%;
+    top: 42px;
+    border-radius: var(--radius-8);
+    padding: 8px 16px;
+    color: var(--color-secondary-600);
+    background: var(--color-base-white);
+    box-shadow: var(--shadowTooltip);
+    white-space: nowrap;
+    z-index: 1;
+}

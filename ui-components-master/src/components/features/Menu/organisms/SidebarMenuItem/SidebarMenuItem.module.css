@@ -1,0 +1,114 @@
+.container {
+    top: 0;
+    left: 0;
+    opacity: 0;
+}
+
+.openContainer {
+    height: 100%;
+    position: fixed;
+    opacity: 1;
+    animation: var(--animation-03);
+}
+
+.openDomainContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-55);
+    padding: 60px 60px 60px 20px;
+    background: var(--color-dark-900);
+}
+
+.containerFromMinimized {
+    opacity: 1;
+    transition: left 0.5s;
+}
+
+.itemsContainer {
+    height: 752px;
+    display: flex;
+    gap: var(--spacing-40);
+}
+
+.menuCategorySection {
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-10);
+}
+
+.menuCategoriesLinks {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: var(--spacing-40);
+    padding-right: 30px;
+}
+
+.menuCategoriesItLinks {
+    width: 510px;
+    height: 75vh;
+    overflow-y: hidden;
+    overflow-x: auto;
+}
+
+.menuCategoriesItLinks::-webkit-scrollbar {
+    height: 6px;
+    background: var(--color-dark-800);
+}
+
+.menuCategoriesItLinks::-webkit-scrollbar-thumb {
+    background: var(--color-dark-500);
+}
+
+.menuCategoriesItLinks::-webkit-scrollbar-thumb:hover {
+    background: var(--color-dark-600);
+}
+
+.menuItemDivider {
+    width: 0;
+    border-top: 0;
+    border-left: 1px solid var(--color-dark-700);
+}
+
+/** Dpi используется для экранов с высоким разрешением. */
+@media (-webkit-min-device-pixel-ratio: 1.25), (min-resolution: 120dpi) {
+    .itemsContainer {
+        height: 580px;
+    }
+
+    .openDomainContainer {
+        gap: var(--spacing-40);
+        padding-top: 40px;
+    }
+}
+
+@media screen and (max-device-width: 1799px), (-webkit-min-device-pixel-ratio: 1.25) {
+    .openContainer {
+        left: 240px;
+    }
+
+    .menuCategorySection {
+        height: 75vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .menuCategorySection::-webkit-scrollbar {
+        width: 4px;
+        background: var(--color-dark-800);
+    }
+
+    .menuCategorySection::-webkit-scrollbar-thumb {
+        background: var(--color-dark-500);
+    }
+
+    .menuCategorySection::-webkit-scrollbar-thumb:hover {
+        background: var(--color-dark-600);
+    }
+
+    .openDomainContainer {
+        gap: var(--spacing-20);
+        padding-top: 40px;
+    }
+}

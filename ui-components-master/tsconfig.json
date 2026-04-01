@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "experimentalDecorators": true,
+        "target": "ES6",
+        "lib": ["DOM", "ES6", "DOM.Iterable", "ScriptHost", "ES2016.Array.Include"],
+        "allowJs": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "noFallthroughCasesInSwitch": true,
+        "module": "esnext",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "jsx": "react-jsx",
+
+        // Свойства для сборщика Rollup.
+        "sourceMap": true,
+        "outDir": "dist",
+        "rootDir": "src",
+
+        "declaration": true,
+        "declarationDir": "./dist/types",
+        "emitDeclarationOnly": true
+    },
+    "include": ["src"]
+}

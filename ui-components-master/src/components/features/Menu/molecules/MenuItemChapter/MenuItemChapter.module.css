@@ -1,0 +1,113 @@
+.menuItemChapter {
+    width: 100%;
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 20px;
+}
+
+.menuItemChapterMinimized {
+    justify-content: center;
+}
+
+/* TODO: добавить перееиспользование из переменной дизайна - h3 extra bold */
+
+/* Используем уточняющий селектор родителя для переопределения font-weight */
+.menuItemChapter.isOpenChapter h6 {
+    font-weight: 800;
+    color: var(--color-base-white);
+}
+
+.menuItemChapter.linkItem:hover h6 {
+    color: var(--color-primary-400);
+}
+
+/* Используем уточняющий селектор родителя для переопределения font-weight */
+.linkActive h6 {
+    font-weight: 800;
+    color: var(--color-primary-400);
+}
+
+.linkActive .menuIcon path {
+    stroke: var(--color-primary-400);
+}
+
+.linkActive::after {
+    width: 4px;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: var(--color-primary-500);
+    content: '';
+}
+
+.labelWithArrowContainer {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    column-gap: var(--spacing-12);
+}
+
+.menuItemLabel {
+    max-width: 155px;
+    margin-left: 12px;
+    word-wrap: break-word;
+}
+
+.menuIcon {
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.4s ease;
+}
+
+.menuIcon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.menuArrow {
+    min-width: 6px;
+    transition: transform 0.4s ease;
+}
+
+.menuArrow path {
+    stroke: var(--color-dark-500);
+    transition: stroke 0.4s ease;
+}
+
+@media (-webkit-min-device-pixel-ratio: 1.25), (min-resolution: 120dpi) {
+    /* Нужно менять размер шрифта, стили не перекрываются. */
+    .menuItemLabel {
+        font-size: 12px !important;
+    }
+
+    .menuItemChapter {
+        padding: 14px;
+    }
+
+    .menuIcon svg {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+@media (-webkit-min-device-pixel-ratio: 1.1) {
+    /* Нужно менять размер шрифта, стили не перекрываются. */
+    .menuItemLabel {
+        font-size: 14px !important;
+    }
+
+    .menuItemChapter {
+        padding: 14px;
+    }
+
+    .menuIcon svg {
+        width: 18px;
+        height: 18px;
+    }
+}

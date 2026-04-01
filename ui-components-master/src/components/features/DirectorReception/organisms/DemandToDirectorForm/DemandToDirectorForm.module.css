@@ -1,0 +1,27 @@
+.container {
+    display: flex;
+    flex-direction: column;
+}
+
+.textAreaWrapper {
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--spacing-12);
+    margin: 2px 2px var(--spacing-32);
+}
+
+.sentStatus {
+    display: flex;
+    border: 1px solid var(--color-primary-500);
+    border-radius: var(--radius-16);
+    margin-bottom: 16px;
+    padding: 16px 21px;
+    background: var(--color-base-white);
+}
+
+.buttonContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    column-gap: var(--spacing-20);
+}

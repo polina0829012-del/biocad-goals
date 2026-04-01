@@ -1,0 +1,19 @@
+image: node:20.4.0
+
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  before_script:
+    - apt-get update -y
+    - apt-get install jq -y
+  script:
+    - echo "@workdeskbio:registry=https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/" >> .npmrc
+    - echo "//${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${CI_JOB_TOKEN}" >> .npmrc
+    - echo "$(jq --arg CI_COMMIT_TAG "$CI_COMMIT_TAG" '.version |= $CI_COMMIT_TAG' package.json)" > package.json
+    - npm install
+    - npm run build
+    - npm publish
+  only:
+    - tags
